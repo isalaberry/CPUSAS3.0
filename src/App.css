@@ -1,0 +1,180 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+.card {
+  background-color: #bfdbfe; /* azul claro */
+  margin: 10px;
+  padding: 20px;
+  border-radius: 0.5rem; /* bordas arredondadas */
+  width: 50%; /* metade da largura do contêiner */
+}
+
+.titletwo {
+  font-size: 1.5rem; /* texto maior */
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace; /* Fonte mono */
+  font-weight: 400; /* Peso da fonte leve */
+  color: #1e3a8a; /* Cor azul equivalente ao texto da Tailwind */
+}
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px; /* espaço entre os grupos de entrada */
+}
+
+.label {
+  font-size: 1rem; /* tamanho da fonte do rótulo */
+  font-weight: bold;
+
+}
+
+.input {
+  border: 1px solid #d1d5db; /* cinza claro */
+  padding: 8px 12px; /* preenchimento interno */
+  margin-top: 4px; /* espaço acima do campo */
+  border-radius: 0.5rem; /* bordas arredondadas */
+  width: 50%; /* metade da largura do contêiner */
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6; /* azul */
+}
+
+.button {
+  background-color: #1d4ed8; /* azul escuro */
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px; /* preenchimento do botão */
+  border-radius: 0.5rem; /* bordas arredondadas */
+  width: 100%; /* largura total */
+  margin-top: 16px; /* espaço acima do botão */
+}
+
+.button:hover {
+  background-color: #1e40af; /* azul mais escuro */
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.h-screen {
+  height: 100vh; /* altura total da tela */
+}
+
+.pt-5 {
+  padding-top: 20px; /* espaço acima */
+}
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 1fr;
+  height: 100%;
+}
+
+.process-grid {
+  background-color: #ebf8ff; /* azul claro */
+  margin: 10px;
+  border-radius: 0.375rem; /* bordas arredondadas */
+  grid-column: span 3; /* ocupa 3 colunas */
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+}
+
+.process {
+  background-color: #2563eb; /* azul escuro */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.description-table {
+  background-color: #ebf8ff; /* azul claro */
+  margin: 10px;
+  border-radius: 0.375rem; /* bordas arredondadas */
+}
+
+.description-table th, .description-table td {
+  border: 1px solid #cbd5e1; /* borda cinza */
+  padding: 16px; /* espaço interno */
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  grid-column: span 10; /* ocupa 10 colunas */
+  padding: 12px; /* espaço interno */
+  height: 100%; /* altura total */
+}
+
+.labelTable {
+  font-size: 1rem; /* tamanho da fonte */
+  font-family: 'JetBrains Mono', monospace; /* fonte monoespaçada */
+  color: black; /* texto preto */
+  text-align: center; /* centraliza o texto */
+}
+
+.navbar {
+  background-color: rgba(29, 78, 216, 0.2); /* Azul com opacidade */
+  padding: 1rem; /* Espaçamento interno */
+  border-radius: 0.75rem; /* Bordas arredondadas */
+}
+
+.nav-list {
+  display: flex; /* Alinha os itens em uma linha */
+  justify-content: space-between; /* Espaço entre os itens */
+}
+
+.nav-item {
+  list-style: none; /* Remove os marcadores de lista */
+}
+
+.nav-link {
+  color: black; /* Cor do texto */
+  font-weight: 600; /* Peso da fonte */
+  text-decoration: none; /* Remove o sublinhado */
+}
+
+.nav-link.active {
+  font-weight: bold; /* Peso da fonte para o item ativo */
+  border-bottom: 2px solid black; /* Linha abaixo do item ativo */
+}
+
+.table {
+  width: 100%; /* Largura total */
+  background-color: white; /* Cor de fundo */
+  border-radius: 1rem; /* Bordas arredondadas */
+  border-collapse: collapse; /* Colapsa bordas da tabela */
+}
+
+.table th, .table td {
+  border: 1px solid #dddddd; /* Borda leve */
+  padding: 0.5rem 1rem; /* Espaçamento interno */
+}
+
+.table th {
+  background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+  text-align: left; /* Alinhamento à esquerda */
+}
+
+.title-container {
+  display: flex; /* Flexbox para centralizar o conteúdo */
+  justify-content: center; /* Alinhamento central */
+}
+
+.title {
+  font-size: 3rem; /* Tamanho da fonte equivalente a text-5xl */
+  font-family: 'JetBrains Mono', monospace; /* Fonte mono */
+  font-weight: 300; /* Peso da fonte leve */
+  color: #1e3a8a; /* Cor azul equivalente ao texto da Tailwind */
+}
