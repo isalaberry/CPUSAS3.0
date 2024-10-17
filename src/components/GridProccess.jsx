@@ -4,6 +4,10 @@ import { gsap } from "gsap";
 export const GridProccess = ({ tableInfos }) => {
     console.log({ tableInfos });
 
+    const sortedProcesses = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
+    console.log({ sortedProcesses });
+    let lastEndTime = 0;
+
     return (
         <div className='grid-container'>
             {/* Grid process - cerne do troço */}
@@ -12,18 +16,34 @@ export const GridProccess = ({ tableInfos }) => {
                     const arrivalTime = parseInt(process.arrivalTime, 10);
                     const runningTime = parseInt(process.runningTime, 10);
 
-                    // Calculando a posição da coluna e a largura
-                    const colStart = arrivalTime + 1; // posição inicial
+
+                    const colStart = Math.max(lastEndTime + 1, arrivalTime + 1); // início da coluna
                     const colSpan = runningTime; // largura da coluna
 
-                    const style = {
+                    const processStyle = {
                         gridColumnStart: colStart,
                         gridColumnEnd: `span ${colSpan}`,
+                        position: 'relative',
+                        gridRowStart: index + 1, 
+                    };
+
+                    const arrivalStyle = {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        backgroundColor: 'yellow',
+                        width: '10px',
+                        height: '100%',
+                        zIndex: 1,//sobrepor o processo
                     };
 
                     return (
-                        <div key={process.id} className='process' style={style}>
-                            P{index + 1}
+                        <div key={process.id} className='process' style={processStyle}>
+                            <div className='arrival-indicator' style={arrivalStyle}></div>
+
+                            <div style={{ zIndex: 2 }}>
+                                P{index + 1}
+                            </div>
                         </div>
                     );
                 })}

@@ -51,7 +51,7 @@ export const Fifo = () => {
               <p className="titletwo">Enter or generate process info:</p>
 
               <div className="input-group">
-                <label htmlFor="arrivalTime" className="label">Arrival Time:</label>
+                <label htmlFor="arrivalTime" className="labelTable">Arrival Time:</label>
                 <input
                   id="arrivalTime"
                   type="number"
@@ -64,7 +64,7 @@ export const Fifo = () => {
               </div>
 
               <div className="input-group">
-                <label htmlFor="runningTime" className="label">Running Time:</label>
+                <label htmlFor="runningTime" className="labelTable">Running Time:</label>
                 <input
                   id="runningTime"
                   type="number"
