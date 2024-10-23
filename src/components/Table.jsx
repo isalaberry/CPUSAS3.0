@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { GridProcess } from './GridProcess';
+import Cookies from 'js-cookie';
 import './../App.css';
 
-
-const Table = ({ processes, handleInputChange }) => {
+ // *Renderiza* a tabela de processos
+const Table = ({ processes, handleInputChange }) => { //handleInputChange é chamado sempre que um input é alterado
   return (
     <table className="table">
       <thead>
@@ -40,9 +41,9 @@ const Table = ({ processes, handleInputChange }) => {
   );
 };
 
-
+// Gerencia a tabela de processos
 class InputTable extends Component {
-  constructor(props) {
+  constructor(props) {// construtor da tabela
     super(props);
     this.state = {
       totalProcess: 0,
@@ -53,6 +54,18 @@ class InputTable extends Component {
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.saveProcessesToCookies = this.saveProcessesToCookies.bind(this);
+  }
+
+  componentDidMount() { //carregar dos cookies (js-cookie library)
+    const savedProcesses = Cookies.get('processes');
+    if (savedProcesses) {
+      this.setState({ processes: JSON.parse(savedProcesses) });
+    }
+  }
+
+  saveProcessesToCookies(processes) { //salvar nos cookies (js-cookie library) por 7 dias
+    Cookies.set('processes', JSON.stringify(processes), { expires: 7 }); 
   }
 
   addProcess() {
@@ -60,12 +73,14 @@ class InputTable extends Component {
       const totalProcess = prevState.totalProcess + 1;
       const newProcess = {
         id: totalProcess,
-        arrivalTime: 0, // Inicializa como 0, pode ser modificado posteriormente
-        runningTime: 0, // Inicializa como 0, pode ser modificado posteriormente
+        arrivalTime: 0,
+        runningTime: 0,
       };
+      const updatedProcesses = [...prevState.processes, newProcess];
+      this.saveProcessesToCookies(updatedProcesses);
       return {
         totalProcess,
-        processes: [...prevState.processes, newProcess],
+        processes: updatedProcesses,
       };
     });
   }
@@ -73,6 +88,7 @@ class InputTable extends Component {
   deleteProcess() {
     this.setState((prevState) => {
       const processes = prevState.processes.slice(0, -1);
+      this.saveProcessesToCookies(processes);
       return {
         totalProcess: processes.length,
         processes,
@@ -84,6 +100,7 @@ class InputTable extends Component {
     this.setState((prevState) => {
       const processes = [...prevState.processes];
       processes[index] = { ...processes[index], [field]: value };
+      this.saveProcessesToCookies(processes);
       return { processes };
     });
   }
@@ -92,16 +109,16 @@ class InputTable extends Component {
     const { processes } = this.state;
 
     return (
-      <div style={styles.screen}>
-        <div style={styles.container}>
+      <div className="screen">
+        <div className="container">
           <Table processes={processes} handleInputChange={this.handleInputChange} />
         </div>
 
-        <div style={{ paddingBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-          <button style={styles.button} onClick={this.addProcess}>
+        <div className="button-container">
+          <button className="button" onClick={this.addProcess}>
             Add Process
           </button>
-          <button style={styles.button} onClick={this.deleteProcess}>
+          <button className="button" onClick={this.deleteProcess}>
             Delete Process
           </button>
         </div>
@@ -113,57 +130,5 @@ class InputTable extends Component {
     );
   }
 }
-
-
-const styles = {
-  screen: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '20px',
-  },
-  switchContainer: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  switchText: {
-    marginRight: '10px',
-  },
-  quantumContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginVertical: '10px',
-  },
-  quantumText: {
-    marginRight: '10px',
-  },
-  quantumInput: {
-    border: '1px solid #ccc',
-    padding: '5px',
-    width: '60px',
-    textAlign: 'center',
-  },
-  container: {
-    padding: '20px',
-  },
-  inputRow: {
-    display: 'flex',
-    marginTop: '10px',
-  },
-  button: {
-    marginTop: '10px',
-    padding: '10px',
-    backgroundColor: '#007BFF',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  cellInput: {
-    border: '1px solid #ccc',
-    padding: '5px',
-    marginRight: '10px',
-    textAlign: 'center',
-  },
-};
 
 export default InputTable;

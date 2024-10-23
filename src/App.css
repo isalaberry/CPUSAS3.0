@@ -1,6 +1,5 @@
 .container {
-  display: flex;
-  justify-content: center;
+  padding: 20px;
   margin: 0 20px;
 }
 
@@ -9,7 +8,6 @@
   margin: 10px;
   padding: 20px;
   border-radius: 0.5rem; /* bordas arredondadas */
-  width: 50%; /* metade da largura do contêiner */
 }
 
 .titletwo {
@@ -30,7 +28,6 @@
 .label {
   font-size: 1rem; /* tamanho da fonte do rótulo */
   font-weight: bold;
-
 }
 
 .input {
@@ -47,13 +44,15 @@
 }
 
 .button {
-  background-color: #1d4ed8; /* azul escuro */
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #007BFF;
   color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
   font-weight: bold;
-  padding: 8px 16px; /* preenchimento do botão */
-  border-radius: 0.5rem; /* bordas arredondadas */
   width: 100%; /* largura total */
-  margin-top: 16px; /* espaço acima do botão */
 }
 
 .button:hover {
@@ -71,7 +70,6 @@
 .pt-5 {
   padding-top: 20px; /* espaço acima */
 }
-
 
 .grid-container {
   display: grid;
@@ -177,4 +175,55 @@
   font-family: 'JetBrains Mono', monospace; /* Fonte mono */
   font-weight: 300; /* Peso da fonte leve */
   color: #1e3a8a; /* Cor azul equivalente ao texto da Tailwind */
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.switchContainer {
+  display: flex;
+  align-items: center;
+}
+
+.switchText {
+  margin-right: 10px;
+}
+
+.quantumContainer {
+  display: flex;
+  align-items: center;
+  margin-vertical: 10px;
+}
+
+.quantumText {
+  margin-right: 10px;
+}
+
+.quantumInput {
+  border: 1px solid #ccc;
+  padding: 5px;
+  width: 60px;
+  text-align: center;
+}
+
+.inputRow {
+  display: flex;
+  margin-top: 10px;
+}
+
+.cellInput {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin-right: 10px;
+  text-align: center;
+}
+
+.button-container {
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
