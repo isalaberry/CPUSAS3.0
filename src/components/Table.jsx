@@ -41,31 +41,40 @@ const Table = ({ processes, handleInputChange }) => { //handleInputChange é cha
   );
 };
 
-// Gerencia a tabela de processos
+
+
+// *Gerencia* a tabela de processos
 class InputTable extends Component {
-  constructor(props) {// construtor da tabela
+  constructor(props) {
     super(props);
     this.state = {
       totalProcess: 0,
       processes: [],
+      history: [], // Histórico de processos - array de t(ime) arrays de processes
       isIoEnabled: false,
       timeQuantum: 2,
+      time: 0, // Tempo inicial é 0 - primeira posicao do history
     };
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.saveProcessesToCookies = this.saveProcessesToCookies.bind(this);
+    this.saveHistoryToCookies = this.saveHistoryToCookies.bind(this);
   }
 
-  componentDidMount() { //carregar dos cookies (js-cookie library)
-    const savedProcesses = Cookies.get('processes');
-    if (savedProcesses) {
-      this.setState({ processes: JSON.parse(savedProcesses) });
+  componentDidMount() { // carregar dos cookies (js-cookie library)
+    const savedHistory = Cookies.get('history');
+    if (savedHistory) {
+      const history = JSON.parse(savedHistory);
+      this.setState({ 
+        history,
+        processes: history[0] || [], // Define processes como o primeiro item do history ou um array vazio
+        time: history.length - 1 // Define o tempo como o último índice do histórico
+      });
     }
   }
 
-  saveProcessesToCookies(processes) { //salvar nos cookies (js-cookie library) por 7 dias
-    Cookies.set('processes', JSON.stringify(processes), { expires: 7 }); 
+  saveHistoryToCookies(history) { // salvar o histórico nos cookies (js-cookie library) por 7 dias
+    Cookies.set('history', JSON.stringify(history), { expires: 7 });
   }
 
   addProcess() {
@@ -77,10 +86,13 @@ class InputTable extends Component {
         runningTime: 0,
       };
       const updatedProcesses = [...prevState.processes, newProcess];
-      this.saveProcessesToCookies(updatedProcesses);
+      const updatedHistory = [...prevState.history, updatedProcesses];
+      this.saveHistoryToCookies(updatedHistory);
       return {
         totalProcess,
         processes: updatedProcesses,
+        history: updatedHistory,
+        time: prevState.time + 1, // Incrementa o tempo
       };
     });
   }
@@ -88,10 +100,13 @@ class InputTable extends Component {
   deleteProcess() {
     this.setState((prevState) => {
       const processes = prevState.processes.slice(0, -1);
-      this.saveProcessesToCookies(processes);
+      const updatedHistory = [...prevState.history, processes];
+      this.saveHistoryToCookies(updatedHistory);
       return {
         totalProcess: processes.length,
         processes,
+        history: updatedHistory,
+        time: prevState.time + 1, // Incrementa o tempo
       };
     });
   }
@@ -100,8 +115,13 @@ class InputTable extends Component {
     this.setState((prevState) => {
       const processes = [...prevState.processes];
       processes[index] = { ...processes[index], [field]: value };
-      this.saveProcessesToCookies(processes);
-      return { processes };
+      const updatedHistory = [...prevState.history, processes];
+      this.saveHistoryToCookies(updatedHistory);
+      return { 
+        processes, 
+        history: updatedHistory,
+        time: prevState.time + 1, // Incrementa o tempo
+      };
     });
   }
 
