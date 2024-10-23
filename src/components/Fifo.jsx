@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Table from './Table';
+import InputTable from './InputTable';
 import { GridProcess } from './GridProcess';
 import './../App.css'; // Importando o CSS
 
@@ -10,7 +10,7 @@ export const Fifo = () => {
 <div className="container">
 
   <div className="card">
-    <Table  />
+    <InputTable  />
   </div>
   
 </div>
