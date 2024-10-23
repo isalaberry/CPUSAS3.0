@@ -3,7 +3,7 @@ import { GridProcess } from './GridProcess';
 import './../App.css';
 
 
-const Table = ({ processes }) => {
+const Table = ({ processes, handleInputChange }) => {
   return (
     <table className="table">
       <thead>
@@ -14,11 +14,25 @@ const Table = ({ processes }) => {
         </tr>
       </thead>
       <tbody>
-        {processes.map((process) => (
+        {processes.map((process, index) => (
           <tr key={process.id}>
             <td>P{process.id}</td>
-            <td>{process.arrivalTime}</td>
-            <td>{process.runningTime}</td>
+            <td>
+              <input
+                type="number"
+                value={process.arrivalTime}
+                onChange={(e) => handleInputChange(index, "arrivalTime", Number(e.target.value))}
+                className="input-table"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                value={process.runningTime}
+                onChange={(e) => handleInputChange(index, "runningTime", Number(e.target.value))}
+                className="input-table"
+              />
+            </td>
           </tr>
         ))}
       </tbody>
@@ -34,11 +48,10 @@ class InputTable extends Component {
       totalProcess: 0,
       processes: [],
       isIoEnabled: false,
-      timeQuantum: 2, // Time Quantum
+      timeQuantum: 2,
     };
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
-    this.toggleButton = this.toggleButton.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
@@ -67,12 +80,6 @@ class InputTable extends Component {
     });
   }
 
-  toggleButton() {
-    this.setState((prevState) => ({
-      isIoEnabled: !prevState.isIoEnabled,
-    }));
-  }
-
   handleInputChange(index, field, value) {
     this.setState((prevState) => {
       const processes = [...prevState.processes];
@@ -81,70 +88,32 @@ class InputTable extends Component {
     });
   }
 
-  timeQuantamTextInput() {
-    return (
-      <div style={styles.quantumContainer}>
-        <span style={styles.quantumText}>Time Quantum:</span>
-        <input
-          type="number"
-          value={this.state.timeQuantum}
-          onChange={(e) => this.setState({ timeQuantum: Number(e.target.value) })}
-          style={styles.quantumInput}
-        />
-      </div>
-    );
-  }
-
   render() {
-    const { processes, timeQuantum } = this.state;
+    const { processes } = this.state;
 
     return (
       <div style={styles.screen}>
-        <div style={styles.switchContainer}>
-          <span style={styles.switchText}>I/O Burst: </span>
-          <input
-            type="checkbox"
-            onChange={this.toggleButton}
-            checked={this.state.isIoEnabled}
-          />
-        </div>
         <div style={styles.container}>
-          <Table processes={processes} />
-          {processes.map((process, index) => (
-            <div key={process.id} style={styles.inputRow}>
-              <input
-                type="number"
-                placeholder="Arrival Time"
-                value={process.arrivalTime}
-                onChange={(e) => this.handleInputChange(index, "arrivalTime", Number(e.target.value))}
-                style={styles.cellInput}
-              />
-              <input
-                type="number"
-                placeholder="Running Time"
-                value={process.runningTime}
-                onChange={(e) => this.handleInputChange(index, "runningTime", Number(e.target.value))}
-                style={styles.cellInput}
-              />
-            </div>
-          ))}
+          <Table processes={processes} handleInputChange={this.handleInputChange} />
         </div>
-        <button style={styles.button} onClick={this.addProcess}>
-          Add Process
-        </button>
-        <button style={styles.button} onClick={this.deleteProcess}>
-          Delete Process
-        </button>
-        {this.timeQuantamTextInput()}
 
-        {/* Adicionando a div no final */}
-        <div className='bg-white h-screen pt-5'>
+        <div style={{ paddingBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+          <button style={styles.button} onClick={this.addProcess}>
+            Add Process
+          </button>
+          <button style={styles.button} onClick={this.deleteProcess}>
+            Delete Process
+          </button>
+        </div>
+
+        <div className='bg-white h-screen'>
           <GridProcess tableInfos={processes} />
         </div>
       </div>
     );
   }
 }
+
 
 const styles = {
   screen: {
