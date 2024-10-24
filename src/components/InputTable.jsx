@@ -3,7 +3,7 @@ import { GridProcess } from './GridProcess';
 import Cookies from 'js-cookie';
 import './../App.css';
 
- // *Renderiza* a tabela de processos
+// *Renderiza* a tabela de processos
 const Table = ({ processes, handleInputChange }) => { //handleInputChange é chamado sempre que um input é alterado
   return (
     <table className="table">
@@ -41,19 +41,17 @@ const Table = ({ processes, handleInputChange }) => { //handleInputChange é cha
   );
 };
 
-
-
-// *Gerencia* a tabela de processos
+// Gerencia a tabela de processos
 class InputTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
       totalProcess: 0,
       processes: [],
-      history: [], // Histórico de processos - array de t(ime) arrays de processes
+      history: [], // Histórico de processos - array de t arrays de processes
       isIoEnabled: false,
       timeQuantum: 2,
-      time: 0, // Tempo inicial é 0 - primeira posicao do history
+      time: 0, // Tempo inicial
     };
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
@@ -65,15 +63,16 @@ class InputTable extends Component {
     const savedHistory = Cookies.get('history');
     if (savedHistory) {
       const history = JSON.parse(savedHistory);
+      console.log('Loaded history from cookies:', history); // Log para verificar o carregamento
       this.setState({ 
         history,
-        processes: history[0] || [], // Define processes como o primeiro item do history ou um array vazio
-        time: history.length - 1 // Define o tempo como o último índice do histórico
+        processes: history[history.length - 1] || [], // Define processes como o último item do history ou um array vazio
       });
     }
   }
 
   saveHistoryToCookies(history) { // salvar o histórico nos cookies (js-cookie library) por 7 dias
+    console.log('Saving history to cookies:', history); // Log para verificar a salvamento
     Cookies.set('history', JSON.stringify(history), { expires: 7 });
   }
 
@@ -81,7 +80,7 @@ class InputTable extends Component {
     this.setState((prevState) => {
       const totalProcess = prevState.totalProcess + 1;
       const newProcess = {
-        id: totalProcess,
+        id: prevState.totalProcess + 1, // Garante que o ID seja único
         arrivalTime: 0,
         runningTime: 0,
       };
@@ -92,7 +91,6 @@ class InputTable extends Component {
         totalProcess,
         processes: updatedProcesses,
         history: updatedHistory,
-        time: prevState.time + 1, // Incrementa o tempo
       };
     });
   }
@@ -106,7 +104,6 @@ class InputTable extends Component {
         totalProcess: processes.length,
         processes,
         history: updatedHistory,
-        time: prevState.time + 1, // Incrementa o tempo
       };
     });
   }
@@ -120,7 +117,6 @@ class InputTable extends Component {
       return { 
         processes, 
         history: updatedHistory,
-        time: prevState.time + 1, // Incrementa o tempo
       };
     });
   }
