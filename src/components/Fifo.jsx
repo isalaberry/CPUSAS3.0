@@ -6,15 +6,10 @@ import './../App.css'; // Importando o CSS
 export const Fifo = () => {
 
   return (
-    
-<div className="container">
-
-  <div className="card">
-    <InputTable  />
-  </div>
-  
-</div>
-
-
+    <div className="container">
+      <div className="card">
+        <InputTable />
+      </div>
+    </div>
   );
 };

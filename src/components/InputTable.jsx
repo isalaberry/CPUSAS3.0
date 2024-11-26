@@ -48,7 +48,7 @@ class InputTable extends Component {
     this.state = {
       totalProcess: 0,
       processes: [],
-      history: [], // Histórico de processos - array de t arrays de processes
+      history: [[]], // Histórico de processos - array de t arrays de processes
       isIoEnabled: false,
       timeQuantum: 2,
       time: 0, // Tempo inicial
@@ -66,7 +66,7 @@ class InputTable extends Component {
       console.log('Loaded history from cookies:', history); // Log para verificar o carregamento
       this.setState({ 
         history,
-        processes: history[history.length - 1] || [], // Define processes como o último item do history ou um array vazio
+        processes: history[0] || [],
       });
     }
   }
@@ -76,16 +76,19 @@ class InputTable extends Component {
     Cookies.set('history', JSON.stringify(history), { expires: 7 });
   }
 
+
+// o codigo salva no historico a tabela de cada alteracao, e isso é errado
+
   addProcess() {
     this.setState((prevState) => {
       const totalProcess = prevState.totalProcess + 1;
       const newProcess = {
-        id: prevState.totalProcess + 1, // Garante que o ID seja único
+        id: prevState.totalProcess + 1,
         arrivalTime: 0,
         runningTime: 0,
       };
       const updatedProcesses = [...prevState.processes, newProcess];
-      const updatedHistory = [...prevState.history, updatedProcesses];
+      const updatedHistory = [updatedProcesses, ...prevState.history.slice(1)];  
       this.saveHistoryToCookies(updatedHistory);
       return {
         totalProcess,
@@ -98,7 +101,7 @@ class InputTable extends Component {
   deleteProcess() {
     this.setState((prevState) => {
       const processes = prevState.processes.slice(0, -1);
-      const updatedHistory = [...prevState.history, processes];
+      const updatedHistory = [processes, ...prevState.history.slice(1)];
       this.saveHistoryToCookies(updatedHistory);
       return {
         totalProcess: processes.length,
@@ -112,7 +115,7 @@ class InputTable extends Component {
     this.setState((prevState) => {
       const processes = [...prevState.processes];
       processes[index] = { ...processes[index], [field]: value };
-      const updatedHistory = [...prevState.history, processes];
+      const updatedHistory = [processes, ...prevState.history.slice(1)];
       this.saveHistoryToCookies(updatedHistory);
       return { 
         processes, 
@@ -140,7 +143,7 @@ class InputTable extends Component {
         </div>
 
         <div className='bg-white h-screen'>
-          <GridProcess tableInfos={processes} />
+          <GridProcess tableInfos={processes} algorithm={this.props.algorithm}/> 
         </div>
       </div>
     );
