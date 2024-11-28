@@ -1,31 +1,36 @@
-import React from 'react';
-import './../App.css';
-
 export const GridProcess = ({ tableInfos }) => {
     console.log({ tableInfos });
 
-    const sortedProcesses = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
-    console.log({ sortedProcesses });
+    // Função para ordenar processos de acordo com o algoritmo
+    const sortProcesses = (tableInfos) => {
+        console.log("Before sorting:", tableInfos.map(p => p.arrivalTime));
+        const sorted = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
+        console.log("After sorting:", sorted.map(p => p.arrivalTime));
+
+        
+        return sorted;
+    };
+
+    const sortedProcesses = sortProcesses(tableInfos);
+  //  console.log( sortedProcesses );
     let lastEndTime = 0;
 
     return (
         <div className='grid-container'>
-            {/* Grid process - cerne do troço */}
             <div className='process-grid'>
                 {sortedProcesses.map((process, index) => {
-                    const arrivalTime = parseInt(process.arrivalTime, 10);
-                    const runningTime = parseInt(process.runningTime, 10);
+                    const { arrivalTime, runningTime } = process;
 
-                    const colStart = Math.max(lastEndTime + 1, arrivalTime + 1); // início da coluna
-                    const colSpan = runningTime; // largura da coluna
-
-                    lastEndTime = colStart + colSpan - 1;
+                    const colStart = Math.max(lastEndTime, arrivalTime+1); 
+                    const colSpan = runningTime; 
+                    lastEndTime = colStart + colSpan; //javascript executa tudo ao mesmo tempo
+                    console.log({colStart});
 
                     const processStyle = {
                         gridColumnStart: colStart,
                         gridColumnEnd: `span ${colSpan}`,
                         position: 'relative',
-                        gridRowStart: index + 1,
+                        gridRowStart: process.id,
                     };
 
                     const arrivalStyle = {
@@ -35,14 +40,14 @@ export const GridProcess = ({ tableInfos }) => {
                         backgroundColor: 'yellow',
                         width: '10px',
                         height: '100%',
-                        zIndex: 1, // sobrepor o processo
+                        zIndex: 1,
                     };
 
                     return (
                         <div key={process.id} className='process' style={processStyle}>
                             <div className='arrival-indicator' style={arrivalStyle}></div>
                             <div style={{ zIndex: 2 }}>
-                                P{index + 1}
+                                {`P${process.id}`} {/* Correção para IDs */}
                             </div>
                         </div>
                     );
@@ -55,7 +60,6 @@ export const GridProcess = ({ tableInfos }) => {
                 </div>
             </div>
 
-            {/* Description table */}
             <div className='description-table'>
                 <table className="w-full">
                     <thead>
@@ -75,5 +79,3 @@ export const GridProcess = ({ tableInfos }) => {
         </div>
     );
 };
-
-export default GridProcess;

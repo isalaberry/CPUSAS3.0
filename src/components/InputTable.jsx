@@ -63,7 +63,7 @@ class InputTable extends Component {
     const savedHistory = Cookies.get('history');
     if (savedHistory) {
       const history = JSON.parse(savedHistory);
-      console.log('Loaded history from cookies:', history); // Log para verificar o carregamento
+   //   console.log('Loaded history from cookies:', history); // Log para verificar o carregamento
       this.setState({ 
         history,
         processes: history[0] || [],
@@ -72,7 +72,7 @@ class InputTable extends Component {
   }
 
   saveHistoryToCookies(history) { // salvar o histórico nos cookies (js-cookie library) por 7 dias
-    console.log('Saving history to cookies:', history); // Log para verificar a salvamento
+  //  console.log('Saving history to cookies:', history); // Log para verificar a salvamento
     Cookies.set('history', JSON.stringify(history), { expires: 7 });
   }
 
