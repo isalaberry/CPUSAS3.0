@@ -4,7 +4,7 @@
 }
 
 .card {
-  background-color: #bfdbfe; /* azul claro */
+  background-color: #CADEED; /* azul claro */
   margin: 10px;
   padding: 20px;
   border-radius: 0.5rem; /* bordas arredondadas */
@@ -40,13 +40,13 @@
 
 .input:focus {
   outline: none;
-  border-color: #3b82f6; /* azul */
+  border-color: #194569; /* azul */
 }
 
 .button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #007BFF;
+  background-color: #194569;
   color: white;
   border: none;
   border-radius: 5px;
@@ -56,16 +56,14 @@
 }
 
 .button:hover {
-  background-color: #1e40af; /* azul mais escuro */
+  background-color: #4e7391; /* azul mais escuro */
 }
 
 .bg-white {
   background-color: white;
 }
 
-.h-screen {
-  height: 100vh; /* altura total da tela */
-}
+
 
 .pt-5 {
   padding-top: 20px; /* espaço acima */
@@ -74,22 +72,22 @@
 .grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: 1fr;
-  height: 100%;
+
 }
 
 .process-grid {
+  padding-top: 70px;
   background-color: #ebf8ff; /* azul claro */
   margin: 10px;
   border-radius: 0.375rem; /* bordas arredondadas */
   grid-column: span 3; /* ocupa 3 colunas */
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(11, 1fr);
+  grid-template-columns: repeat(10, auto); /* Ajusta automaticamente a largura das colunas */
+  grid-auto-rows: minmax(50px, 100px); /* Define altura mínima e máxima para as linhas */
 }
 
 .process {
-  background-color: #2563eb; /* azul escuro */
+  background-color: #194569; /* azul escuro */
   color: white;
   display: flex;
   align-items: center;
@@ -123,9 +121,11 @@
 }
 
 .navbar {
-  background-color: rgba(29, 78, 216, 0.2); /* Azul com opacidade */
+  background-color: #CADEED; /* Azul com opacidade */
   padding: 1rem; /* Espaçamento interno */
   border-radius: 0.75rem; /* Bordas arredondadas */
+  margin-left: 50px;
+  margin-right: 50px;
 }
 
 .nav-list {
@@ -226,4 +226,14 @@
   display: flex;
   justify-content: center;
   gap: 20px;
+}
+
+.button-time-container {
+  grid-column: 2; /* Posiciona na segunda coluna */
+  margin-bottom: 40px;
+  gap: 20px;
+  display: flex;
+  justify-content: flex-start; /* Alinha os botões à esquerda */
+  align-items: center;
+  height: 100%; /* Garante que ocupe toda a altura da coluna */
 }

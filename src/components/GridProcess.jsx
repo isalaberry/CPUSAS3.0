@@ -1,29 +1,41 @@
-export const GridProcess = ({ tableInfos }) => {
+export const GridProcess = ({ tableInfos, algorithm }) => {
     console.log({ tableInfos });
 
-    // Função para ordenar processos de acordo com o algoritmo
     const sortProcesses = (tableInfos) => {
-        console.log("Before sorting:", tableInfos.map(p => p.arrivalTime));
-        const sorted = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
-        console.log("After sorting:", sorted.map(p => p.arrivalTime));
-
-        
+        let sorted;
+        if (algorithm === 'FIFO') {
+            sorted = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
+        } else if (algorithm === 'SJF') {
+            sorted = [...tableInfos].sort((a, b) => a.runningTime - b.runningTime);
+        } else if (algorithm === 'PP' || algorithm === 'PNP') {
+            sorted = [...tableInfos].sort((a, b) => a.priority - b.priority);
+        }
         return sorted;
     };
 
     const sortedProcesses = sortProcesses(tableInfos);
-  //  console.log( sortedProcesses );
     let lastEndTime = 0;
 
     return (
         <div className='grid-container'>
-            <div className='process-grid'>
+            <div className='process-grid' style={{ position: 'relative' }}>
+
+                <div className="time-bar" style={{
+                    position: 'absolute',
+                    width: '10px',
+                    height: '100%',
+                    backgroundColor: 'yellow',
+                    zIndex: 4, // Ensure it is above other elements
+                    top: 0,
+                    bottom: 0,
+                }}></div>
+
                 {sortedProcesses.map((process, index) => {
                     const { arrivalTime, runningTime } = process;
 
-                    const colStart = Math.max(lastEndTime, arrivalTime+1); 
+                    const colStart = Math.max(lastEndTime, arrivalTime + 1); 
                     const colSpan = runningTime; 
-                    lastEndTime = colStart + colSpan; //javascript executa tudo ao mesmo tempo
+                    lastEndTime = colStart + colSpan;
                     console.log({colStart});
 
                     const processStyle = {
@@ -33,23 +45,33 @@ export const GridProcess = ({ tableInfos }) => {
                         gridRowStart: process.id,
                     };
 
+                    return (
+                        <div key={process.id} className='process' style={processStyle}>
+                            <div style={{ zIndex: 2 }}>
+                                {`P${process.id}`}
+                            </div>
+                        </div>
+                    );
+                })}
+
+                {sortedProcesses.map((process) => {
+                    const { arrivalTime } = process;
+
                     const arrivalStyle = {
-                        position: 'absolute',
+                        gridColumnStart: arrivalTime + 1,
+                        gridColumnEnd: arrivalTime + 2,
+                        position: 'relative',
                         top: 0,
                         left: 0,
-                        backgroundColor: 'yellow',
+                        backgroundColor: '#CADEED',
                         width: '10px',
                         height: '100%',
+                        gridRowStart: process.id,
                         zIndex: 1,
                     };
 
                     return (
-                        <div key={process.id} className='process' style={processStyle}>
-                            <div className='arrival-indicator' style={arrivalStyle}></div>
-                            <div style={{ zIndex: 2 }}>
-                                {`P${process.id}`} {/* Correção para IDs */}
-                            </div>
-                        </div>
+                        <div key={`arrival-${process.id}`} className='arrival-indicator' style={arrivalStyle}></div>
                     );
                 })}
 
@@ -75,6 +97,13 @@ export const GridProcess = ({ tableInfos }) => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="button-time-container">
+                <button onClick={() => console.log('<<')} className="button">{'<<'}</button>
+                <button onClick={() => console.log('<')} className="button">{'<'}</button>
+                <button onClick={() => console.log('>')} className="button">{'>'}</button>
+                <button onClick={() => console.log('>>')} className="button">{'>>'}</button>
             </div>
         </div>
     );

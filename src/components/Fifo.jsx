@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import InputTable from './InputTable';
-import { GridProcess } from './GridProcess';
-import './../App.css'; // Importando o CSS
+import './../App.css';
 
 export const Fifo = () => {
 
   return (
     <div className="container">
       <div className="card">
-        <InputTable />
+        <InputTable algorithm="FIFO"/> 
       </div>
     </div>
   );
