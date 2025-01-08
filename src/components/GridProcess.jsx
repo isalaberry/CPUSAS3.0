@@ -1,5 +1,25 @@
+import React, { useState } from 'react';
+
 export const GridProcess = ({ tableInfos, algorithm }) => {
     console.log({ tableInfos });
+
+    const [currentColumn, setCurrentColumn] = useState(1);
+
+    const handleNextColumn = () => {
+        setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
+    };
+
+    const handlePreviousColumn = () => {
+        setCurrentColumn((prevColumn) => Math.max(prevColumn - 1, 1));
+    };
+
+    const handleFirstColumn = () => {
+        setCurrentColumn(1);
+    };
+    
+    const handleLastColumn = () => {
+        setCurrentColumn(11);
+    };
 
     const sortProcesses = (tableInfos) => {
         let sorted;
@@ -25,9 +45,11 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     width: '10px',
                     height: '100%',
                     backgroundColor: 'yellow',
-                    zIndex: 4, // Ensure it is above other elements
+                    zIndex: 4,
                     top: 0,
                     bottom: 0,
+                    gridColumnStart: currentColumn,
+                    gridColumnEnd: currentColumn + 1,
                 }}></div>
 
                 {sortedProcesses.map((process, index) => {
@@ -80,6 +102,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                         <div key={i} className="label">{i}</div>
                     ))}
                 </div>
+
             </div>
 
             <div className='description-table'>
@@ -100,10 +123,10 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             </div>
 
             <div className="button-time-container">
-                <button onClick={() => console.log('<<')} className="button">{'<<'}</button>
-                <button onClick={() => console.log('<')} className="button">{'<'}</button>
-                <button onClick={() => console.log('>')} className="button">{'>'}</button>
-                <button onClick={() => console.log('>>')} className="button">{'>>'}</button>
+                <button onClick={handleFirstColumn} className="button">{'<<'}</button>
+                <button onClick={handlePreviousColumn} className="button">{'<'}</button>
+                <button onClick={handleNextColumn} className="button">{'>'}</button>
+                <button onClick={handleLastColumn} className="button">{'>>'}</button>
             </div>
         </div>
     );
