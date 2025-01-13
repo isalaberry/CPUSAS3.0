@@ -46,15 +46,28 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             lastEndTime = colStart + colSpan;
 
             //se o timebar é menor que o colStart, o processo nao existe ainda
-            if(currentColumn === colStart){
+            if(currentColumn === colStart + colSpan){
+                newDescriptions[process.id] = `P${process.id} exited`;
+            }
+           
+            else if(currentColumn === colStart && currentColumn === arrivalTime + 1){
+                newDescriptions[process.id] = `P${process.id} arriveded and entered`;
+            }
+            else if(currentColumn === arrivalTime + 1){
+                newDescriptions[process.id] = `P${process.id} arrived`;
+            }
+            else if(currentColumn === colStart){
                 newDescriptions[process.id] = `P${process.id} entered`;
             }
             else if(currentColumn === colStart + colSpan){
                 newDescriptions[process.id] = `P${process.id} exited`;
             }
+            else if(currentColumn < arrivalTime + 1){
+                newDescriptions[process.id] = `P${process.id} didn't arrive yet`;
+            }
             else if(currentColumn > colStart && currentColumn < colStart + colSpan){
                 newDescriptions[process.id] = `P${process.id} is executing`;
-            }
+            }  
             else if(currentColumn<colStart){
                 newDescriptions[process.id] = `P${process.id} is waiting`;
             }
