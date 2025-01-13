@@ -53,6 +53,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 }}></div>
 
                 {sortedProcesses.map((process, index) => {
+
+
                     const { arrivalTime, runningTime } = process;
 
                     const colStart = Math.max(lastEndTime, arrivalTime + 1); 
@@ -66,6 +68,24 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                         position: 'relative',
                         gridRowStart: process.id,
                     };
+
+                    //esse sortedProcesses é o array de processos ordenado pelo algoritmo. se a posicaao do time-bar for igual ao colstart entao o processo ta entrando na cpu.
+                    //se a posicao da timebar for igual ao tempo de colstart + colspan, entao o processo ta saindo da cpu.
+                    //se a posicao da timebar for entre esses dois, o processo ta em execucao
+                    if(currentColumn===colStart){
+                        console.log('entrou');
+                        //atualiza a description pro processo
+                    }
+                    else if(currentColumn===colStart+colSpan){
+                        console.log('saiu');
+                    }
+                    else if(currentColumn>colStart && currentColumn<colStart+colSpan){
+                        console.log('executando');
+                    }
+                    else{
+                        console.log('error');
+                    }
+
 
                     return (
                         <div key={process.id} className='process' style={processStyle}>
@@ -115,7 +135,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     <tbody>
                         {tableInfos.map((process) => (
                             <tr key={process.id}>
-                                <td className='p-4'>description {process.id}</td>
+                                <td className='p-4'>process {process.id}</td>
                             </tr>
                         ))}
                     </tbody>
