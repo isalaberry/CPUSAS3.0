@@ -98,11 +98,23 @@
   background-color: #ebf8ff; /* azul claro */
   margin: 10px;
   border-radius: 0.375rem; /* bordas arredondadas */
+  padding: 16px; /* espaço interno */
 }
 
-.description-table th, .description-table td {
+.description-table td {
   border: 1px solid #cbd5e1; /* borda cinza */
   padding: 16px; /* espaço interno */
+  
+}
+
+.description-table th {
+  padding: 16px; /* espaço interno */
+  font-size: 1.5rem; /* tamanho da fonte grande */
+
+}
+
+.description-table table {
+  border-spacing: 36px; /* espaço entre os tds */
 }
 
 .labels {

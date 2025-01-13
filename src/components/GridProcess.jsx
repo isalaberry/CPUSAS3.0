@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const GridProcess = ({ tableInfos, algorithm }) => {
     console.log({ tableInfos });
 
     const [currentColumn, setCurrentColumn] = useState(1);
+    const [descriptions, setDescriptions] = useState({});
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -32,6 +33,42 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         }
         return sorted;
     };
+
+    useEffect(() => {
+        const sortedProcesses = sortProcesses(tableInfos);
+        let lastEndTime = 0;
+        const newDescriptions = {};
+
+        sortedProcesses.forEach((process) => {
+            const { arrivalTime, runningTime } = process;
+            const colStart = Math.max(lastEndTime, arrivalTime + 1); 
+            const colSpan = runningTime; 
+            lastEndTime = colStart + colSpan;
+
+            //se o timebar é menor que o colStart, o processo nao existe ainda
+            if(currentColumn === colStart){
+                newDescriptions[process.id] = `P${process.id} entered`;
+            }
+            else if(currentColumn === colStart + colSpan){
+                newDescriptions[process.id] = `P${process.id} exited`;
+            }
+            else if(currentColumn > colStart && currentColumn < colStart + colSpan){
+                newDescriptions[process.id] = `P${process.id} is executing`;
+            }
+            else if(currentColumn<colStart){
+                newDescriptions[process.id] = `P${process.id} is waiting`;
+            }
+            else if(currentColumn>colStart+colSpan){
+                newDescriptions[process.id] = `P${process.id} ended`;
+            }
+            else{
+                newDescriptions[process.id] = `Error`;
+            }
+
+        });
+
+        setDescriptions(newDescriptions);
+    }, [currentColumn, tableInfos, algorithm]);
 
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
@@ -69,24 +106,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                         gridRowStart: process.id,
                     };
 
-                    //esse sortedProcesses é o array de processos ordenado pelo algoritmo. se a posicaao do time-bar for igual ao colstart entao o processo ta entrando na cpu.
-                    //se a posicao da timebar for igual ao tempo de colstart + colspan, entao o processo ta saindo da cpu.
-                    //se a posicao da timebar for entre esses dois, o processo ta em execucao
-                    if(currentColumn===colStart){
-                        console.log('entrou');
-                        //atualiza a description pro processo
-                    }
-                    else if(currentColumn===colStart+colSpan){
-                        console.log('saiu');
-                    }
-                    else if(currentColumn>colStart && currentColumn<colStart+colSpan){
-                        console.log('executando');
-                    }
-                    else{
-                        console.log('error');
-                    }
-
-
+                    
                     return (
                         <div key={process.id} className='process' style={processStyle}>
                             <div style={{ zIndex: 2 }}>
@@ -126,7 +146,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             </div>
 
             <div className='description-table'>
-                <table className="w-full">
+                <table style={{ width: '100%' }}>
                     <thead>
                         <tr>
                             <th>Description</th>
@@ -135,7 +155,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     <tbody>
                         {tableInfos.map((process) => (
                             <tr key={process.id}>
-                                <td className='p-4'>process {process.id}</td>
+                                <td style={{ padding: '16px' }}>{descriptions[process.id]}</td>
                             </tr>
                         ))}
                     </tbody>
