@@ -36,12 +36,14 @@
   margin-top: 4px; /* espaço acima do campo */
   border-radius: 0.5rem; /* bordas arredondadas */
   width: 50%; /* metade da largura do contêiner */
+
 }
 
 .input-table {
   border: 1px solid #ccc; /* Borda cinza */
   border-radius: 4px; /* Bordas arredondadas */
   box-sizing: border-box; /* Inclui padding e border no tamanho total */
+  
 }
 
 .input:focus {
@@ -86,9 +88,10 @@
   background-color: #ebf8ff; /* azul claro */
   margin: 10px;
   border-radius: 0.375rem; /* bordas arredondadas */
-  grid-column: span 3; /* ocupa 3 colunas */
+  grid-column: 1 / span 3; /* ocupa 3 colunas */
+  grid-row: 1;
   display: grid;
-  grid-template-columns: repeat(10, auto); /* Ajusta automaticamente a largura das colunas */
+  grid-template-columns: repeat(10, 1fr); /* Define 10 colunas de largura igual */
   grid-auto-rows: minmax(50px, 100px); /* Define altura mínima e máxima para as linhas */
 }
 
@@ -105,6 +108,9 @@
   margin: 10px;
   border-radius: 0.375rem; /* bordas arredondadas */
   padding: 16px; /* espaço interno */
+  grid-column: 4 / span 1; 
+  grid-row:1;
+
 }
 
 .description-table td {
@@ -120,6 +126,7 @@
   padding: 16px; /* espaço interno */
   font-size: 1.5rem; /* tamanho da fonte grande */
 
+
 }
 
 .description-table table {
@@ -129,9 +136,10 @@
 .labels {
   display: flex;
   justify-content: space-between;
-  grid-column: span 10; /* ocupa 10 colunas */
   padding: 12px; /* espaço interno */
   height: 100%; /* altura total */
+  grid-column: span 3; /* ocupa 3 colunas */
+
 }
 
 .labelTable {

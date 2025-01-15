@@ -23,14 +23,32 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     };
 
     const sortProcesses = (tableInfos) => {
-        let sorted;
-        if (algorithm === 'FIFO') {
-            sorted = [...tableInfos].sort((a, b) => a.arrivalTime - b.arrivalTime);
-        } else if (algorithm === 'SJF') {
-            sorted = [...tableInfos].sort((a, b) => a.runningTime - b.runningTime);
-        } else if (algorithm === 'PP' || algorithm === 'PNP') {
-            sorted = [...tableInfos].sort((a, b) => a.priority - b.priority);
+        let sorted = [];
+        let currentTime = 0;
+    
+        while (tableInfos.length > 0) {
+            let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
+    
+            if (availableProcesses.length === 0) {
+                // Se não houver processos disponíveis, avance o tempo para o próximo processo
+                currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
+                availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
+            }
+    
+            let nextProcess;
+            if (algorithm === 'FIFO') {
+                nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
+            } else if (algorithm === 'SJF') {
+                nextProcess = availableProcesses.sort((a, b) => a.runningTime - b.runningTime)[0];
+            } else if (algorithm === 'PP' || algorithm === 'PNP') {
+                nextProcess = availableProcesses.sort((a, b) => a.priority - b.priority)[0];
+            }
+    
+            sorted.push(nextProcess);
+            currentTime += nextProcess.runningTime;
+            tableInfos = tableInfos.filter(process => process.id !== nextProcess.id);
         }
+    
         return sorted;
     };
 
@@ -51,7 +69,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             }
            
             else if(currentColumn === colStart && currentColumn === arrivalTime + 1){
-                newDescriptions[process.id] = `P${process.id} arriveded and entered`;
+                newDescriptions[process.id] = `P${process.id} arrived and entered`;
             }
             else if(currentColumn === arrivalTime + 1){
                 newDescriptions[process.id] = `P${process.id} arrived`;
@@ -150,11 +168,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     );
                 })}
 
-                <div className="labels">
-                    {[...Array(11)].map((_, i) => (
-                        <div key={i} className="label">{i}</div>
-                    ))}
-                </div>
+
 
             </div>
 
@@ -174,6 +188,14 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     </tbody>
                 </table>
             </div>
+
+            <div className="labels">
+                    {[...Array(11)].map((_, i) => (
+                        <div key={i} className="label">{i}</div>
+                    ))}
+            </div>
+
+            
 
             <div className="button-time-container">
                 <button onClick={handleFirstColumn} className="button">{'<<'}</button>
