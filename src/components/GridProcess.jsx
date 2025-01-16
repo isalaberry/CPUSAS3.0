@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 export const GridProcess = ({ tableInfos, algorithm }) => {
-    console.log({ tableInfos });
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
+    const [averageWaitingTime, setAverageWaitingTime] = useState(0);
+    const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
+
+
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -30,7 +33,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
     
             if (availableProcesses.length === 0) {
-                // Se não houver processos disponíveis, avance o tempo para o próximo processo
                 currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
                 availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
             }
@@ -56,6 +58,9 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         const sortedProcesses = sortProcesses(tableInfos);
         let lastEndTime = 0;
         const newDescriptions = {};
+        let totalWaitingTime = 0;
+        let totalTurnaroundTime = 0;
+
 
         sortedProcesses.forEach((process) => {
             const { arrivalTime, runningTime } = process;
@@ -63,7 +68,12 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             const colSpan = runningTime; 
             lastEndTime = colStart + colSpan;
 
-            //se o timebar é menor que o colStart, o processo nao existe ainda
+            const waitingTime = colStart - arrivalTime;
+            totalWaitingTime += waitingTime;
+
+            const turnaroundTime = (lastEndTime-1) - arrivalTime;
+            totalTurnaroundTime += turnaroundTime;
+
             if(currentColumn === colStart + colSpan){
                 newDescriptions[process.id] = `P${process.id} exited`;
             }
@@ -99,6 +109,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         });
 
         setDescriptions(newDescriptions);
+        setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
+        setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
     }, [currentColumn, tableInfos, algorithm]);
 
     const sortedProcesses = sortProcesses(tableInfos);
@@ -128,7 +140,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     const colStart = Math.max(lastEndTime, arrivalTime + 1); 
                     const colSpan = runningTime; 
                     lastEndTime = colStart + colSpan;
-                    console.log({colStart});
 
                     const processStyle = {
                         gridColumnStart: colStart,
@@ -202,6 +213,16 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 <button onClick={handlePreviousColumn} className="button">{'<'}</button>
                 <button onClick={handleNextColumn} className="button">{'>'}</button>
                 <button onClick={handleLastColumn} className="button">{'>>'}</button>
+            </div>
+
+            <div className="ttwt-container">
+                <div>
+                    Average Waiting Time: {averageWaitingTime.toFixed(2)}
+                </div>
+                <div>
+                    Turnaround Time: {averageTurnaroundTime.toFixed(2)}
+
+                </div>
             </div>
         </div>
     );
