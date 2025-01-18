@@ -1,7 +1,12 @@
 import React from 'react';
+import InputTable from './InputTable';
+import './../App.css';
 
 export const Pp = () => {
     return (
-        <div>Priorities preemptive - simulator in construction!!</div>
-    )
+        <div className="container">
+        <div className="card">
+          <InputTable algorithm="PP"/> 
+        </div>
+      </div>       )
 }

@@ -28,7 +28,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     const sortProcesses = (tableInfos) => {
         let sorted = [];
         let currentTime = 0;
-    
+    //
         while (tableInfos.length > 0) {
             let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
     
@@ -36,7 +36,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
                 availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
             }
-    
+    //
             let nextProcess;
             if (algorithm === 'FIFO') {
                 nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
@@ -136,14 +136,46 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
 
                     const { arrivalTime, runningTime } = process;
+                    let colStart = Math.max(lastEndTime, arrivalTime + 1); 
+                    let colSpan = runningTime; 
+                    let newColspan = colSpan;
+//
+                    if (algorithm === 'PP') {
+                        let remainingTime = runningTime;
+                        while (remainingTime > 0) {
+                            let nextArrival = Math.min(...tableInfos.map(p => p.arrivalTime).filter(time => time > colStart));
+                            if (nextArrival && nextArrival < colStart + remainingTime) {
+                                newColspan = nextArrival - colStart;
+                                remainingTime -= newColspan;
+                                colStart = nextArrival;
+                            } else {
+                                newColspan = remainingTime;
+                                remainingTime = 0;
+                            }
+                        }
+                    }
+//
 
-                    const colStart = Math.max(lastEndTime, arrivalTime + 1); 
-                    const colSpan = runningTime; 
+/*
+       if (algorithm === 'PP') {
+                        let remainingTime = runningTime; //ok
+                        while (remainingTime > 0) { //ok
+                            if(process.arrivalTime+process.runningTime>nextprocess.arrivaltime ){
+                                remainingTime=process.runningTime-nextprocess.arrivalTime;
+                                colSpan= nextprocess.colstart - process.colStart;
+                            }
+                        }
+        }
+*/
+
+
+
+
                     lastEndTime = colStart + colSpan;
 
                     const processStyle = {
                         gridColumnStart: colStart,
-                        gridColumnEnd: `span ${colSpan}`,
+                        gridColumnEnd: algorithm === 'PP' && newColspan ? `span ${newColspan}` : `span ${colSpan}`, //if pp newcolspan
                         position: 'relative',
                         gridRowStart: process.id,
                     };
@@ -217,10 +249,10 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
             <div className="ttwt-container">
                 <div>
-                    Average Waiting Time: {averageWaitingTime.toFixed(2)}
+                    Average Waiting Time: {averageWaitingTime}
                 </div>
                 <div>
-                    Turnaround Time: {averageTurnaroundTime.toFixed(2)}
+                    Turnaround Time: {averageTurnaroundTime}
 
                 </div>
             </div>

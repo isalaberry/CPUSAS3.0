@@ -114,9 +114,8 @@
 }
 
 .description-table td {
-  border: 1px solid #cbd5e1;
   padding: 8px;
-  border-radius: 0.375rem;
+  border-radius: 1rem;
   background-color: white;
   text-align: center;
   
