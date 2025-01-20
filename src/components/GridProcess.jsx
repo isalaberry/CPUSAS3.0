@@ -132,54 +132,52 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     gridColumnEnd: currentColumn + 1,
                 }}></div>
 
-                {sortedProcesses.map((process, index) => {
+                {sortedProcesses.map((process, index) => { 
+                    const { arrivalTime, runningTime, priority = null } = process; 
+                    let colStart, colSpan; 
 
+                    if (algorithm === 'PP') {  //lembrando que sortedProcesses ja esta sorteado em orddem de prioridade
+                        let remainingTime = runningTime; 
 
-                    const { arrivalTime, runningTime } = process;
-                    let colStart = Math.max(lastEndTime, arrivalTime + 1); 
-                    let colSpan = runningTime; 
-                    let newColspan = colSpan;
-//
-                    if (algorithm === 'PP') {
-                        let remainingTime = runningTime;
-                        while (remainingTime > 0) {
-                            let nextArrival = Math.min(...tableInfos.map(p => p.arrivalTime).filter(time => time > colStart));
-                            if (nextArrival && nextArrival < colStart + remainingTime) {
-                                newColspan = nextArrival - colStart;
-                                remainingTime -= newColspan;
-                                colStart = nextArrival;
-                            } else {
-                                newColspan = remainingTime;
-                                remainingTime = 0;
+                        let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity; //pega o arrival do proximo processo
+                        let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity; //pega a prioridade do proximo processo
+                        let stack = []; //declara a stack
+                        
+                        //
+                        
+                            //tem coisas na stack? SIM: um item da stack tem prioridade menor que o atual? SIM: executa o item da stack NÃO: executa o atual
+                            //tem coisas na stack? NAO: executa o atual
+                            if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) { //se o proximo processo cortar o atual
+                                colSpan = nextArrival - arrivalTime;
+                                remainingTime -= colSpan;
+                                colStart = Math.max(lastEndTime, arrivalTime + 1);
+                                console.log("algum processo cortou");
+                                stack.push({ arrivalTime: nextArrival, remainingTime, priority: nextPriority });
+                                lastEndTime = colStart + colSpan; 
+
+                            } else {  //se o proximo processo nao cortar o atual
+                                console.log("processo nao cortou", remainingTime);
+                                colStart = Math.max(lastEndTime, arrivalTime + 1);
+                                colSpan = runningTime;
+                                lastEndTime = colStart + colSpan;
                             }
-                        }
+
+                        
+
+                    } else { //outros algoritmos
+                        colStart = Math.max(lastEndTime, arrivalTime + 1);
+                        colSpan = runningTime;
+                        lastEndTime = colStart + colSpan; 
+
                     }
-//
 
-/*
-       if (algorithm === 'PP') {
-                        let remainingTime = runningTime; //ok
-                        while (remainingTime > 0) { //ok
-                            if(process.arrivalTime+process.runningTime>nextprocess.arrivaltime ){
-                                remainingTime=process.runningTime-nextprocess.arrivalTime;
-                                colSpan= nextprocess.colstart - process.colStart;
-                            }
-                        }
-        }
-*/
-
-
-
-
-                    lastEndTime = colStart + colSpan;
-
+                    
                     const processStyle = {
                         gridColumnStart: colStart,
-                        gridColumnEnd: algorithm === 'PP' && newColspan ? `span ${newColspan}` : `span ${colSpan}`, //if pp newcolspan
+                        gridColumnEnd: `span ${colSpan}`,
                         position: 'relative',
                         gridRowStart: process.id,
                     };
-
                     
                     return (
                         <div key={process.id} className='process' style={processStyle}>

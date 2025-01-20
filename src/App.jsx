@@ -16,6 +16,7 @@ export function App() {
         <div className='bg-blue-200 p-8'>
           <NavBar/>
             <Routes>
+              <Route path="/" element={<Fifo />} />
               <Route path="/fifo" element={<Fifo />} />
               <Route path="/sjf" element={<Sjf />} />
               <Route path="/pnp" element={<Pnp />} />

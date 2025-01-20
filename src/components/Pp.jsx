@@ -8,5 +8,6 @@ export const Pp = () => {
         <div className="card">
           <InputTable algorithm="PP"/> 
         </div>
-      </div>       )
+      </div>       
+      )
 }
