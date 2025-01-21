@@ -41,11 +41,11 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             }
 
             let nextProcess;
-            if (algorithm === 'FIFO') {
+            if (algorithm === 'FIFO' || algorithm === 'PP') {
                 nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
             } else if (algorithm === 'SJF') {
                 nextProcess = availableProcesses.sort((a, b) => a.runningTime - b.runningTime)[0];
-            } else if (algorithm === 'PP' || algorithm === 'PNP') {
+            } else if (algorithm === 'PNP') {
                 nextProcess = availableProcesses.sort((a, b) => a.priority - b.priority)[0];
             }
     
@@ -69,7 +69,7 @@ useEffect(() => {
         }
         else if(currentColumn === colStart){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
-            console.log('entrou?', colStart===currentColumn);//true - NAO TA INDO TRUE
+            //console.log('entrou?', colStart===currentColumn);//true - NAO TA INDO TRUE ? problema na stack
         }
         else if(currentColumn === colStart + colSpan){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
@@ -101,7 +101,7 @@ useEffect(() => {
         squares.forEach((square) => {
             const backgroundColor = window.getComputedStyle(square).backgroundColor;
             if (backgroundColor === 'rgb(25, 69, 105)') { // Verifica se a cor é azul escuro
-                console.log(square);
+                //console.log(square);
 
                 const colStart = parseInt(square.style.gridColumnStart, 10);
                 const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); // Pega o span diretamente
@@ -171,19 +171,16 @@ useEffect(() => {
                         
                         //-------------------PP-------------------
 
-                            //se a stack nao estiver vazia e a prioridade do processo for maior que a do topo da stack
-                            if (stack.length > 0 && stack[0].priority < priority) { 
-                                const processData = stack.pop(); //stack  -1
-                                stackElement = printStackElement(processData);
-                                
-                            }
+                       
 
                             //se o proximo processo cortar o atual -> o final do tempo de execucao nao é necessariamente arrivalTime + runningTime!!!
                             if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
+                                //console.log('proximo processo corta o atual');
                                 colSpan = nextArrival - arrivalTime; //nextArrival-1 - arrivalTime
                                 remainingTime -= colSpan;
                                 colStart = Math.max(lastEndTime, arrivalTime + 1);
                                 stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                                console.log(stack);//certo
                                 lastEndTime = colStart + colSpan; 
                                 processId=process.id;
                                 //logica para salvar tempo de inicio e final do processo
@@ -197,7 +194,21 @@ useEffect(() => {
                                 lastEndTime = colStart + colSpan;
                                 processId = process.id;
                                 //logica para salvar tempo de inicio e final do processo
+
+
+                                            //  1 problema: se o ultimo tiver maior prioridade, a stack nunca é printada
+                                            //  2 problema: tem que executar os outros processos da stack
+                                if (stack.length > 0 && stack[0].priority < priority || index === sortedProcesses.length - 1) { //  bom!!
+                                    //  if is the last process, execute all the stack!!!!!!!!!! IDEA!!!!
+                                    do{
+                                        const processData = stack.pop(); //     
+                                        console.log('stack.pop', processData);
+                                        stackElement = printStackElement(processData);
+                                    }while(index === sortedProcesses.length - 1&&stack.length>0);
+                                }
                             }
+
+                             
 
                         //-------------------PP-------------------
 
