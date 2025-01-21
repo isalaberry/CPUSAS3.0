@@ -1,12 +1,16 @@
  
 import React, { useState, useEffect } from 'react';
 
+import { useRef } from 'react';
+
 export const GridProcess = ({ tableInfos, algorithm }) => {
+    const processGridRef = useRef(null);
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
+    const [darkBlueSquares, setDarkBlueSquares] = useState([]);
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -52,65 +56,65 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     
         return sorted;
     };
+//-------------FIX: DESCRIPTION TABLE----------------
 
-    useEffect(() => {
-        const sortedProcesses = sortProcesses(tableInfos);
-        let lastEndTime = 0;
-        const newDescriptions = {};
-        let totalWaitingTime = 0;
-        let totalTurnaroundTime = 0;
+useEffect(() => {
+    const newDescriptions = {};
 
-        sortedProcesses.forEach((process) => {
-            const { arrivalTime, runningTime } = process;
-            const colStart = Math.max(lastEndTime, arrivalTime + 1); 
-            const colSpan = runningTime; 
-            lastEndTime = colStart + colSpan;
+    darkBlueSquares.forEach(({ colStart, colSpan, rowStart }) => {
+        let processDescriptionId = parseInt(rowStart, 10);
 
-            const waitingTime = colStart - arrivalTime;
-            totalWaitingTime += waitingTime;
+        if(currentColumn === colStart + colSpan){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
+        }
+        else if(currentColumn === colStart){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
+            console.log('entrou?', colStart===currentColumn);//true - NAO TA INDO TRUE
+        }
+        else if(currentColumn === colStart + colSpan){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
+        }
+        else if(currentColumn > colStart && currentColumn < colStart + colSpan){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
+        }  
+        else if(currentColumn<colStart){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`;
+        }
+        else if(currentColumn>colStart+colSpan){
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
+        }
+        else{
+            newDescriptions[processDescriptionId] = `Error`;
+        }
+    });
 
-            const turnaroundTime = (lastEndTime-1) - arrivalTime;
-            totalTurnaroundTime += turnaroundTime;
+    setDescriptions(newDescriptions);
+    //setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
+    //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
+}, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
 
-            if(currentColumn === colStart + colSpan){
-                newDescriptions[process.id] = `P${process.id} exited`;
-            }
-           
-            else if(currentColumn === colStart && currentColumn === arrivalTime + 1){
-                newDescriptions[process.id] = `P${process.id} arrived and entered`;
-            }
-            else if(currentColumn === arrivalTime + 1){
-                newDescriptions[process.id] = `P${process.id} arrived`;
-            }
-            else if(currentColumn === colStart){
-                newDescriptions[process.id] = `P${process.id} entered`;
-            }
-            else if(currentColumn === colStart + colSpan){
-                newDescriptions[process.id] = `P${process.id} exited`;
-            }
-            else if(currentColumn < arrivalTime + 1){
-                newDescriptions[process.id] = `P${process.id} didn't arrive yet`;
-            }
-            else if(currentColumn > colStart && currentColumn < colStart + colSpan){
-                newDescriptions[process.id] = `P${process.id} is executing`;
-            }  
-            else if(currentColumn<colStart){
-                newDescriptions[process.id] = `P${process.id} is waiting`;
-            }
-            else if(currentColumn>colStart+colSpan){
-                newDescriptions[process.id] = `P${process.id} ended`;
-            }
-            else{
-                newDescriptions[process.id] = `Error`;
-            }
+// nova funcao
+useEffect(() => {
+    if (processGridRef.current) {
+        const squares = processGridRef.current.querySelectorAll('.process');
+        const darkBlueSquares = [];
+        squares.forEach((square) => {
+            const backgroundColor = window.getComputedStyle(square).backgroundColor;
+            if (backgroundColor === 'rgb(25, 69, 105)') { // Verifica se a cor é azul escuro
+                console.log(square);
 
+                const colStart = parseInt(square.style.gridColumnStart, 10);
+                const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); // Pega o span diretamente
+                const rowStart = square.style.gridRowStart;
+                darkBlueSquares.push({ colStart, colSpan, rowStart });
+            }
         });
+        setDarkBlueSquares(darkBlueSquares);
+    }
+}, [currentColumn, tableInfos, algorithm]);
 
-        setDescriptions(newDescriptions);
-        setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
-        setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
-    }, [currentColumn, tableInfos, algorithm]);
 
+//-------------------FIX: DESCRIPTION TABLE-------------------
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
     let stack = [];
@@ -137,7 +141,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
     return (
         <div className='grid-container'>
-            <div className='process-grid' style={{ position: 'relative' }}>
+            <div className='process-grid' style={{ position: 'relative' }} ref={processGridRef}>
 
                 <div className="time-bar" style={{
                     position: 'absolute',
@@ -182,6 +186,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                                 stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
                                 lastEndTime = colStart + colSpan; 
                                 processId=process.id;
+                                //logica para salvar tempo de inicio e final do processo
+                                //setProcessEntered [process.id] (chegada,saida); - salva o tempo de chegada e saida do processo
                             } 
 
                             //se o proximo processo nao cortar o atual
@@ -190,6 +196,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                                 colSpan = runningTime;
                                 lastEndTime = colStart + colSpan;
                                 processId = process.id;
+                                //logica para salvar tempo de inicio e final do processo
                             }
 
                         //-------------------PP-------------------
@@ -275,10 +282,10 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
             <div className="ttwt-container">
                 <div>
-                    Average Waiting Time: {averageWaitingTime}
+                    Average Waiting Time: {0}
                 </div>
                 <div>
-                    Turnaround Time: {averageTurnaroundTime}
+                    Turnaround Time: {0}
                 </div>
             </div>
         </div>
