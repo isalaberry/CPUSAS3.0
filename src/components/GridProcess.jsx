@@ -1,3 +1,4 @@
+ 
 import React, { useState, useEffect } from 'react';
 
 export const GridProcess = ({ tableInfos, algorithm }) => {
@@ -6,8 +7,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     const [descriptions, setDescriptions] = useState({});
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
-
-
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -28,7 +27,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     const sortProcesses = (tableInfos) => {
         let sorted = [];
         let currentTime = 0;
-    //
+
         while (tableInfos.length > 0) {
             let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
     
@@ -36,7 +35,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
                 availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
             }
-    //
+
             let nextProcess;
             if (algorithm === 'FIFO') {
                 nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
@@ -60,7 +59,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         const newDescriptions = {};
         let totalWaitingTime = 0;
         let totalTurnaroundTime = 0;
-
 
         sortedProcesses.forEach((process) => {
             const { arrivalTime, runningTime } = process;
@@ -115,6 +113,27 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
+    let stack = [];
+
+    const printStackElement = (processData) => {
+        let colStart = Math.max(lastEndTime, processData.arrivalTime + 1);
+        let colSpan = processData.remainingTime;
+        lastEndTime = colStart + colSpan;
+        
+        return (
+            <div className='process' style={{
+                gridColumnStart: colStart,
+                gridColumnEnd: `span ${colSpan}`,
+                position: 'relative',
+                gridRowStart: processData.idStack,
+
+            }}>
+                <div style={{ zIndex: 2 }}>
+                    {`P${processData.idStack}`}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className='grid-container'>
@@ -135,56 +154,69 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 {sortedProcesses.map((process, index) => { 
                     const { arrivalTime, runningTime, priority = null } = process; 
                     let colStart, colSpan; 
+                    let processId; //declara o id do processo
+
+                    let stackElement = null; // Variável para armazenar o elemento da stack
 
                     if (algorithm === 'PP') {  //lembrando que sortedProcesses ja esta sorteado em orddem de prioridade
                         let remainingTime = runningTime; 
 
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity; //pega o arrival do proximo processo
                         let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity; //pega a prioridade do proximo processo
-                        let stack = []; //declara a stack
+                        let nextId = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].id : null; //pega o id do proximo processo
                         
-                        //
-                        
-                            //tem coisas na stack? SIM: um item da stack tem prioridade menor que o atual? SIM: executa o item da stack NÃO: executa o atual
-                            //tem coisas na stack? NAO: executa o atual
-                            if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) { //se o proximo processo cortar o atual
-                                colSpan = nextArrival - arrivalTime;
+                        //-------------------PP-------------------
+
+                            //se a stack nao estiver vazia e a prioridade do processo for maior que a do topo da stack
+                            if (stack.length > 0 && stack[0].priority < priority) { 
+                                const processData = stack.pop(); //stack  -1
+                                stackElement = printStackElement(processData);
+                                
+                            }
+
+                            //se o proximo processo cortar o atual -> o final do tempo de execucao nao é necessariamente arrivalTime + runningTime!!!
+                            if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
+                                colSpan = nextArrival - arrivalTime; //nextArrival-1 - arrivalTime
                                 remainingTime -= colSpan;
                                 colStart = Math.max(lastEndTime, arrivalTime + 1);
-                                console.log("algum processo cortou");
-                                stack.push({ arrivalTime: nextArrival, remainingTime, priority: nextPriority });
+                                stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
                                 lastEndTime = colStart + colSpan; 
+                                processId=process.id;
+                            } 
 
-                            } else {  //se o proximo processo nao cortar o atual
-                                console.log("processo nao cortou", remainingTime);
+                            //se o proximo processo nao cortar o atual
+                            else {  
                                 colStart = Math.max(lastEndTime, arrivalTime + 1);
                                 colSpan = runningTime;
                                 lastEndTime = colStart + colSpan;
+                                processId = process.id;
                             }
 
-                        
+                        //-------------------PP-------------------
 
                     } else { //outros algoritmos
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         colSpan = runningTime;
-                        lastEndTime = colStart + colSpan; 
-
+                        lastEndTime = colStart + colSpan;
+                        processId = process.id; 
                     }
 
-                    
                     const processStyle = {
                         gridColumnStart: colStart,
                         gridColumnEnd: `span ${colSpan}`,
                         position: 'relative',
-                        gridRowStart: process.id,
+                        gridRowStart: processId,
                     };
                     
                     return (
-                        <div key={process.id} className='process' style={processStyle}>
-                            <div style={{ zIndex: 2 }}>
-                                {`P${process.id}`}
+                        <React.Fragment key={process.id}>
+                            {stackElement} {/* Renderiza o elemento da stack, se houver */}
+                            <div className='process' style={processStyle}>
+                                <div style={{ zIndex: 2 }}>
+                                    {`P${processId}`}
+                                </div>
                             </div>
-                        </div>
+                        </React.Fragment>
                     );
                 })}
 
@@ -209,8 +241,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     );
                 })}
 
-
-
             </div>
 
             <div className='description-table'>
@@ -231,12 +261,10 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             </div>
 
             <div className="labels">
-                    {[...Array(11)].map((_, i) => (
-                        <div key={i} className="label">{i}</div>
-                    ))}
+                {[...Array(11)].map((_, i) => (
+                    <div key={i} className="label">{i}</div>
+                ))}
             </div>
-
-            
 
             <div className="button-time-container">
                 <button onClick={handleFirstColumn} className="button">{'<<'}</button>
@@ -251,7 +279,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 </div>
                 <div>
                     Turnaround Time: {averageTurnaroundTime}
-
                 </div>
             </div>
         </div>
