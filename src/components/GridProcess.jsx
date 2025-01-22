@@ -8,9 +8,12 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
+    //-------------------FIX: Average Waiting Time and Average Turnaround Time-------------------
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
     const [darkBlueSquares, setDarkBlueSquares] = useState([]);
+
+
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -56,7 +59,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     
         return sorted;
     };
-//-------------FIX: DESCRIPTION TABLE----------------
+//-------------FIX: DESCRIPTION TABLE----------------primeiro item nao entra + problems
 
 useEffect(() => {
     const newDescriptions = {};
@@ -69,7 +72,6 @@ useEffect(() => {
         }
         else if(currentColumn === colStart){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
-            //console.log('entrou?', colStart===currentColumn);//true - NAO TA INDO TRUE ? problema na stack
         }
         else if(currentColumn === colStart + colSpan){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
@@ -93,18 +95,16 @@ useEffect(() => {
     //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
 }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
 
-// nova funcao
 useEffect(() => {
     if (processGridRef.current) {
         const squares = processGridRef.current.querySelectorAll('.process');
         const darkBlueSquares = [];
         squares.forEach((square) => {
             const backgroundColor = window.getComputedStyle(square).backgroundColor;
-            if (backgroundColor === 'rgb(25, 69, 105)') { // Verifica se a cor é azul escuro
-                //console.log(square);
+            if (backgroundColor === 'rgb(25, 69, 105)') { 
 
                 const colStart = parseInt(square.style.gridColumnStart, 10);
-                const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); // Pega o span diretamente
+                const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); 
                 const rowStart = square.style.gridRowStart;
                 darkBlueSquares.push({ colStart, colSpan, rowStart });
             }
@@ -120,10 +120,10 @@ useEffect(() => {
     let stack = [];
 
     const printStackElement = (processData) => {
-        let colStart = Math.max(lastEndTime, processData.arrivalTime + 1);
+        let colStart = Math.max(lastEndTime);
         let colSpan = processData.remainingTime;
         lastEndTime = colStart + colSpan;
-        
+
         return (
             <div className='process' style={{
                 gridColumnStart: colStart,
@@ -137,6 +137,7 @@ useEffect(() => {
                 </div>
             </div>
         );
+        
     };
 
     return (
@@ -155,36 +156,30 @@ useEffect(() => {
                     gridColumnEnd: currentColumn + 1,
                 }}></div>
 
+                
                 {sortedProcesses.map((process, index) => { 
                     const { arrivalTime, runningTime, priority = null } = process; 
                     let colStart, colSpan; 
-                    let processId; //declara o id do processo
+                    let processId;
 
-                    let stackElement = null; // Variável para armazenar o elemento da stack
+                    let stackElement = null;
 
-                    if (algorithm === 'PP') {  //lembrando que sortedProcesses ja esta sorteado em orddem de prioridade
+                    if (algorithm === 'PP') {
                         let remainingTime = runningTime; 
 
-                        let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity; //pega o arrival do proximo processo
-                        let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity; //pega a prioridade do proximo processo
-                        let nextId = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].id : null; //pega o id do proximo processo
+                        let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
+                        let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity;
                         
                         //-------------------PP-------------------
 
-                       
-
-                            //se o proximo processo cortar o atual -> o final do tempo de execucao nao é necessariamente arrivalTime + runningTime!!!
+                            //se o proximo processo cortar o atual
                             if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
-                                //console.log('proximo processo corta o atual');
-                                colSpan = nextArrival - arrivalTime; //nextArrival-1 - arrivalTime
+                                colSpan = nextArrival - arrivalTime;
                                 remainingTime -= colSpan;
                                 colStart = Math.max(lastEndTime, arrivalTime + 1);
                                 stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
-                                console.log(stack);//certo
                                 lastEndTime = colStart + colSpan; 
                                 processId=process.id;
-                                //logica para salvar tempo de inicio e final do processo
-                                //setProcessEntered [process.id] (chegada,saida); - salva o tempo de chegada e saida do processo
                             } 
 
                             //se o proximo processo nao cortar o atual
@@ -193,22 +188,16 @@ useEffect(() => {
                                 colSpan = runningTime;
                                 lastEndTime = colStart + colSpan;
                                 processId = process.id;
-                                //logica para salvar tempo de inicio e final do processo
 
-
-                                            //  1 problema: se o ultimo tiver maior prioridade, a stack nunca é printada
-                                            //  2 problema: tem que executar os outros processos da stack
-                                if (stack.length > 0 && stack[0].priority < priority || index === sortedProcesses.length - 1) { //  bom!!
-                                    //  if is the last process, execute all the stack!!!!!!!!!! IDEA!!!!
+                                //verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
+                                if((index === sortedProcesses.length - 1||nextPriority>stack[0].priority) && stack.length>0){
                                     do{
-                                        const processData = stack.pop(); //     
-                                        console.log('stack.pop', processData);
-                                        stackElement = printStackElement(processData);
+                                    const processData = stack.pop();    
+                                    stackElement = printStackElement(processData);
                                     }while(index === sortedProcesses.length - 1&&stack.length>0);
                                 }
-                            }
 
-                             
+                            }
 
                         //-------------------PP-------------------
 
@@ -228,7 +217,7 @@ useEffect(() => {
                     
                     return (
                         <React.Fragment key={process.id}>
-                            {stackElement} {/* Renderiza o elemento da stack, se houver */}
+                            {stackElement}
                             <div className='process' style={processStyle}>
                                 <div style={{ zIndex: 2 }}>
                                     {`P${processId}`}
