@@ -67,6 +67,7 @@ class InputTable extends Component {
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleQuantumChange = this.handleQuantumChange.bind(this);
     this.saveHistoryToCookies = this.saveHistoryToCookies.bind(this);
     this.generateGanttChart = this.generateGanttChart.bind(this);
   }
@@ -95,6 +96,7 @@ class InputTable extends Component {
         arrivalTime: 0,
         runningTime: 0,
         priority: 0,
+        quantum: prevState.timeQuantum, // Inicializa com o valor do quantum atual
       };
       const updatedProcesses = [...prevState.tempProcesses, newProcess];
       return {
@@ -127,6 +129,11 @@ class InputTable extends Component {
     });
   }
 
+  handleQuantumChange(e) {
+    const newQuantum = Number(e.target.value);
+    this.setState({ timeQuantum: newQuantum });
+  }
+
   generateGanttChart() {
     this.setState((prevState) => {
       const tempProcesses = [...prevState.tempProcesses];
@@ -146,10 +153,16 @@ class InputTable extends Component {
         return { showGanttChart: false };
       }
 
-      const updatedHistory = [tempProcesses, ...prevState.history.slice(1)];
+      // Atualiza o quantum para todos os processos
+      const updatedProcesses = tempProcesses.map(process => ({
+        ...process,
+        quantum: prevState.timeQuantum,
+      }));
+
+      const updatedHistory = [updatedProcesses, ...prevState.history.slice(1)];
       this.saveHistoryToCookies(updatedHistory);
       return {
-        processes: tempProcesses,
+        processes: updatedProcesses,
         history: updatedHistory,
         showGanttChart: true,
       };
@@ -157,33 +170,52 @@ class InputTable extends Component {
   }
 
   render() {
-    const { tempProcesses, showGanttChart } = this.state;
+    const { tempProcesses, showGanttChart, timeQuantum } = this.state;
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
+    const showQuantum = algorithm === 'RR';
 
     return (
       <div className="screen">
-        <div className="container">
-          <Table processes={tempProcesses} handleInputChange={this.handleInputChange} showPriority={showPriority} />
+      <div className="container">
+        <Table processes={tempProcesses} handleInputChange={this.handleInputChange} showPriority={showPriority} />
+        {showQuantum && (
+        <div className="quantum-container">
+          <label htmlFor="quantum">Quantum:</label>
+          <input
+          type="number"
+          id="quantum"
+          value={timeQuantum}
+          onChange={this.handleQuantumChange}
+          min="1"
+          style={{
+            border: "1px solid #d1d5db",
+            margin: "4px",
+            borderRadius: "0.5rem",
+            
+          }}
+          />
         </div>
-
-        <div className="button-container">
-          <button className="button" onClick={this.addProcess}>
-            Add Process
-          </button>
-          <button className="button" onClick={this.deleteProcess}>
-            Delete Process
-          </button>
-          <button className="button" onClick={this.generateGanttChart}>
-            Generate Gantt Chart
-          </button>
-        </div>
-
-        {showGanttChart && (
-          <div className='bg-white h-screen'>
-            <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
-          </div>
         )}
+      </div>
+
+      <div className="button-container">
+        <button className="button" onClick={this.addProcess}>
+        Add Process
+        </button>
+        <button className="button" onClick={this.deleteProcess}>
+        Delete Process
+        </button>
+        <button className="button" onClick={this.generateGanttChart}>
+        Generate Gantt Chart
+        </button>
+      </div>
+
+      {showGanttChart && (
+        <div className='bg-white h-screen'>
+        <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
+        </div>
+      )}
       </div>
     );
   }

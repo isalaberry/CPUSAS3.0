@@ -44,12 +44,14 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             }
 
             let nextProcess;
-            if (algorithm === 'FIFO' || algorithm === 'PP') {
+            if (algorithm === 'FIFO' || algorithm === 'PP'|| algorithm === 'RR') {
                 nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
             } else if (algorithm === 'SJF') {
                 nextProcess = availableProcesses.sort((a, b) => a.runningTime - b.runningTime)[0];
             } else if (algorithm === 'PNP') {
                 nextProcess = availableProcesses.sort((a, b) => a.priority - b.priority)[0];
+            } else {
+                console.log('Error in algorithm atribuition');
             }
     
             sorted.push(nextProcess);
@@ -119,9 +121,30 @@ useEffect(() => {
     let lastEndTime = 0;
     let stack = [];
 
-    const printStackElement = (processData) => {
+    const printStackElement = (processData) => {//PP
         let colStart = Math.max(lastEndTime);
         let colSpan = processData.remainingTime;
+        lastEndTime = colStart + colSpan;
+
+        return (
+            <div className='process' style={{
+                gridColumnStart: colStart,
+                gridColumnEnd: `span ${colSpan}`,
+                position: 'relative',
+                gridRowStart: processData.idStack,
+
+            }}>
+                <div style={{ zIndex: 2 }}>
+                    {`P${processData.idStack}`}
+                </div>
+            </div>
+        );
+        
+    };
+
+    const printStackElementRR = (processData) => {
+        let colStart = Math.max(lastEndTime);
+        let colSpan = processData.quantum;
         lastEndTime = colStart + colSpan;
 
         return (
@@ -161,8 +184,9 @@ useEffect(() => {
                     const { arrivalTime, runningTime, priority = null } = process; 
                     let colStart, colSpan; 
                     let processId;
-
                     let stackElement = null;
+
+                    //-------------------PP-------------------
 
                     if (algorithm === 'PP') {
                         let remainingTime = runningTime; 
@@ -170,7 +194,7 @@ useEffect(() => {
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
                         let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity;
                         
-                        //-------------------PP-------------------
+                        
 
                             //se o proximo processo cortar o atual
                             if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
@@ -199,9 +223,101 @@ useEffect(() => {
 
                             }
 
-                        //-------------------PP-------------------
+                    //-------------------PP-------------------
+/*
+                        colSpan = runningTime; OK
+                        lastEndTime = colStart + colSpan;
+                        processId = process.id;
+                        colStart = Math.max(lastEndTime, arrivalTime + 1);
+                        */
 
-                    } else { //outros algoritmos
+                        //- editar InputTable para adicionar quantum OK
+                        //- colspan é sempre igual ao quantum, menos quando remainingTime<quantum OK
+                        //- se o processo terminar antes do quantum, o colspan é igual ao tempo restante OK
+                        //- a cada ciclo remainingtime-quantum OK
+                        //- o ciclo para quando remainingtime=0 OK
+
+                        //**next step: implementar a stack para o RR
+                        //-verificar se o proximo processo da stack tem arrival time menor - nao precisa eu acho OK
+
+                        //executar a stack no final da lista de processos ou se fim do processo atual for menor que o arrival time do proximo processo
+                        //-se o processo da stack ainda nao terminou, ele volta para a stack
+                        //
+
+                        /*         
+                            do{
+                                const processData = stack.pop();    
+                                stackElement = printStackElement(processData);
+                            }while(index === sortedProcesses.length - 1&&stack.length>0);
+                        */
+
+
+
+                    //-------------------RR-------------------
+                } else if (algorithm === 'RR') { // inicializações padrão
+                    let remainingTime = runningTime;
+                    let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
+                
+                    // se for o último processo e tiver coisa na stack
+                    if (index === sortedProcesses.length - 1 && stack.length > 0) {
+                        colSpan = Math.min(process.quantum, remainingTime);
+                        remainingTime -= colSpan;
+                
+                        processId = process.id;
+                        colStart = Math.max(lastEndTime, arrivalTime + 1);
+                        lastEndTime = colStart + colSpan;
+                
+                        if (remainingTime > 0) {
+                            stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                        }
+                
+                        do {
+                            const processData = stack.pop();
+                            if (processData) {
+                                stackElement = printStackElementRR(processData);
+                            }
+                        } while (stack.length > 0);
+                    }
+                
+                    // se um processo está finalizando e o remaining time é menor que o quantum
+                    else if (remainingTime < process.quantum) {
+                        colSpan = remainingTime;
+                        remainingTime = 0;
+                
+                        processId = process.id;
+                        colStart = Math.max(lastEndTime, arrivalTime + 1);
+                        lastEndTime = colStart + colSpan;
+                
+                        // se o processo finalizar antes do próximo processo chegar - executa a stack
+                        if (lastEndTime < nextArrival && stack.length > 0) {
+                            const processData = stack.pop();
+                            if (processData) {
+                                stackElement = printStackElementRR(processData);
+                            }
+                        }
+                    }
+                
+                    // se o running time for maior que o quantum e não for o último processo
+                    else {
+                        colSpan = process.quantum;
+                        remainingTime -= process.quantum;
+                
+                        processId = process.id;
+                        colStart = Math.max(lastEndTime, arrivalTime + 1);
+                        lastEndTime = colStart + colSpan;
+                
+                        stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                
+                        if (lastEndTime < nextArrival && stack.length > 0) {
+                            // se fim do processo atual for menor que o arrival time do próximo processo
+                            const processData = stack.pop();
+                            if (processData) {
+                                stackElement = printStackElementRR(processData);
+                            }
+                        }
+                    }//-------------------RR-------------------
+
+                } else { //outros algoritmos
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         colSpan = runningTime;
                         lastEndTime = colStart + colSpan;
