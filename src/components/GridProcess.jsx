@@ -1,4 +1,3 @@
- 
 import React, { useState, useEffect } from 'react';
 
 import { useRef } from 'react';
@@ -119,9 +118,10 @@ useEffect(() => {
 //-------------------FIX: DESCRIPTION TABLE-------------------
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
-    let stack = [];
+    //let stack = [];
+    let queue = [];
 
-    const printStackElement = (processData) => {//PP
+    const printQueueElementPP = (processData) => {//PP
         let colStart = Math.max(lastEndTime);
         let colSpan = processData.remainingTime;
         lastEndTime = colStart + colSpan;
@@ -131,36 +131,46 @@ useEffect(() => {
                 gridColumnStart: colStart,
                 gridColumnEnd: `span ${colSpan}`,
                 position: 'relative',
-                gridRowStart: processData.idStack,
+                gridRowStart: processData.idQueue,
 
             }}>
                 <div style={{ zIndex: 2 }}>
-                    {`P${processData.idStack}`}
+                    {`P${processData.idQueue}`}
                 </div>
             </div>
         );
         
     };
 
-    const printStackElementRR = (processData) => {
-        let colStart = Math.max(lastEndTime);
-        let colSpan = processData.quantum;
+    const printQueueElementRR = (processData) => {
+        if (!processData || processData.idQueue === undefined) {
+            console.error('Invalid processData:', processData);
+            return null;
+        }
+
+
+        let colStart = lastEndTime//NaN
+        let colSpan = processData.remainingTime;//se o remainingtime for maior que o quantum colocar na queue!!!!!!!!
         lastEndTime = colStart + colSpan;
 
+
+          console.log(`Process ID: ${processData.idQueue}, ColStart: ${colStart}, ColSpan: ${colSpan}, LastEndTime: ${lastEndTime}`);
+        console.log('----');
+
+
         return (
+            
             <div className='process' style={{
                 gridColumnStart: colStart,
                 gridColumnEnd: `span ${colSpan}`,
                 position: 'relative',
-                gridRowStart: processData.idStack,
-
+                gridRowStart: processData.idQueue,
             }}>
                 <div style={{ zIndex: 2 }}>
-                    {`P${processData.idStack}`}
+                    {`P${processData.idQueue}`}
                 </div>
             </div>
         );
-        
     };
 
     return (
@@ -184,7 +194,8 @@ useEffect(() => {
                     const { arrivalTime, runningTime, priority = null } = process; 
                     let colStart, colSpan; 
                     let processId;
-                    let stackElement = null;
+                    let queueElement = null;
+                    
 
                     //-------------------PP-------------------
 
@@ -201,7 +212,7 @@ useEffect(() => {
                                 colSpan = nextArrival - arrivalTime;
                                 remainingTime -= colSpan;
                                 colStart = Math.max(lastEndTime, arrivalTime + 1);
-                                stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                                queue.push({ idQueue: process.id, arrivalTime, remainingTime, priority });
                                 lastEndTime = colStart + colSpan; 
                                 processId=process.id;
                             } 
@@ -214,11 +225,11 @@ useEffect(() => {
                                 processId = process.id;
 
                                 //verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
-                                if((index === sortedProcesses.length - 1||nextPriority>stack[0].priority) && stack.length>0){
+                                if((index === sortedProcesses.length - 1||nextPriority>queue[0].priority) && queue.length>0){
                                     do{
-                                    const processData = stack.pop();    
-                                    stackElement = printStackElement(processData);
-                                    }while(index === sortedProcesses.length - 1&&stack.length>0);
+                                    const processData = queue.shift();    
+                                    queueElement = printQueueElementPP(processData);
+                                    }while(index === sortedProcesses.length - 1&&queue.length>0);
                                 }
 
                             }
@@ -232,8 +243,8 @@ useEffect(() => {
                         */
 
                         //- editar InputTable para adicionar quantum OK
-                        //- colspan é sempre igual ao quantum, menos quando remainingTime<quantum OK
-                        //- se o processo terminar antes do quantum, o colspan é igual ao tempo restante OK
+                        //- colspan Ã© sempre igual ao quantum, menos quando remainingTime<quantum OK
+                        //- se o processo terminar antes do quantum, o colspan Ã© igual ao tempo restante OK
                         //- a cada ciclo remainingtime-quantum OK
                         //- o ciclo para quando remainingtime=0 OK
 
@@ -254,12 +265,12 @@ useEffect(() => {
 
 
                     //-------------------RR-------------------
-                } else if (algorithm === 'RR') { // inicializações padrão
+                } else if (algorithm === 'RR') { // inicializaÃ§Ãµes padrÃ£o
                     let remainingTime = runningTime;
                     let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
                 
-                    // se for o último processo e tiver coisa na stack
-                    if (index === sortedProcesses.length - 1 && stack.length > 0) {
+                    // se for o ultimo processo e tiver coisa na queue
+                    if (index === sortedProcesses.length - 1 && queue.length > 0) {
                         colSpan = Math.min(process.quantum, remainingTime);
                         remainingTime -= colSpan;
                 
@@ -267,19 +278,19 @@ useEffect(() => {
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         lastEndTime = colStart + colSpan;
                 
-                        if (remainingTime > 0) {
-                            stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                        if (remainingTime > 0) {                                        //tirar priority
+                            queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
                         }
                 
                         do {
-                            const processData = stack.pop();
+                            const processData = queue.shift();
                             if (processData) {
-                                stackElement = printStackElementRR(processData);
+                                queueElement = printQueueElementRR(processData);
                             }
-                        } while (stack.length > 0);
+                        } while (queue.length > 0);
                     }
                 
-                    // se um processo está finalizando e o remaining time é menor que o quantum
+                    // se um processo esta finalizando e o remaining time Ã© menor que o quantum
                     else if (remainingTime < process.quantum) {
                         colSpan = remainingTime;
                         remainingTime = 0;
@@ -288,16 +299,16 @@ useEffect(() => {
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         lastEndTime = colStart + colSpan;
                 
-                        // se o processo finalizar antes do próximo processo chegar - executa a stack
-                        if (lastEndTime < nextArrival && stack.length > 0) {
-                            const processData = stack.pop();
+                        // se o processo finalizar antes do prÃ³ximo processo chegar - executa a stack
+                        if (lastEndTime < nextArrival && queue.length > 0) {
+                            const processData = queue.shift();
                             if (processData) {
-                                stackElement = printStackElementRR(processData);
+                                queueElement = printQueueElementRR(processData);
                             }
                         }
                     }
                 
-                    // se o running time for maior que o quantum e não for o último processo
+                    // se o running time for maior que o quantum e nÃ£o for o Ãºltimo processo
                     else {
                         colSpan = process.quantum;
                         remainingTime -= process.quantum;
@@ -306,13 +317,13 @@ useEffect(() => {
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         lastEndTime = colStart + colSpan;
                 
-                        stack.push({ idStack: process.id, arrivalTime, remainingTime, priority });
+                        queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
                 
-                        if (lastEndTime < nextArrival && stack.length > 0) {
-                            // se fim do processo atual for menor que o arrival time do próximo processo
-                            const processData = stack.pop();
+                        if (lastEndTime < nextArrival && queue.length > 0) {
+                            // se fim do processo atual for menor que o arrival time do prÃ³ximo processo
+                            const processData = queue.shift();
                             if (processData) {
-                                stackElement = printStackElementRR(processData);
+                                queueElement = printQueueElementRR(processData);
                             }
                         }
                     }//-------------------RR-------------------
@@ -333,7 +344,7 @@ useEffect(() => {
                     
                     return (
                         <React.Fragment key={process.id}>
-                            {stackElement}
+                            {queueElement}
                             <div className='process' style={processStyle}>
                                 <div style={{ zIndex: 2 }}>
                                     {`P${processId}`}
