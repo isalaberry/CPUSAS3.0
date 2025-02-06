@@ -285,3 +285,18 @@
   padding: 8px;
   font-weight: 600;
 }
+
+.user-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #194569;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+

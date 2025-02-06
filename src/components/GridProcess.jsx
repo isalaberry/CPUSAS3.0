@@ -6,9 +6,10 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
     //-------------------FIX: Average Waiting Time and Average Turnaround Time-------------------
+    //dê um id e um estado para cada um dos darkbluesquares. o forEach do darkblueSquares deve percorrer todo o array de darkbluequares a cada iteracao e assignar estados para cada darkbluesquare
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
-    const [darkBlueSquares, setDarkBlueSquares] = useState([]);
+    const [darkBlueSquares, setDarkBlueSquares] = useState([]);     
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
@@ -72,16 +73,13 @@ useEffect(() => {
         else if(currentColumn === colStart){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
         }
-        else if(currentColumn === colStart + colSpan){
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
-        }
         else if(currentColumn > colStart && currentColumn < colStart + colSpan){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
         }  
-        else if(currentColumn<colStart){
+        else if(currentColumn < colStart){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`;
         }
-        else if(currentColumn>colStart+colSpan){
+        else if(currentColumn > colStart + colSpan){
             newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
         }
         else{
@@ -90,6 +88,7 @@ useEffect(() => {
     });
 
     setDescriptions(newDescriptions);
+    console.log('Descriptions:', newDescriptions);
     //setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
     //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
 }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
@@ -108,12 +107,13 @@ useEffect(() => {
                 darkBlueSquares.push({ colStart, colSpan, rowStart });
             }
         });
+       
+        console.log('Identified darkBlueSquares:', darkBlueSquares);
         setDarkBlueSquares(darkBlueSquares);
     }
 }, [currentColumn, tableInfos, algorithm]);
+//-----------------------------------
 
-
-//-------------------FIX: DESCRIPTION TABLE-------------------
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
     //let stack = [];
@@ -150,9 +150,6 @@ useEffect(() => {
         let colSpan = Math.min(processData.remainingTime, processData.quantum);
         lastEndTime = colStart + colSpan;
 
-        console.log(`Process ID: ${processData.idQueue}, ColStart: ${colStart}, ColSpan: ${colSpan}, LastEndTime: ${lastEndTime}, quantum ${processData.quantum}, remaining time ${processData.remainingTime}`);
-        console.log('----');
-
         return (
             <div className='process' style={{
                 gridColumnStart: colStart,
@@ -183,111 +180,104 @@ useEffect(() => {
                     gridColumnEnd: currentColumn + 1,
                 }}></div>
 
-                
-                {sortedProcesses.map((process, index) => { 
-                    const { arrivalTime, runningTime, priority = null, quantum } = process; 
-                    let colStart, colSpan; 
+                {sortedProcesses.map((process, index) => {
+                    const { arrivalTime, runningTime, priority = null, quantum } = process;
+                    let colStart, colSpan;
                     let processId;
                     let queueElement = null;
-                    
+
                     if (algorithm === 'PP') {
-                        let remainingTime = runningTime; 
+                        let remainingTime = runningTime;
 
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
                         let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity;
-                        
-                        
 
-                            //se o proximo processo cortar o atual
-                            if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
-                                colSpan = nextArrival - arrivalTime;
-                                remainingTime -= colSpan;
-                                colStart = Math.max(lastEndTime, arrivalTime + 1);
-                                queue.push({ idQueue: process.id, arrivalTime, remainingTime, priority });
-                                lastEndTime = colStart + colSpan; 
-                                processId=process.id;
-                            } 
+                        // se o proximo processo cortar o atual
+                        if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
+                            colSpan = nextArrival - arrivalTime;
+                            remainingTime -= colSpan;
+                            colStart = Math.max(lastEndTime, arrivalTime + 1);
+                            queue.push({ idQueue: process.id, arrivalTime, remainingTime, priority });
+                            lastEndTime = colStart + colSpan;
+                            processId = process.id;
+                        }
+                        // se o proximo processo nao cortar o atual
+                        else {
+                            colStart = Math.max(lastEndTime, arrivalTime + 1);
+                            colSpan = runningTime;
+                            lastEndTime = colStart + colSpan;
+                            processId = process.id;
 
-                            //se o proximo processo nao cortar o atual
-                            else {  
-                                colStart = Math.max(lastEndTime, arrivalTime + 1);
-                                colSpan = runningTime;
-                                lastEndTime = colStart + colSpan;
-                                processId = process.id;
-
-                                //verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
-                                if((index === sortedProcesses.length - 1||nextPriority>queue[0].priority) && queue.length>0){
-                                    do{
-                                    const processData = queue.shift();    
+                            // verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
+                            if ((index === sortedProcesses.length - 1 || nextPriority > queue[0].priority) && queue.length > 0) {
+                                do {
+                                    const processData = queue.shift();
                                     queueElement = printQueueElementPP(processData);
-                                    }while(index === sortedProcesses.length - 1&&queue.length>0);
+                                } while (index === sortedProcesses.length - 1 && queue.length > 0);
+                            }
+                        }
+
+                    } else if (algorithm === 'RR') {
+                        let remainingTime = runningTime;
+                        let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
+
+                        // se for o ultimo processo e tiver coisa na queue
+                        if (index === sortedProcesses.length - 1 && queue.length > 0) {
+                            colSpan = Math.min(quantum, remainingTime);
+                            remainingTime -= colSpan;
+
+                            processId = process.id;
+                            colStart = Math.max(lastEndTime, arrivalTime + 1);
+                            lastEndTime = colStart + colSpan;
+
+                            if (remainingTime > 0) {
+                                queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum });
+                            }
+
+                            queueElement = queue.map(processData => printQueueElementRR(processData));
+                        }
+                        // se um processo esta finalizando e o remaining time for menor que o quantum
+                        else if (remainingTime < quantum) {
+                            colSpan = remainingTime;
+                            remainingTime = 0;
+
+                            processId = process.id;
+                            colStart = Math.max(lastEndTime, arrivalTime + 1);
+                            lastEndTime = colStart + colSpan;
+
+                            // se o processo finalizar antes do proximo processo chegar - executa a stack
+                            if (lastEndTime < nextArrival && queue.length > 0) {
+                                const processData = queue.shift();
+                                if (processData) {
+                                    queueElement = printQueueElementRR(processData);
                                 }
-
-                            }
-
-                    //-------------------RR-------------------
-                } else if (algorithm === 'RR') {
-                    let remainingTime = runningTime;
-                    let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
-                
-                    // se for o ultimo processo e tiver coisa na queue
-                    if (index === sortedProcesses.length - 1 && queue.length > 0) {
-                        colSpan = Math.min(quantum, remainingTime);
-                        remainingTime -= colSpan;
-                
-                        processId = process.id;
-                        colStart = Math.max(lastEndTime, arrivalTime + 1);
-                        lastEndTime = colStart + colSpan;
-                
-                        if (remainingTime > 0) {
-                            queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum });
-                        }
-
-                        queueElement = queue.map(processData => printQueueElementRR(processData));
-                    }
-                    // se um processo esta finalizando e o remaining time for menor que o quantum
-                    else if (remainingTime < quantum) {
-                        colSpan = remainingTime;
-                        remainingTime = 0;
-                
-                        processId = process.id;
-                        colStart = Math.max(lastEndTime, arrivalTime + 1);
-                        lastEndTime = colStart + colSpan;
-                
-                        // se o processo finalizar antes do proximo processo chegar - executa a stack
-                        if (lastEndTime < nextArrival && queue.length > 0) {
-                            const processData = queue.shift();
-                            if (processData) {
-                                queueElement = printQueueElementRR(processData);
                             }
                         }
-                    }
-                
-                    // se o running time for maior que o quantum e nao for o ultimo processo
-                    else {
-                        colSpan = quantum;
-                        remainingTime -= quantum;
-                
-                        processId = process.id;
-                        colStart = Math.max(lastEndTime, arrivalTime + 1);
-                        lastEndTime = colStart + colSpan;
-                
-                        queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
-                
-                        if (lastEndTime < nextArrival && queue.length > 0) {
-                            // se fim do processo atual for menor que o arrival time do prOximo processo
-                            const processData = queue.shift();
-                            if (processData) {
-                                queueElement = printQueueElementRR(processData);
+                        // se o running time for maior que o quantum e nao for o ultimo processo
+                        else {
+                            colSpan = quantum;
+                            remainingTime -= quantum;
+
+                            processId = process.id;
+                            colStart = Math.max(lastEndTime, arrivalTime + 1);
+                            lastEndTime = colStart + colSpan;
+
+                            queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
+
+                            if (lastEndTime < nextArrival && queue.length > 0) {
+                                // se fim do processo atual for menor que o arrival time do proximo processo
+                                const processData = queue.shift();
+                                if (processData) {
+                                    queueElement = printQueueElementRR(processData);
+                                }
                             }
                         }
-                    }//-------------------RR-------------------
 
-                } else { //outros algoritmos
+                    } else { // outros algoritmos
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         colSpan = runningTime;
                         lastEndTime = colStart + colSpan;
-                        processId = process.id; 
+                        processId = process.id;
                     }
 
                     const processStyle = {
@@ -296,7 +286,7 @@ useEffect(() => {
                         position: 'relative',
                         gridRowStart: processId,
                     };
-                    
+
                     return (
                         <React.Fragment key={process.id}>
                             {queueElement}
