@@ -1,20 +1,14 @@
 import React from 'react';
 import { FaUser } from 'react-icons/fa';
 import './../App.css'; 
-import UserDataPage from './UserDataPage';
+import { Link } from 'react-router-dom';
 
 const UserButton = () => {
 
-    const handleClick = () => {
-        console.log('User button clicked');
-        <UserDataPage />
-    };
-
     return (
-        <button className="user-button" onClick={handleClick}>
+        <Link to="/user-data-page" className="user-button">
             <FaUser size={24} />
-
-        </button>
+        </Link>
     );
 };
 

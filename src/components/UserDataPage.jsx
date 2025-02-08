@@ -1,19 +1,27 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import ButtonTypeOne from './ButtonTypeOne';
 
 const UserDataPage = () => {
+    const navigate = useNavigate();
 
     return (
         <div>
-            <button style={{ position: 'absolute', top: 10, left: 10 }} onClick={() => navigate('/')}>
-                Home
-            </button>
-            <h1>User Data Page</h1>
-            <p>Aqui, se o user estiver logado, estará uma lista com todas as tabelas de processos que ele salvou</p>
-            <p>Adicionarei também na gridprocess um botao para salvar a tabela na database.</p>
-            <p>Se o user nao estiver logado, aparecerá um botão para logar ou registrar. Por enquanto eu vou usar firebase para armazenar os dados do usuario</p>
+            logado: sim - mostrar tabelas do usuário
 
-            database de tabelas de processos: firebase
-            database de users: firebase
+            logado: nao - botao para logar e botao para registrar
+
+            import ButtonTypeOne from './ButtonTypeOne';
+
+            <div>
+                <ButtonTypeOne to="/login-page">Login</ButtonTypeOne>
+            </div>
+            <div>   
+                <ButtonTypeOne to="/register-page">Register</ButtonTypeOne>
+            </div>
+
+
+            
         </div>
     );
 };

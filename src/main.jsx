@@ -10,6 +10,8 @@ import {Pnp} from './components/Pnp'
 import {Pp} from './components/Pp'
 import {Rr} from './components/Rr'
 import UserDataPage from './components/UserDataPage'
+import LoginPage from './components/LoginPage'
+import RegisterPage from './components/RegisterPage'
 
 const router = createBrowserRouter([
   {
@@ -40,7 +42,15 @@ const router = createBrowserRouter([
       {
         path: '/user-data-page',
         element: <UserDataPage />,
-      }
+      },
+      {
+        path: '/login-page',
+        element: <LoginPage />,
+      },
+      {
+        path: '/register-page',
+        element: <RegisterPage />,
+      },
     ]
       
   },

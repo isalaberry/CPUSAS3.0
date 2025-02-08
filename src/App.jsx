@@ -1,10 +1,7 @@
 import NavBar from './components/NavBar';
 import { Title } from './components/Title';
-import UserButton from './components/User';
-import { Route, Routes} from "react-router-dom";
-import { Fifo, Sjf, Pnp, Pp, Rr } from "./components";
-import UniversalInitial from './components/UniversalInitial';
-import UserDataPage from './components/UserDataPage';
+import UserButton from './components/UserButton';
+
 import { Outlet } from 'react-router-dom'
 
 
