@@ -3,6 +3,9 @@ import { Title } from './components/Title';
 import UserButton from './components/User';
 import { Route, Routes} from "react-router-dom";
 import { Fifo, Sjf, Pnp, Pp, Rr } from "./components";
+import UniversalInitial from './components/UniversalInitial';
+import UserDataPage from './components/UserDataPage';
+import { Outlet } from 'react-router-dom'
 
 
 export function App() {
@@ -24,14 +27,7 @@ export function App() {
 
       <div className='bg-blue-200 p-8' style={{ width: '100%' }}>
         <NavBar />
-        <Routes>
-          <Route path="/" element={<Fifo />} />
-          <Route path="/fifo" element={<Fifo />} />
-          <Route path="/sjf" element={<Sjf />} />
-          <Route path="/pnp" element={<Pnp />} />
-          <Route path="/pp" element={<Pp />} />
-          <Route path="/rr" element={<Rr />} />
-        </Routes>
+        <Outlet />
       </div>
     </div>
   );

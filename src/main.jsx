@@ -2,13 +2,55 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App'
 import './index.css'
-import {BrowserRouter} from "react-router-dom"
+import {BrowserRouter, createBrowserRouter, RouterProvider} from "react-router-dom"
+import UniversalInitial from './components/UniversalInitial'
+import {Fifo} from './components/Fifo'
+import {Sjf} from './components/Sjf'
+import {Pnp} from './components/Pnp'
+import {Pp} from './components/Pp'
+import {Rr} from './components/Rr'
+import UserDataPage from './components/UserDataPage'
 
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    errorElement: <div>Not Found</div>,
+    children: [  
+      {
+        path: '/fifo',
+        element: <Fifo />,
+      },
+      {
+        path: '/sjf',
+        element: <Sjf />,
+      },
+      {
+        path: '/pnp',
+        element: <Pnp />,
+      },
+      {
+        path: '/pp',
+        element: <Pp />,
+      },
+      {
+        path: '/rr',
+        element: <Rr />,
+      },
+      {
+        path: '/user-data-page',
+        element: <UserDataPage />,
+      }
+    ]
+      
+  },
+  
+
+])
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter >
-    <App />
-    </BrowserRouter>
+      <RouterProvider router={router} />
+    
   </React.StrictMode>,
 )
