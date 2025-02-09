@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ButtonTypeOne from './ButtonTypeOne';
+import LoginPage from './LoginPage';
+import NotLoggedPage from './NotLoggedPage';
 
 const UserDataPage = () => {
     const navigate = useNavigate();
@@ -12,13 +14,8 @@ const UserDataPage = () => {
             logado: nao - botao para logar e botao para registrar
 
             import ButtonTypeOne from './ButtonTypeOne';
-
-            <div>
-                <ButtonTypeOne to="/login-page">Login</ButtonTypeOne>
-            </div>
-            <div>   
-                <ButtonTypeOne to="/register-page">Register</ButtonTypeOne>
-            </div>
+            
+           <NotLoggedPage />
 
 
             

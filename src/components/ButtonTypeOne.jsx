@@ -14,7 +14,8 @@ const ButtonTypeOne = ({ to, children }) => {
                     border: 'none',
                     cursor: 'pointer',
                     margin: '10px',
-                    width: '20%'
+                    width: '40%',
+                    minWidth: '300px',
                 }}
             >
                 {children}

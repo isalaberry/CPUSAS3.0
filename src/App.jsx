@@ -1,7 +1,6 @@
 import NavBar from './components/NavBar';
 import { Title } from './components/Title';
 import UserButton from './components/UserButton';
-
 import { Outlet } from 'react-router-dom'
 
 
