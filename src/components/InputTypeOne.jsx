@@ -1,11 +1,12 @@
 import React from 'react';
 
-const InputTypeOne = ({ type, placeholder }) => {
+const InputTypeOne = ({ type, placeholder, onChange }) => {
     return (
         <div>
             <input
                 type={type}
                 placeholder={placeholder}
+                onChange={onChange}
                 style={{
                     padding: '10px',
                     borderRadius: '20px',
