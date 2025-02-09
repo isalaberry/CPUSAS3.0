@@ -9,18 +9,14 @@ const UserDataPage = () => {
 
     return (
         <div>
-            logado: sim - mostrar tabelas do usuário
-
-            logado: nao - botao para logar e botao para registrar
-
-            import ButtonTypeOne from './ButtonTypeOne';
+  
             
-           <NotLoggedPage />
 
 
             
         </div>
     );
 };
+//            isLogged? <UserTables /> : <NotLoggedPage/>
 
 export default UserDataPage;

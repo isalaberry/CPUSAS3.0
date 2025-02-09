@@ -1,22 +1,26 @@
 import React from 'react';
-import ButtonTypeOne from './ButtonTypeOne'; 
+import ButtonTypeTwo from './ButtonTypeTwo'; 
 import InputTypeOne from './InputTypeOne';
+import ArrowToUserDataPage from './ArrowToUserDataPage';
 
 const LoginPage = () => {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-            <h1>Insert your credentials</h1>
+        <div>
+            <ArrowToUserDataPage />
 
-            <form>
-                <InputTypeOne type="text" placeholder="Username" />
-                <InputTypeOne type="password" placeholder="Password" />
-                <InputTypeOne type="password" placeholder="Confirm Password" />
-            </form>
+            <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+                <h1>Insert your credentials</h1>
+                
+                <form>
+                    <InputTypeOne type="text" placeholder="Username" />
+                    <InputTypeOne type="password" placeholder="Password" />
+                </form>
 
-            <div>
-                <ButtonTypeOne to="/login-page">Login</ButtonTypeOne>
+                <div>
+                    <ButtonTypeTwo>Login</ButtonTypeTwo>
+                </div>
+                
             </div>
-            
         </div>
     );
 };
