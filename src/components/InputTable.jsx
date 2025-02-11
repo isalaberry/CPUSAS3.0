@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import './../App.css';
 import Cookies from 'js-cookie';
 import { GridProcess } from './GridProcess';
+import { db } from '../config/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const Table = ({ processes, handleInputChange, showPriority }) => {
   return (
@@ -134,8 +136,8 @@ class InputTable extends Component {
     this.setState({ timeQuantum: newQuantum });
   }
 
-  generateGanttChart() {
-    this.setState((prevState) => {
+  async generateGanttChart() {
+    this.setState(async (prevState) => {
       const tempProcesses = [...prevState.tempProcesses];
 
       // Check if any runningTime is zero
@@ -161,6 +163,18 @@ class InputTable extends Component {
 
       const updatedHistory = [updatedProcesses, ...prevState.history.slice(1)];
       this.saveHistoryToCookies(updatedHistory);
+
+      // Adicionar a tabela ao Firestore
+      try {
+        await addDoc(collection(db, 'tables'), {
+          processes: updatedProcesses,
+          timestamp: new Date(),
+        });
+        console.log('Table added to Firestore');
+      } catch (error) {
+        console.error('Error adding table to Firestore:', error);
+      }
+
       return {
         processes: updatedProcesses,
         history: updatedHistory,
