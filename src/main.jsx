@@ -20,6 +20,10 @@ const router = createBrowserRouter([
     errorElement: <div>Not Found</div>,
     children: [  
       {
+        path: '/',
+        element:<UniversalInitial />,
+      },
+      {
         path: '/fifo',
         element: <Fifo />,
       },

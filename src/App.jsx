@@ -23,7 +23,7 @@ export function App() {
 
       <div className='bg-blue-200 p-8' style={{ width: '100%' }}>
         <NavBar />
-        <Outlet />
+        <Outlet /> 
       </div>
     </div>
   );

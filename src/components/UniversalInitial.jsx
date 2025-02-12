@@ -1,9 +1,12 @@
 import React from 'react';
+import initialpage from '../assets/initialpage.jpg';
+import ButtonTypeOne from './ButtonTypeOne';
+import './../App.css';
 
 const UniversalInitial = () => {
     return (
-        <div>
-            <p>clique no tipo de algoritmo que voce deseja ou logue nos seus algoritmos previos</p>
+        <div className="universalinitial-image-container">
+            <ButtonTypeOne to="/user-data-page" className="universalinitial-login-button">Login</ButtonTypeOne>
         </div>
     );
 };
