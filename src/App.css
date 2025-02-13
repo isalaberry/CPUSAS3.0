@@ -357,3 +357,11 @@
 .universalinitial-login-button {
  margin-bottom:20px;
 }
+
+.notlp-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  color: #1e3a8a; 
+}

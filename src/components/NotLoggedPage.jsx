@@ -8,7 +8,7 @@ const NotLoggedPage = () => {
     return (
         <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
             
-            <h1>You are not logged yet! Please, login or register:</h1>
+            <h1 className='notlp-title'>You are not logged yet! Please, login or register:</h1>
             
             <div>
                 <ButtonTypeOne to="/login-page">Login</ButtonTypeOne>

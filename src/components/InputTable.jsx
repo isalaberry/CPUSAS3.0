@@ -13,7 +13,6 @@ class InputTable extends Component {
       processes: [],
       tempProcesses: [],
       history: [[]],
-      isIoEnabled: false,
       time: 0,
       showGanttChart: false,
     };
@@ -101,15 +100,6 @@ class InputTable extends Component {
       return;
     }
 
-    // Check if all quantums are the same
-    const firstQuantum = tempProcesses[0].quantum;
-    const allQuantumsSame = tempProcesses.every(process => process.quantum === firstQuantum);
-    if (!allQuantumsSame) {
-      alert("Quantum must be the same for all processes");
-      this.setState({ showGanttChart: false });
-      return;
-    }
-
     const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
     this.saveHistoryToCookies(updatedHistory);
 
@@ -124,15 +114,17 @@ class InputTable extends Component {
       console.error('Error adding table to Firestore:', error);
     }
 
-    this.setState({
+    const returnValue = {
       processes: tempProcesses,
       history: updatedHistory,
       showGanttChart: true,
-    });
+    };
+
+    this.setState(returnValue);
   }
 
   render() {
-    const { tempProcesses, showGanttChart, timeQuantum } = this.state;
+    const { tempProcesses, showGanttChart } = this.state;
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
     const showQuantum = algorithm === 'RR';

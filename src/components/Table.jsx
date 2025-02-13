@@ -1,6 +1,11 @@
 import React from 'react';
 
 const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
+  if (!Array.isArray(processes)) {
+    console.error("Processes must be an array");
+    console.log(processes);
+    return null;
+  }
   return (
     <table className="table">
       <thead>
