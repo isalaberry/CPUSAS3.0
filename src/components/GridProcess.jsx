@@ -88,7 +88,7 @@ useEffect(() => {
     });
 
     setDescriptions(newDescriptions);
-    console.log('Descriptions:', newDescriptions);
+    //console.log('Descriptions:', newDescriptions);
     //setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
     //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
 }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
@@ -108,7 +108,7 @@ useEffect(() => {
             }
         });
        
-        console.log('Identified darkBlueSquares:', darkBlueSquares);
+        //console.log('Identified darkBlueSquares:', darkBlueSquares);
         setDarkBlueSquares(darkBlueSquares);
     }
 }, [currentColumn, tableInfos, algorithm]);
@@ -188,11 +188,10 @@ useEffect(() => {
 
                     if (algorithm === 'PP') {
                         let remainingTime = runningTime;
-
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
                         let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity;
 
-                        // se o proximo processo cortar o atual
+                        // se o proximo processo cortar o atual e tiver menos prioridade (+)
                         if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
                             colSpan = nextArrival - arrivalTime;
                             remainingTime -= colSpan;
@@ -209,7 +208,7 @@ useEffect(() => {
                             processId = process.id;
 
                             // verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
-                            if ((index === sortedProcesses.length - 1 || nextPriority > queue[0].priority) && queue.length > 0) {
+                            if (queue.length > 0&&(index === sortedProcesses.length - 1 || nextPriority > queue[0].priority) ) { //queue undefined?
                                 do {
                                     const processData = queue.shift();
                                     queueElement = printQueueElementPP(processData);
