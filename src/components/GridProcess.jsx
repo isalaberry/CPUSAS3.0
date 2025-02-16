@@ -67,7 +67,7 @@ useEffect(() => {
         let processDescriptionId = parseInt(rowStart, 10);
 
         const allSquaresInRow = darkBlueSquares.filter(square => square.rowStart === rowStart);
-        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan - 1) || currentColumn === 10;
+        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan - 1) || currentColumn === 11;
         const isEntered = allSquaresInRow.some(square => currentColumn === square.colStart);
         const isExited = allSquaresInRow.some(square => currentColumn === square.colStart + square.colSpan);
         const isExecuting = allSquaresInRow.some(square => currentColumn > square.colStart && currentColumn < square.colStart + square.colSpan);
@@ -109,7 +109,7 @@ useEffect(() => {
         const darkBlueSquares = [];
         squares.forEach((square) => {
             const backgroundColor = window.getComputedStyle(square).backgroundColor;
-            if (backgroundColor === 'rgb(25, 69, 105)') { 
+            if (backgroundColor === 'rgb(68, 92, 243)') { 
 
                 const colStart = parseInt(square.style.gridColumnStart, 10);
                 const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); 

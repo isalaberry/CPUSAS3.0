@@ -163,8 +163,8 @@ class InputTable extends Component {
         <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
         </div>
       ) : (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        <img src="../src/assets/cpusas3.jpg" alt="CPUSAS3" />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ebf8ff' }}>
+        <img src="../src/assets/cpusas3.jpg" alt="CPUSAS3"/>
         </div>
       )}
       </div>
