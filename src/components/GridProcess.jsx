@@ -5,8 +5,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
-    //-------------------FIX: Average Waiting Time and Average Turnaround Time-------------------
-    //dê um id e um estado para cada um dos darkbluesquares. o forEach do darkblueSquares deve percorrer todo o array de darkbluequares a cada iteracao e assignar estados para cada darkbluesquare
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
     const [darkBlueSquares, setDarkBlueSquares] = useState([]);     
@@ -33,16 +31,14 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
         while (tableInfos.length > 0) {
             let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
-    
-          
+
             if (availableProcesses.length === 0) {
                 currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
                 availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
             }
-        
 
             let nextProcess;
-            if (algorithm === 'FIFO' || algorithm === 'PP'|| algorithm === 'RR') {
+            if (algorithm === 'FIFO' || algorithm === 'PP' || algorithm === 'RR') {
                 nextProcess = availableProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime)[0];
             } else if (algorithm === 'SJF') {
                 nextProcess = availableProcesses.sort((a, b) => a.runningTime - b.runningTime)[0];
@@ -51,85 +47,102 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             } else {
                 console.log('Error in algorithm atribuition');
             }
-    
+
             sorted.push(nextProcess);
             currentTime += nextProcess.runningTime;
             tableInfos = tableInfos.filter(process => process.id !== nextProcess.id);
         }
-    
+
         return sorted;
     };
 
-useEffect(() => {
-    const newDescriptions = {};
+    useEffect(() => {
+        const newDescriptions = {};
 
-    darkBlueSquares.forEach(({ id, colStart, colSpan, rowStart }) => {
-        let processDescriptionId = parseInt(rowStart, 10);
+        darkBlueSquares.forEach(({ id, colStart, colSpan, rowStart }) => {
+            let processDescriptionId = parseInt(rowStart, 10);
 
-        const allSquaresInRow = darkBlueSquares.filter(square => square.rowStart === rowStart);
-        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan - 1) || currentColumn === 11;
-        const isEntered = allSquaresInRow.some(square => currentColumn === square.colStart);
-        const isExited = allSquaresInRow.some(square => currentColumn === square.colStart + square.colSpan);
-        const isExecuting = allSquaresInRow.some(square => currentColumn > square.colStart && currentColumn < square.colStart + square.colSpan);
-        const isWaiting = allSquaresInRow.some(square => currentColumn < square.colStart);
+            const allSquaresInRow = darkBlueSquares.filter(square => square.rowStart === rowStart);
+            const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan - 1) || currentColumn === 11;
+            const isEntered = allSquaresInRow.some(square => currentColumn === square.colStart);
+            const isExited = allSquaresInRow.some(square => currentColumn === square.colStart + square.colSpan);
+            const isExecuting = allSquaresInRow.some(square => currentColumn > square.colStart && currentColumn < square.colStart + square.colSpan);
+            const isWaiting = allSquaresInRow.some(square => currentColumn < square.colStart);
 
-        if (isEntered) { 
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
-        }
+            if (isEntered) { 
+                newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
+            }
 
-        else if (isEnded) {
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
-        }
+            else if (isEnded) {
+                newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
+            }
 
-        else if (isExited) {
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
-        }
+            else if (isExited) {
+                newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
+            }
 
-        else if (isExecuting) { 
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
-        }  
+            else if (isExecuting) { 
+                newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
+            }  
 
-        else if (isWaiting) {
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`; 
-        }
+            else if (isWaiting) {
+                newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`; 
+            }
 
-        else {
-            newDescriptions[processDescriptionId] = `Error`;
-        }
-    });
-
-    setDescriptions(newDescriptions);
-    //setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
-    //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
-}, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
-
-useEffect(() => {
-    if (processGridRef.current) {
-        const squares = processGridRef.current.querySelectorAll('.process');
-        const darkBlueSquares = [];
-        squares.forEach((square) => {
-            const backgroundColor = window.getComputedStyle(square).backgroundColor;
-            if (backgroundColor === 'rgb(68, 92, 243)') { 
-
-                const colStart = parseInt(square.style.gridColumnStart, 10);
-                const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); 
-                const rowStart = square.style.gridRowStart;
-                darkBlueSquares.push({id:colStart, colStart, colSpan, rowStart });
+            else {
+                newDescriptions[processDescriptionId] = `Error`;
             }
         });
-       
-        //console.log('Identified darkBlueSquares:', darkBlueSquares);
-        setDarkBlueSquares(darkBlueSquares);
-    }
-}, [currentColumn, tableInfos, algorithm]);
-//-----------------------------------
+
+        setDescriptions(newDescriptions);
+    }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
+
+    useEffect(() => {
+        if (processGridRef.current) {
+            const squares = processGridRef.current.querySelectorAll('.process');
+            const darkBlueSquares = [];
+            squares.forEach((square) => {
+                const backgroundColor = window.getComputedStyle(square).backgroundColor;
+                if (backgroundColor === 'rgb(68, 92, 243)') { 
+                    const colStart = parseInt(square.style.gridColumnStart, 10);
+                    const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); 
+                    const rowStart = square.style.gridRowStart;
+                    darkBlueSquares.push({ id: colStart, colStart, colSpan, rowStart });
+                }
+            });
+
+            setDarkBlueSquares(darkBlueSquares);
+        }
+    }, [currentColumn, tableInfos, algorithm]);
+
+    // TURNAROUND TIME ----------------------------------------
+    useEffect(() => {
+        let turnaroundTime = 0;
+        const numProc = tableInfos.length;
+
+        const executedRows = new Set();
+
+        darkBlueSquares.forEach((process) => {
+            if (!executedRows.has(process.rowStart)) {
+            const lastProcessInRow = darkBlueSquares.filter(p => p.rowStart === process.rowStart).sort((a, b) => b.colStart - a.colStart)[0];
+            let completionTime = lastProcessInRow.colStart-1 + lastProcessInRow.colSpan;
+            const procArrivalTime = tableInfos.find(p => p.id === parseInt(process.rowStart, 10)).arrivalTime;
+            turnaroundTime += completionTime - procArrivalTime;
+
+            executedRows.add(process.rowStart);
+
+        });
+
+        let averageTurnaroundTime =turnaroundTime / numProc
+        setAverageTurnaroundTime(averageTurnaroundTime);
+    }, [darkBlueSquares, tableInfos]);
+    //--------------------------------------------------------
 
     const sortedProcesses = sortProcesses(tableInfos);
     let lastEndTime = 0;
-    //let stack = [];
     let queue = [];
 
-    const printQueueElementPP = (processData) => {//PP
+    const printQueueElementPP = (processData) => {
         let colStart = Math.max(lastEndTime);
         let colSpan = processData.remainingTime;
         lastEndTime = colStart + colSpan;
@@ -140,14 +153,12 @@ useEffect(() => {
                 gridColumnEnd: `span ${colSpan}`,
                 position: 'relative',
                 gridRowStart: processData.idQueue,
-
             }}>
                 <div style={{ zIndex: 2 }}>
                     {`P${processData.idQueue}`}
                 </div>
             </div>
         );
-        
     };
 
     const printQueueElementRR = (processData) => {
@@ -201,7 +212,6 @@ useEffect(() => {
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
                         let nextPriority = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].priority : Infinity;
 
-                        // se o proximo processo cortar o atual e tiver menos prioridade (+)
                         if (nextArrival && nextArrival < arrivalTime + runningTime && priority > nextPriority) {
                             colSpan = nextArrival - arrivalTime;
                             remainingTime -= colSpan;
@@ -209,16 +219,13 @@ useEffect(() => {
                             queue.push({ idQueue: process.id, arrivalTime, remainingTime, priority });
                             lastEndTime = colStart + colSpan;
                             processId = process.id;
-                        }
-                        // se o proximo processo nao cortar o atual
-                        else {
+                        } else {
                             colStart = Math.max(lastEndTime, arrivalTime + 1);
                             colSpan = runningTime;
                             lastEndTime = colStart + colSpan;
                             processId = process.id;
 
-                            // verificar se o proximo tem prioridade maior que o da stack - se tiver, executar o da stack em seguida
-                            if (queue.length > 0&&(index === sortedProcesses.length - 1 || nextPriority > queue[0].priority) ) { //queue undefined?
+                            if (queue.length > 0 && (index === sortedProcesses.length - 1 || nextPriority > queue[0].priority)) {
                                 do {
                                     const processData = queue.shift();
                                     queueElement = printQueueElementPP(processData);
@@ -230,7 +237,6 @@ useEffect(() => {
                         let remainingTime = runningTime;
                         let nextArrival = index < sortedProcesses.length - 1 ? sortedProcesses[index + 1].arrivalTime : Infinity;
 
-                        // se for o ultimo processo e tiver coisa na queue
                         if (index === sortedProcesses.length - 1 && queue.length > 0) {
                             colSpan = Math.min(quantum, remainingTime);
                             remainingTime -= colSpan;
@@ -244,9 +250,7 @@ useEffect(() => {
                             }
 
                             queueElement = queue.map(processData => printQueueElementRR(processData));
-                        }
-                        // se um processo esta finalizando e o remaining time for menor que o quantum
-                        else if (remainingTime < quantum) {
+                        } else if (remainingTime < quantum) {
                             colSpan = remainingTime;
                             remainingTime = 0;
 
@@ -254,16 +258,13 @@ useEffect(() => {
                             colStart = Math.max(lastEndTime, arrivalTime + 1);
                             lastEndTime = colStart + colSpan;
 
-                            // se o processo finalizar antes do proximo processo chegar - executa a stack
                             if (lastEndTime < nextArrival && queue.length > 0) {
                                 const processData = queue.shift();
                                 if (processData) {
                                     queueElement = printQueueElementRR(processData);
                                 }
                             }
-                        }
-                        // se o running time for maior ou igual que o quantum e nao for o ultimo processo
-                        else {
+                        } else {
                             colSpan = quantum;
                             remainingTime -= quantum;
 
@@ -271,11 +272,10 @@ useEffect(() => {
                             colStart = Math.max(lastEndTime, arrivalTime + 1);
                             lastEndTime = colStart + colSpan;
 
-                            if(remainingTime>0){
+                            if (remainingTime > 0) {
                                 queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
                             }
 
-                                // se fim do processo atual for menor que o arrival time do proximo processo
                             if (lastEndTime < nextArrival && queue.length > 0) {
                                 const processData = queue.shift();
                                 if (processData) {
@@ -284,7 +284,7 @@ useEffect(() => {
                             }
                         }
 
-                    } else { // outros algoritmos
+                    } else {
                         colStart = Math.max(lastEndTime, arrivalTime + 1);
                         colSpan = runningTime;
                         lastEndTime = colStart + colSpan;
@@ -337,7 +337,7 @@ useEffect(() => {
                 <table style={{ width: '100%' }}>
                     <thead>
                         <tr>
-                            <th>Description</th>
+                            <th className='description-table-title'>Description</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -365,10 +365,10 @@ useEffect(() => {
 
             <div className="ttwt-container">
                 <div>
-                    Average Waiting Time: {0}
+                    Average Waiting Time: {averageWaitingTime.toFixed(2)}
                 </div>
                 <div>
-                    Turnaround Time: {0}
+                    Turnaround Time: {averageTurnaroundTime.toFixed(2)}
                 </div>
             </div>
         </div>
