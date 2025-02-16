@@ -65,10 +65,9 @@ useEffect(() => {
 
     darkBlueSquares.forEach(({ id, colStart, colSpan, rowStart }) => {
         let processDescriptionId = parseInt(rowStart, 10);
-        console.log(colStart+colSpan);
 
         const allSquaresInRow = darkBlueSquares.filter(square => square.rowStart === rowStart);
-        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan-1);
+        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan - 1) || currentColumn === 10;
         const isEntered = allSquaresInRow.some(square => currentColumn === square.colStart);
         const isExited = allSquaresInRow.some(square => currentColumn === square.colStart + square.colSpan);
         const isExecuting = allSquaresInRow.some(square => currentColumn > square.colStart && currentColumn < square.colStart + square.colSpan);
@@ -76,6 +75,10 @@ useEffect(() => {
 
         if (isEntered) { 
             newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
+        }
+
+        else if (isEnded) {
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
         }
 
         else if (isExited) {
@@ -90,17 +93,12 @@ useEffect(() => {
             newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`; 
         }
 
-        else if (isEnded) {
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
-        }
-        
         else {
             newDescriptions[processDescriptionId] = `Error`;
         }
     });
 
     setDescriptions(newDescriptions);
-    //console.log('Descriptions:', newDescriptions);
     //setAverageWaitingTime(totalWaitingTime / sortedProcesses.length);
     //setAverageTurnaroundTime(totalTurnaroundTime / sortedProcesses.length);
 }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
