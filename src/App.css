@@ -4,7 +4,7 @@
 }
 
 .card {
-  background-color: #CADEED;
+  background-color: #ebf8ff;
   margin: 10px;
   padding: 20px;
   border-radius: 0.5rem;
@@ -48,13 +48,13 @@
 
 .input:focus {
   outline: none;
-  border-color: #194569;
+  border-color: #0c2cec;
 }
 
 .button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #194569;
+  background-color: #8494f4;
   color: white;
   border: none;
   border-radius: 5px;
@@ -63,8 +63,12 @@
   width: 100%;
 }
 
+.button:active {
+  background-color: #ffceaa;
+}
+
 .button:hover {
-  background-color: #4e7391;
+  background-color: #445cf3;
 }
 
 .bg-white {
@@ -96,7 +100,7 @@
 }
 
 .process {
-  background-color: #194569;
+  background-color: #445cf3;
   color: white;
   display: flex;
   align-items: center;
@@ -149,11 +153,12 @@
 }
 
 .navbar {
-  background-color: #CADEED;
+  background-color: #8494f4;
   padding: 1rem;
   border-radius: 0.75rem; 
   margin-left: 50px;
   margin-right: 50px;
+
 }
 
 .nav-list {
@@ -166,14 +171,14 @@
 }
 
 .nav-link {
-  color: black;
-  font-weight: 600;
+  color: white;
+  font-weight: 400;
   text-decoration: none;
 }
 
 .nav-link.active {
   font-weight: bold;
-  border-bottom: 2px solid black;
+  color: #0c2cec;
 }
 
 .table {
@@ -189,8 +194,11 @@
 }
 
 .table th {
-  background-color: #ebf8ff;
-  text-align: left;
+  background-color: #E0DAF4;
+  color: black;
+  font-weight: 500;
+  font-size: medium;
+  text-align: center;
 }
 
 .title-container {
@@ -202,7 +210,7 @@
   font-size: 3rem;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 300;
-  color: #1e3a8a;
+  color: #445cf3;
 }
 
 .screen {
@@ -293,7 +301,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #194569;
+  background-color: #445cf3;
   color: #fff;
   border: none;
   cursor: pointer;
@@ -306,7 +314,7 @@
   margin: 20px 0;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background-color: #CADEED;
+  background-color: #ebf8ff;
 }
 
 .usertables-card-header {
@@ -322,13 +330,13 @@
   right: 10px;
   background: none;
   border: none;
-  color: #194569;
+  color: #0c2cec;
   font-size: 1.5rem;
   cursor: pointer;
 }
 
 .usertables-delete-button:hover {
-  color: #194569;
+  color: #8c7ccc;
 }
 
 .usertables-title {
@@ -336,7 +344,7 @@
   font-weight: bold;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
-  color: #1e3a8a;
+  color: #0c2cec;
   text-align: center;
 }
 
@@ -348,7 +356,7 @@
   height: 70vh;
   width: 70%;
   margin: 0 auto;
-  background-image: url('../src/assets/initialpage.jpg');
+  background-image: url('../src/assets/cpusas2.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -360,8 +368,50 @@
 
 .notlp-title {
   font-size: 1.5rem;
-  font-weight: bold;
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 400;
-  color: #1e3a8a; 
+  font-weight:500;
+  color: black; 
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.notlp-background {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  align-items: center;
+  height: 70vh;
+  width: 70%;
+  margin: 0 auto;
+  background-image: url('../src/assets/cpusas1.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-type-one, .button-type-two {
+  background-color: #CADEED;
+  border-radius: 20px;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  margin: 10px;
+  width: 40%;
+  min-width: 300px;
+  text-decoration: none;
+}
+
+.button-type-one:active, .button-type-two:active {
+  background-color: #ffceaa;
+}
+
+.lp-title {
+  font-size: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight:500;
+  color: black; 
+  margin-bottom: 50px;
+  text-align: center;
 }

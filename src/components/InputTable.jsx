@@ -142,27 +142,31 @@ class InputTable extends Component {
 
     return (
       <div className="screen">
-        <div className="container">
-          <Table processes={tempProcesses} handleInputChange={this.handleInputChange} showPriority={showPriority} showQuantum={showQuantum} />
-        </div>
+      <div className="container">
+        <Table processes={tempProcesses} handleInputChange={this.handleInputChange} showPriority={showPriority} showQuantum={showQuantum} />
+      </div>
 
-        <div className="button-container">
-          <button className="button" onClick={this.addProcess}>
-            Add Process
-          </button>
-          <button className="button" onClick={this.deleteProcess}>
-            Delete Process
-          </button>
-          <button className="button" onClick={this.generateGanttChart}>
-            Generate Gantt Chart
-          </button>
-        </div>
+      <div className="button-container">
+        <button className="button" onClick={this.addProcess}>
+        Add Process
+        </button>
+        <button className="button" onClick={this.deleteProcess}>
+        Delete Process
+        </button>
+        <button className="button" onClick={this.generateGanttChart}>
+        Generate Gantt Chart
+        </button>
+      </div>
 
-        {showGanttChart && (
-          <div className='bg-white h-screen'>
-            <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
-          </div>
-        )}
+      {showGanttChart ? (
+        <div className='bg-white h-screen'>
+        <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
+        </div>
+      ) : (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        <img src="../src/assets/cpusas3.jpg" alt="CPUSAS3" />
+        </div>
+      )}
       </div>
     );
   }

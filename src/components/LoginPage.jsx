@@ -4,6 +4,7 @@ import InputTypeOne from './InputTypeOne';
 import ArrowToUserDataPage from './ArrowToUserDataPage';
 import {auth} from '../config/firebase';
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import '../App.css';
 
 
 const LoginPage = () => {
@@ -23,7 +24,7 @@ const LoginPage = () => {
             <ArrowToUserDataPage />
 
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <h1>Insert your credentials</h1>
+                <h1 className='lp-title'>Insert your credentials</h1>
                 
                 <form>
                     <InputTypeOne type="text" placeholder="E-mail" onChange={(e) => setEmail(e.target.value)}/>

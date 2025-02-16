@@ -28,8 +28,8 @@ const ButtonEndSession = ({ onClick }) => {
                 justifyContent: 'center',
             }}
         >
-            <span style={{ marginRight: '8px', color: '#194569', fontSize: '16px' }}>Log out</span>
-            <FaSignOutAlt size={24} color="#194569" />
+            <span style={{ marginRight: '8px', color: '#646de8', fontSize: '16px' }}>Log out</span>
+            <FaSignOutAlt size={24} color="#646de8" />
         </button>
     );
 };

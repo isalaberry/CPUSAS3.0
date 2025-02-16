@@ -6,9 +6,8 @@ import {auth} from '../config/firebase';
 const NotLoggedPage = () => {
     console.log(auth?.currentUser?.email);
     return (
-        <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-            
-            <h1 className='notlp-title'>You are not logged yet! Please, login or register:</h1>
+        <div className='notlp-background'>
+                    <h1 className='notlp-title'>You are not logged yet! <br/> Please, login or register:</h1>
             
             <div>
                 <ButtonTypeOne to="/login-page">Login</ButtonTypeOne>

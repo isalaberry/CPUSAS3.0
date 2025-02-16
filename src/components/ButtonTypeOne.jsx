@@ -1,22 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import '../App.css';
 
 const ButtonTypeOne = ({ to, children }) => {
+    const [isPressed, setIsPressed] = React.useState(false);
+
     return (
-        <Link to={to} style={{ textDecoration: 'none' }}>
+        <Link to={to} className="button-type-one-link">
             <button
-                style={{
-                    backgroundColor: '#194569',
-                    borderRadius: '20px',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    margin: '10px',
-                    width: '40%',
-                    minWidth: '300px',
-                }}
+                onMouseDown={() => setIsPressed(true)}
+                onMouseUp={() => setIsPressed(false)}
+                onMouseLeave={() => setIsPressed(false)}
+                className={`button-type-one ${isPressed ? 'button-type-one:active' : ''}`}
             >
                 {children}
             </button>
