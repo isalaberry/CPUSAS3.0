@@ -59,30 +59,42 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     
         return sorted;
     };
-//-------------FIX: DESCRIPTION TABLE----------------primeiro item nao entra + problems
 
 useEffect(() => {
     const newDescriptions = {};
 
-    darkBlueSquares.forEach(({ colStart, colSpan, rowStart }) => {
+    darkBlueSquares.forEach(({ id, colStart, colSpan, rowStart }) => {
         let processDescriptionId = parseInt(rowStart, 10);
+        console.log(colStart+colSpan);
 
-        if(currentColumn === colStart + colSpan){
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
-        }
-        else if(currentColumn === colStart){
+        const allSquaresInRow = darkBlueSquares.filter(square => square.rowStart === rowStart);
+        const isEnded = allSquaresInRow.every(square => currentColumn > square.colStart + square.colSpan-1);
+        const isEntered = allSquaresInRow.some(square => currentColumn === square.colStart);
+        const isExited = allSquaresInRow.some(square => currentColumn === square.colStart + square.colSpan);
+        const isExecuting = allSquaresInRow.some(square => currentColumn > square.colStart && currentColumn < square.colStart + square.colSpan);
+        const isWaiting = allSquaresInRow.some(square => currentColumn < square.colStart);
+
+        if (isEntered) { 
             newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
         }
-        else if(currentColumn > colStart && currentColumn < colStart + colSpan){
+
+        else if (isExited) {
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
+        }
+
+        else if (isExecuting) { 
             newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
         }  
-        else if(currentColumn < colStart){
-            newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`;
+
+        else if (isWaiting) {
+            newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`; 
         }
-        else if(currentColumn > colStart + colSpan){
+
+        else if (isEnded) {
             newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
         }
-        else{
+        
+        else {
             newDescriptions[processDescriptionId] = `Error`;
         }
     });
@@ -104,7 +116,7 @@ useEffect(() => {
                 const colStart = parseInt(square.style.gridColumnStart, 10);
                 const colSpan = parseInt(square.style.gridColumnEnd.split('span ')[1], 10); 
                 const rowStart = square.style.gridRowStart;
-                darkBlueSquares.push({ colStart, colSpan, rowStart });
+                darkBlueSquares.push({id:colStart, colStart, colSpan, rowStart });
             }
         });
        
@@ -252,7 +264,7 @@ useEffect(() => {
                                 }
                             }
                         }
-                        // se o running time for maior que o quantum e nao for o ultimo processo
+                        // se o running time for maior ou igual que o quantum e nao for o ultimo processo
                         else {
                             colSpan = quantum;
                             remainingTime -= quantum;
@@ -261,10 +273,12 @@ useEffect(() => {
                             colStart = Math.max(lastEndTime, arrivalTime + 1);
                             lastEndTime = colStart + colSpan;
 
-                            queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
+                            if(remainingTime>0){
+                                queue.push({ idQueue: process.id, arrivalTime, remainingTime, quantum: process.quantum });
+                            }
 
-                            if (lastEndTime < nextArrival && queue.length > 0) {
                                 // se fim do processo atual for menor que o arrival time do proximo processo
+                            if (lastEndTime < nextArrival && queue.length > 0) {
                                 const processData = queue.shift();
                                 if (processData) {
                                     queueElement = printQueueElementRR(processData);
@@ -287,7 +301,7 @@ useEffect(() => {
                     };
 
                     return (
-                        <React.Fragment key={process.id}>
+                        <React.Fragment key={`${colStart - 1}-${process.id}`}>
                             {queueElement}
                             <div className='process' style={processStyle}>
                                 <div style={{ zIndex: 2 }}>
