@@ -348,7 +348,7 @@
   height: 70vh;
   width: 70%;
   margin: 0 auto;
-  background-image: url('https://cdn.discordapp.com/attachments/1300366647030452255/1339277770366390373/click_on_an_algorithm_to_start_the_simulation_or_log_in_to_your_account.jpg?ex=67ae231f&is=67acd19f&hm=6e53725890f3201ef3122899f5696b8998764943dad0b6ffc00eab63f7922879&');
+  background-image: url('../src/assets/initialpage.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

@@ -1,6 +1,6 @@
 import React from 'react';
 import ButtonTypeOne from './ButtonTypeOne';
-import './../App.css';
+import '../App.css';
 import {auth} from '../config/firebase';
 
 const NotLoggedPage = () => {
