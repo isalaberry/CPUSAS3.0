@@ -4,6 +4,7 @@ import { GridProcess } from './GridProcess';
 import { db } from '../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import Table from './Table';
+import { auth } from '../config/firebase'; 
 
 class InputTable extends Component {
   constructor(props) {
@@ -15,6 +16,7 @@ class InputTable extends Component {
       history: [[]],
       time: 0,
       showGanttChart: false,
+      user: null,
     };
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
@@ -33,6 +35,14 @@ class InputTable extends Component {
         tempProcesses: history[0] || [],
       });
     }
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ user });
+      } else {
+        this.setState({ user: null });
+      }
+    });
   }
 
   saveHistoryToCookies(history) {
@@ -103,15 +113,16 @@ class InputTable extends Component {
     const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
     this.saveHistoryToCookies(updatedHistory);
 
-    // Adicionar a tabela ao Firestore
-    try {
-      await addDoc(collection(db, 'tables'), {
-        processes: tempProcesses,
-        timestamp: new Date(),
-      });
-      console.log('Table added to Firestore');
-    } catch (error) {
-      console.error('Error adding table to Firestore:', error);
+    if (this.state.user) {
+      try {
+        await addDoc(collection(db, 'tables'), {
+          processes: tempProcesses,
+          timestamp: new Date(),
+          userId: this.state.user.uid,
+        });
+      } catch (error) {
+        console.error('Error adding table to Firestore:', error);
+      }
     }
 
     const returnValue = {

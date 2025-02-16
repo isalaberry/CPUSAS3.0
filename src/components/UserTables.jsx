@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { FaTimes } from 'react-icons/fa';
 import ButtonEndSession from './ButtonEndSession';
 import Table from './Table';
 import './../App.css';
 
-const UserTables = () => {
+const UserTables = ({ user }) => {
     const [tables, setTables] = useState([]);
     const navigate = useNavigate();
 
@@ -45,6 +45,31 @@ const UserTables = () => {
         }
     };
 
+    const handleAddTable = async (newTableData) => {
+        if (!user) {
+            console.error('No user logged in. Cannot add table.');
+            return;
+        }
+
+        try {
+            const tableData = {
+                ...newTableData,
+                userId: user.uid,
+                timestamp: new Date(),
+            };
+            await addDoc(collection(db, 'tables'), tableData);
+            const querySnapshot = await getDocs(collection(db, 'tables'));
+            const filteredData = querySnapshot.docs.map(doc => ({
+                ...doc.data(),
+                id: doc.id,
+            }));
+            setTables(filteredData);
+            console.log('Table added and data reloaded');
+        } catch (error) {
+            console.error('Error adding table:', error);
+        }
+    };
+
     const handleLogout = async () => {
         try {
             await signOut(auth);
@@ -60,7 +85,6 @@ const UserTables = () => {
             {tables.map((table, index) => (
                 <div key={table.id} className="usertables-card">
                     <div className="usertables-card-header">
-                    
                         <button className="usertables-delete-button" onClick={() => handleDeleteTable(table.id)}>
                             <FaTimes />
                         </button>

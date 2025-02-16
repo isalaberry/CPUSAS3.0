@@ -17,10 +17,11 @@ const UserDataPage = () => {
 
     return (
         <div>
-            {user ? <UserTables /> : <NotLoggedPage />}
+            {user ? <UserTables user={user}/> : <NotLoggedPage />}
         </div>
     );
 };
 
 export default UserDataPage;
 //            isLogged? <UserTables /> : <NotLoggedPage/>
+  
