@@ -246,7 +246,7 @@
 .quantumContainer {
   display: flex;
   align-items: center;
-  margin-vertical: 10px;
+  margin-ertical: 10px;
 }
 
 .quantumText {
@@ -422,7 +422,7 @@
   background-color: #ffceaa;
 }
 
-.lp-title {
+.lprp-title {
   font-size: 1.5rem;
   font-family: 'JetBrains Mono', monospace;
   font-weight:500;

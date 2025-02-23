@@ -15,7 +15,7 @@ const LoginPage = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
-            console.error('Error logging in:', error);
+            alert('Error logging in: ' + error.message);
         }
     };
 
@@ -24,7 +24,7 @@ const LoginPage = () => {
             <ArrowToUserDataPage />
 
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <h1 className='lp-title'>Insert your credentials</h1>
+                <h1 className='lprp-title'>Insert your credentials</h1>
                 
                 <form>
                     <InputTypeOne type="text" placeholder="E-mail" onChange={(e) => setEmail(e.target.value)}/>

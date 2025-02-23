@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, addDoc, query, where } from 'firebase/firestore'; // ADICIONADO QUERY E WHERE
 import { FaTimes } from 'react-icons/fa';
 import ButtonEndSession from './ButtonEndSession';
 import Table from './Table';
@@ -15,25 +15,29 @@ const UserTables = ({ user }) => {
     useEffect(() => {
         const getTables = async () => {
             try {
-                const querySnapshot = await getDocs(collection(db, 'tables'));
-                const filteredData = querySnapshot.docs.map(doc => ({
-                    ...doc.data(),
-                    id: doc.id,
-                }));
-                setTables(filteredData);
-                console.log(filteredData);
+                if (user) { // VERIFICA SE HÁ UM USUÁRIO LOGADO
+                    const q = query(collection(db, 'tables'), where('userId', '==', user.uid)); // FILTRA AS TABELAS PELO userId
+                    const querySnapshot = await getDocs(q);
+                    const filteredData = querySnapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.id,
+                    }));
+                    setTables(filteredData);
+                    console.log(filteredData);
+                }
             } catch (error) {
                 console.error('Error getting tables:', error);
             }
         };
 
         getTables();
-    }, []);
+    }, [user]); // ADICIONADO user COMO DEPENDÊNCIA
 
     const handleDeleteTable = async (tableId) => {
         try {
             await deleteDoc(doc(db, 'tables', tableId));
-            const querySnapshot = await getDocs(collection(db, 'tables'));
+            const q = query(collection(db, 'tables'), where('userId', '==', user.uid)); // FILTRA AS TABELAS PELO userId
+            const querySnapshot = await getDocs(q);
             const filteredData = querySnapshot.docs.map(doc => ({
                 ...doc.data(),
                 id: doc.id,
@@ -54,11 +58,12 @@ const UserTables = ({ user }) => {
         try {
             const tableData = {
                 ...newTableData,
-                userId: user.uid,
+                userId: user.uid, // ADICIONADO userId AO tableData
                 timestamp: new Date(),
             };
             await addDoc(collection(db, 'tables'), tableData);
-            const querySnapshot = await getDocs(collection(db, 'tables'));
+            const q = query(collection(db, 'tables'), where('userId', '==', user.uid)); // FILTRA AS TABELAS PELO userId
+            const querySnapshot = await getDocs(q);
             const filteredData = querySnapshot.docs.map(doc => ({
                 ...doc.data(),
                 id: doc.id,

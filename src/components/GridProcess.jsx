@@ -55,7 +55,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
         return sorted;
     };
-
+//DESCRIPTION TABLE --------------------------------------------------------------
     useEffect(() => {
         const newDescriptions = {};
 
@@ -96,7 +96,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
         setDescriptions(newDescriptions);
     }, [currentColumn, tableInfos, algorithm, darkBlueSquares]);
-
+//-----------------------------------------------------------------------------
     useEffect(() => {
         if (processGridRef.current) {
             const squares = processGridRef.current.querySelectorAll('.process');
@@ -113,11 +113,12 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
 
             setDarkBlueSquares(darkBlueSquares);
         }
-    }, [currentColumn, tableInfos, algorithm]);
+    }, [ tableInfos, algorithm]);
 
-    // TURNAROUND TIME ----------------------------------------
+    // TURNAROUND TIME / WAITING TIME ----------------------------------------
     useEffect(() => {
         let turnaroundTime = 0;
+        let waitingTime = 0;
         const numProc = tableInfos.length;
 
         const executedRows = new Set();
@@ -129,12 +130,20 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             const procArrivalTime = tableInfos.find(p => p.id === parseInt(process.rowStart, 10)).arrivalTime;
             turnaroundTime += completionTime - procArrivalTime;
 
+            const burstTime = tableInfos.find(p => p.id === parseInt(process.rowStart, 10)).runningTime;
+            console.log('burstTime', burstTime);
+            waitingTime += (completionTime-procArrivalTime) - burstTime;
+
             executedRows.add(process.rowStart);
 
+            
+            }
         });
 
         let averageTurnaroundTime =turnaroundTime / numProc
+        let averageWaitingTime = waitingTime / numProc
         setAverageTurnaroundTime(averageTurnaroundTime);
+        setAverageWaitingTime(averageWaitingTime);
     }, [darkBlueSquares, tableInfos]);
     //--------------------------------------------------------
 
