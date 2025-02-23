@@ -23,6 +23,7 @@ class InputTable extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveHistoryToCookies = this.saveHistoryToCookies.bind(this);
     this.generateGanttChart = this.generateGanttChart.bind(this);
+    this.generateRandomData = this.generateRandomData.bind(this); // ADICIONADO BIND PARA A FUNÇÃO
   }
 
   componentDidMount() {
@@ -134,6 +135,19 @@ class InputTable extends Component {
     this.setState(returnValue);
   }
 
+  generateRandomData() {
+    this.setState((prevState) => {
+      const tempProcesses = prevState.tempProcesses.map(process => ({
+        ...process,
+        arrivalTime: Math.floor(Math.random() * 10),
+        runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
+        priority: Math.floor(Math.random() * 10),
+        quantum: Math.floor(Math.random() * 10) + 1, // quantum deve ser maior que zero
+      }));
+      return { tempProcesses };
+    });
+  }
+
   render() {
     const { tempProcesses, showGanttChart } = this.state;
     const { algorithm } = this.props;
@@ -153,9 +167,13 @@ class InputTable extends Component {
         <button className="button" onClick={this.deleteProcess}>
         Delete Process
         </button>
+        <button className="button" onClick={this.generateRandomData}>
+        Generate Random Data
+        </button>
         <button className="button" onClick={this.generateGanttChart}>
         Generate Gantt Chart
         </button>
+
       </div>
 
       {showGanttChart ? (
