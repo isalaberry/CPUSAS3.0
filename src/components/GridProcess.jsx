@@ -10,7 +10,7 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     const [darkBlueSquares, setDarkBlueSquares] = useState([]);     
 
     const handleNextColumn = () => {
-        setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, 11));
+        setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, totalRunningTime+1));
     };
 
     const handlePreviousColumn = () => {
@@ -22,7 +22,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
     };
     
     const handleLastColumn = () => {
-        setCurrentColumn(11);
+        const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
+        setCurrentColumn(totalRunningTime+1);
     };
 
     const sortProcesses = (tableInfos) => {
@@ -194,6 +195,9 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         );
     };
 
+    // Calcular a soma do runningTime de todos os processos
+    const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
+
     return (
         <div className='grid-container'>
             <div className='process-grid' style={{ position: 'relative' }} ref={processGridRef}>
@@ -340,6 +344,12 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                     );
                 })}
 
+                <div className="labels" style={{ gridRowStart: sortedProcesses.length + 1 }}>
+                    {[...Array(totalRunningTime + 1)].map((_, i) => (
+                        <div key={i} className="label">{i.toString().padStart(2, '0')}</div>
+                    ))}
+                </div>
+
             </div>
 
             <div className='description-table'>
@@ -357,12 +367,6 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                         ))}
                     </tbody>
                 </table>
-            </div>
-
-            <div className="labels">
-                {[...Array(11)].map((_, i) => (
-                    <div key={i} className="label">{i}</div>
-                ))}
             </div>
 
             <div className="button-time-container">

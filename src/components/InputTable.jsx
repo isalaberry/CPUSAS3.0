@@ -104,12 +104,14 @@ class InputTable extends Component {
     }
 
     // Check if total runningTime exceeds 10
+    /*
     const totalRunningTime = tempProcesses.reduce((sum, process) => sum + process.runningTime, 0);
     if (totalRunningTime > 10) {
       alert("Total Running Time cannot exceed 10");
       this.setState({ showGanttChart: false });
       return;
     }
+    */
 
     const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
     this.saveHistoryToCookies(updatedHistory);
