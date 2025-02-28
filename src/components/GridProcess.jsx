@@ -25,6 +25,18 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
         setCurrentColumn(totalRunningTime+1);
     };
+    const handleAutoIncrement = () => {
+        const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
+        const intervalId = setInterval(() => {
+            setCurrentColumn((prevColumn) => {
+                if (prevColumn >= totalRunningTime + 1) {
+                    clearInterval(intervalId);
+                    return prevColumn;
+                }
+                return prevColumn + 1;
+            });
+        }, 1000);
+    };
 
     const sortProcesses = (tableInfos) => {
         let sorted = [];
@@ -374,6 +386,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 <button onClick={handlePreviousColumn} className="button">{'<'}</button>
                 <button onClick={handleNextColumn} className="button">{'>'}</button>
                 <button onClick={handleLastColumn} className="button">{'>>'}</button>
+                <button onClick={handleAutoIncrement} className="button">{'auto  >'}</button>
+
             </div>
 
             <div className="ttwt-container">
