@@ -101,17 +101,16 @@ class InputTable extends Component {
         this.setState({ showGanttChart: false });
         return;
       }
-    }
+        }
 
-    // Check if total runningTime exceeds 10
-    /*
-    const totalRunningTime = tempProcesses.reduce((sum, process) => sum + process.runningTime, 0);
-    if (totalRunningTime > 10) {
-      alert("Total Running Time cannot exceed 10");
-      this.setState({ showGanttChart: false });
-      return;
+      if (this.props.algorithm === 'RR') {
+      const quantumSet = new Set(tempProcesses.map(process => process.quantum));
+        if (quantumSet.size > 1) {
+          alert("All quantum values must be the same for Round Robin algorithm");
+          this.setState({ showGanttChart: false });
+          return;
+        }
     }
-    */
 
     const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
     this.saveHistoryToCookies(updatedHistory);
@@ -139,13 +138,25 @@ class InputTable extends Component {
 
   generateRandomData() {
     this.setState((prevState) => {
-      const tempProcesses = prevState.tempProcesses.map(process => ({
-        ...process,
-        arrivalTime: Math.floor(Math.random() * 10),
-        runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
-        priority: Math.floor(Math.random() * 10),
-        quantum: Math.floor(Math.random() * 10) + 1, // quantum deve ser maior que zero
-      }));
+      let tempProcesses;
+      if (this.props.algorithm === 'RR') {
+        const quantum = Math.floor(Math.random() * 10) + 1; // quantum deve ser maior que zero
+        tempProcesses = prevState.tempProcesses.map(process => ({
+          ...process,
+          arrivalTime: Math.floor(Math.random() * 10),
+          runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
+          priority: Math.floor(Math.random() * 10),
+          quantum: quantum,
+        }));
+      } else {
+        tempProcesses = prevState.tempProcesses.map(process => ({
+          ...process,
+          arrivalTime: Math.floor(Math.random() * 10),
+          runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
+          priority: Math.floor(Math.random() * 10),
+          quantum: Math.floor(Math.random() * 10) + 1, // quantum deve ser maior que zero
+        }));
+      }
       return { tempProcesses };
     });
   }
