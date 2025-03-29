@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-//fix: timebar must end on the maximum time of process+not process
 export const GridProcess = ({ tableInfos, algorithm }) => {
     const processGridRef = useRef(null);
 
@@ -22,10 +21,11 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
         setCurrentColumn(1);
     };
     
-    const handleLastColumn = () => {
+    const handleLastColumn = () => { //fix: timebar must end on the maximum time of process+not process - tem que ser a soma  do startTime do último processo + (se for RR OU PP (minimo entre o remainingtime e o running time do último processo)) ou (se for outro, runningTime do último processo)
         const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
         setCurrentColumn(totalRunningTime+1);
     };
+
     const handleAutoIncrement = () => {
         const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
         const intervalId = setInterval(() => {

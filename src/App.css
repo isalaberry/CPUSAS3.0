@@ -440,3 +440,23 @@
   margin-bottom: 50px;
   text-align: center;
 }
+
+.user-tables-algorithm-dropdown{
+  padding: 3px;
+  border-radius: 5px;
+  margin: 5px;
+
+}
+
+.user-tables-button-import{
+  margin-top: 10px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: #8494f4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
