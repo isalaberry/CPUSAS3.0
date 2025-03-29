@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+//fix: timebar must end on the maximum time of process+not process
 export const GridProcess = ({ tableInfos, algorithm }) => {
     const processGridRef = useRef(null);
 
@@ -83,27 +84,39 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
             const isWaiting = allSquaresInRow.some(square => currentColumn < square.colStart);
 
             if (isEntered) { 
-                newDescriptions[processDescriptionId] = `P${processDescriptionId} entered`;
-            }
-
-            else if (isEnded) {
-                newDescriptions[processDescriptionId] = `P${processDescriptionId} ended`;
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'darkblue' }}>{`P${processDescriptionId} entered`}</span>
+                );
             }
 
             else if (isExited) {
-                newDescriptions[processDescriptionId] = `P${processDescriptionId} exited`;
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'darkblue' }}>{`P${processDescriptionId} exited`}</span>
+                );
+            }
+
+            else if (isEnded) {
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'darkgray' }}>{`P${processDescriptionId} ended`}</span>
+                );
             }
 
             else if (isExecuting) { 
-                newDescriptions[processDescriptionId] = `P${processDescriptionId} is executing`;
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'blue' }}>{`P${processDescriptionId} is executing`}</span>
+                );
             }  
 
             else if (isWaiting) {
-                newDescriptions[processDescriptionId] = `P${processDescriptionId} is waiting`; 
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'darkgray' }}>{`P${processDescriptionId} is waiting`}</span>
+                );
             }
 
             else {
-                newDescriptions[processDescriptionId] = `Error`;
+                newDescriptions[processDescriptionId] = (
+                    <span style={{ color: 'red' }}>{`Error`}</span>
+                );
             }
         });
 

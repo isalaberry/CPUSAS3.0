@@ -140,11 +140,11 @@ class InputTable extends Component {
     this.setState((prevState) => {
       let tempProcesses;
       if (this.props.algorithm === 'RR') {
-        const quantum = Math.floor(Math.random() * 10) + 1; // quantum deve ser maior que zero
+        const quantum = Math.floor(Math.random() * 10) + 1;
         tempProcesses = prevState.tempProcesses.map(process => ({
           ...process,
           arrivalTime: Math.floor(Math.random() * 10),
-          runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
+          runningTime: Math.floor(Math.random() * 10) + 1,
           priority: Math.floor(Math.random() * 10),
           quantum: quantum,
         }));
@@ -152,9 +152,9 @@ class InputTable extends Component {
         tempProcesses = prevState.tempProcesses.map(process => ({
           ...process,
           arrivalTime: Math.floor(Math.random() * 10),
-          runningTime: Math.floor(Math.random() * 10) + 1, // runningTime deve ser maior que zero
+          runningTime: Math.floor(Math.random() * 10) + 1,
           priority: Math.floor(Math.random() * 10),
-          quantum: Math.floor(Math.random() * 10) + 1, // quantum deve ser maior que zero
+          quantum: Math.floor(Math.random() * 10) + 1,
         }));
       }
       return { tempProcesses };
