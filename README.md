@@ -30,15 +30,15 @@ Para rodar o projeto, você precisa ter o **Node.js** instalado. Você pode faze
 - Clone o repositório do projeto para a sua máquina local:
 ```bash
 git clone https://github.com/isabelsalaberry/CPUSAS.git
-
-- Instale as dependências
+```
+Instale as dependências
 ```bash
 npm install
-
+```
 - Execute o projeto localmente
 ```bash
 npm run dev
-
+```
 ## Hospedagem
 
 O projeto está hospedado no Firebase Hosting e pode ser acessado através do seguinte link:
@@ -81,15 +81,15 @@ To run the project, you need to have **Node.js** installed. You can download and
 - Clone the project repository to your local machine:
 ```bash
 git clone https://github.com/isabelsalaberry/CPUSAS.git
-
+```
 - Install the dependencies
 ```bash
 npm install
-
+```
 - Run the project locally
 ```bash
 npm run dev
-
+```
 ## Hosting
 
 The project is hosted on Firebase Hosting and can be accessed via the following link:
