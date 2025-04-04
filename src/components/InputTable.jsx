@@ -184,7 +184,7 @@ class InputTable extends Component {
         Generate Random Data
         </button>
         <button className="button" onClick={this.generateGanttChart}>
-        Generate GANTE CHARTE BAH
+        Generate Gantt ChartE
         </button>
 
       </div>
