@@ -1,0 +1,23 @@
+{
+    "steps": [
+      {
+        "name": "gcr.io/cloud-builders/npm",
+        "args": ["install"]
+      },
+      {
+        "name": "gcr.io/cloud-builders/npm",
+        "args": ["run", "build"]
+      },
+      {
+        "name": "gcr.io/cpusas/firebase",
+        "args": [
+          "deploy",
+          "--project",
+          "cpusas",
+          "--only",
+          "hosting"
+        ]
+      }
+    ]
+  }
+  
