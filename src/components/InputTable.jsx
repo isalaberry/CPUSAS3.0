@@ -184,7 +184,7 @@ class InputTable extends Component {
         Generate Random Data
         </button>
         <button className="button" onClick={this.generateGanttChart}>
-        Generate Gantt Chart
+        Generate GANTE CHARTE BAH
         </button>
 
       </div>
@@ -194,7 +194,7 @@ class InputTable extends Component {
         <GridProcess tableInfos={this.state.processes} algorithm={algorithm}/> 
         </div>
       ) : (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'green' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ebf8ff' }}>
         <img src="../src/assets/cpusas3.jpg" alt="CPUSAS3"/>
         </div>
       )}
