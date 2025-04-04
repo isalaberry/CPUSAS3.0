@@ -184,7 +184,7 @@ class InputTable extends Component {
         Generate Random Data
         </button>
         <button className="button" onClick={this.generateGanttChart}>
-        Generate Gantt ChartE
+        Generate Gantt Chart
         </button>
 
       </div>
@@ -195,7 +195,7 @@ class InputTable extends Component {
         </div>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ebf8ff' }}>
-        <img src="../src/assets/cpusas3.jpg" alt="CPUSAS3"/>
+          <img src="/assets/cpusas3.jpg" alt="insert your data and then generate gantt chart" />
         </div>
       )}
       </div>

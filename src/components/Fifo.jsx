@@ -8,7 +8,6 @@ export const Fifo = () => {
     <div className="container">
       <div className="card">
         <InputTable algorithm="FIFO"/> 
-        TESTEEEEEEEEEEEEEEEEE
       </div>
     </div>
   );

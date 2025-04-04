@@ -381,7 +381,7 @@
   height: 70vh;
   width: 70%;
   margin: 0 auto;
-  background-image: url('../src/assets/cpusas2.jpg');
+  background-image: url('/assets/cpusas2.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -409,7 +409,7 @@
   height: 70vh;
   width: 70%;
   margin: 0 auto;
-  background-image: url('../src/assets/cpusas1.jpg');
+  background-image: url('/assets/cpusas1.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

@@ -1,5 +1,5 @@
 import React from 'react';
-import initialpage from '../assets/initialpage.jpg';
+import initialpage from '/assets/initialpage.jpg';
 import ButtonTypeOne from './ButtonTypeOne';
 import './../App.css';
 
