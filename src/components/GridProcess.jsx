@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export const GridProcess = ({ tableInfos, algorithm }) => {
+export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     const processGridRef = useRef(null);
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
     const [averageWaitingTime, setAverageWaitingTime] = useState(0);
     const [averageTurnaroundTime, setAverageTurnaroundTime] = useState(0);
-    const [darkBlueSquares, setDarkBlueSquares] = useState([]);     
+    const [darkBlueSquares, setDarkBlueSquares] = useState([]);
+
+    const handleSaveTable = () => {
+        if (saveDataToFirestore && typeof saveDataToFirestore === 'function') {
+            saveDataToFirestore(tableInfos);
+        } else {
+            console.error('saveDataToFirestore is not defined or not a function.');
+        }
+    };
 
     const handleNextColumn = () => {
         setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, totalRunningTime+1));
@@ -399,8 +407,8 @@ export const GridProcess = ({ tableInfos, algorithm }) => {
                 <button onClick={handlePreviousColumn} className="button">{'<'}</button>
                 <button onClick={handleNextColumn} className="button">{'>'}</button>
                 <button onClick={handleLastColumn} className="button">{'>>'}</button>
-                <button onClick={handleAutoIncrement} className="button">{'auto  >'}</button>
-
+                <button onClick={handleAutoIncrement} className="button" style={{ minWidth: '20%' }}>{'auto  >'}</button>
+                <button onClick={handleSaveTable} className="button" style={{ minWidth: '30%' }}>Save Table</button>
             </div>
 
             <div className="ttwt-container">
