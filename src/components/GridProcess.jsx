@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { UserContext } from './UserContext';
 
 export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     const processGridRef = useRef(null);
+    const { user } = useContext(UserContext);
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
@@ -10,7 +12,7 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     const [darkBlueSquares, setDarkBlueSquares] = useState([]);
 
     const handleSaveTable = () => {
-        if (saveDataToFirestore && typeof saveDataToFirestore === 'function') {
+        if (user && saveDataToFirestore && typeof saveDataToFirestore === 'function') {
             saveDataToFirestore(tableInfos);
         } else {
             console.error('saveDataToFirestore is not defined or not a function.');
@@ -408,7 +410,9 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
                 <button onClick={handleNextColumn} className="button">{'>'}</button>
                 <button onClick={handleLastColumn} className="button">{'>>'}</button>
                 <button onClick={handleAutoIncrement} className="button" style={{ minWidth: '20%' }}>{'auto  >'}</button>
-                <button onClick={handleSaveTable} className="button" style={{ minWidth: '30%' }}>Save Table</button>
+                {user && saveDataToFirestore && typeof saveDataToFirestore === 'function' && (
+                        <button onClick={handleSaveTable} className="button" style={{ minWidth: '30%' }}>Save Table</button>
+                )}
             </div>
 
             <div className="ttwt-container">
