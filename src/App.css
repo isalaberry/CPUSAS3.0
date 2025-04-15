@@ -469,9 +469,8 @@
 /* ============================= */
 
 .AdminUserManagement-page {
-  padding: 20px;
-  max-width: 900px;
-  margin: 20px auto;
+  margin: 20px 40px 20px 40px;
+  padding: 40px 200px 60px  200px;
   background-color: #ebf8ff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -592,10 +591,9 @@
 /* ============================= */
 
 .AdminSettings-page {
-  padding: 20px;
-  max-width: 600px;
-  margin: 20px auto;
-  background-color: #f9f9f9;
+  margin: 20px 40px 20px 40px;
+  padding: 40px 400px 60px  400px;
+  background-color: #ebf8ff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -609,6 +607,7 @@
 
 .AdminSettings-settings-form {
   margin-bottom: 20px;
+  margin-top: 50px;
   padding: 15px;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
@@ -642,7 +641,7 @@
   display: block;
   width: 100%;
   padding: 12px 15px;
-  background-color: #007bff;
+  background-color: #8494f4;
   color: white;
   border: none;
   border-radius: 4px;

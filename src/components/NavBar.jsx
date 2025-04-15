@@ -15,20 +15,24 @@ export function NavBar() {
         rr: true,
     });
 
-    useEffect(() => {
-        // Fetch visibility settings from Firestore
+    useEffect(() => {// Inside NavBar.js -> useEffect -> fetchVisibility
         const fetchVisibility = async () => {
-            const configDocRef = doc(db, "appConfig", "visibility"); // Example path
+            console.log("NavBar: Attempting to fetch visibility config..."); // Log start
+            const configDocRef = doc(db, "appConfig", "visibility");
             try {
                 const docSnap = await getDoc(configDocRef);
                 if (docSnap.exists()) {
-                    setVisibility(docSnap.data());
+                    console.log("NavBar: Visibility document found!"); // Log success
+                    const fetchedData = docSnap.data();
+                    console.log("NavBar: Fetched visibility data:", fetchedData); // Log the data itself
+                    setVisibility(fetchedData);
                 } else {
-                    console.log("Visibility config not found, using defaults.");
-                    // Optional: Create default config if it doesn't exist
+                    // Document non-existent
+                    console.log("NavBar: Visibility config document '/appConfig/visibility' not found, using defaults.");
                 }
             } catch (error) {
-                console.error("Error fetching visibility config:", error);
+                // Error during fetch
+                console.error("NavBar: Error fetching visibility config:", error);
             }
         };
         fetchVisibility();
