@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { UserContext } from './UserContext';
 
+
 export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     const processGridRef = useRef(null);
-    const { user } = useContext(UserContext);
+    const { user, userProfile } = useContext(UserContext);
+
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
@@ -410,7 +412,7 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
                 <button onClick={handleNextColumn} className="button">{'>'}</button>
                 <button onClick={handleLastColumn} className="button">{'>>'}</button>
                 <button onClick={handleAutoIncrement} className="button" style={{ minWidth: '20%' }}>{'auto  >'}</button>
-                {user && saveDataToFirestore && typeof saveDataToFirestore === 'function' && (
+                {user && userProfile?.status === 'approved' && saveDataToFirestore && typeof saveDataToFirestore === 'function' && (
                         <button onClick={handleSaveTable} className="button" style={{ minWidth: '30%' }}>Save Table</button>
                 )}
             </div>

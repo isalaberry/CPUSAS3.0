@@ -1,12 +1,27 @@
-import React, { useEffect, useState, useContext } from 'react'; // Import useContext
-// Remove onAuthStateChanged import here if using context primarily
-import { auth } from '../config/firebase';
+import React, { useEffect, useContext } from 'react'; // Removed useState as it wasn't used directly
+import { useNavigate } from 'react-router-dom';       // Import useNavigate
+import { signOut } from 'firebase/auth';               // Import signOut
+import { auth } from '../config/firebase';             // Ensure auth is imported
 import NotLoggedPage from './NotLoggedPage';
 import UserTables from './UserTables';
-import { UserContext } from './UserContext'; // Import UserContext
+import { UserContext } from './UserContext';
+import ButtonEndSession from './ButtonEndSession';   // Keep the button import
 
 const UserDataPage = () => {
-    const { user, userProfile, loadingAuth } = useContext(UserContext); // Use context
+    const { user, userProfile, loadingAuth } = useContext(UserContext);
+    const navigate = useNavigate(); // Hook for navigation
+
+    // Define the handleLogout function within UserDataPage
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            // You might want to clear other states if necessary
+            navigate('/'); // Redirect to the home page after logout
+        } catch (error) {
+            console.error('Error logging out:', error);
+            // Handle logout errors, maybe show a message
+        }
+    };
 
     if (loadingAuth) {
         return <div style={{marginTop: '20px', marginLeft:'20px', color: '#445cf3'}}>Loading authentication...</div>;
@@ -15,14 +30,16 @@ const UserDataPage = () => {
     if (user && userProfile) {
         if (userProfile.status === 'approved') {
             // User logged in AND approved
-            return <UserTables user={user} userProfile={userProfile} />; // Pass profile down if needed
+            // Render UserTables - it has its own internal handleLogout for its button
+            return <UserTables user={user} userProfile={userProfile} />;
         } else if (userProfile.status === 'pending') {
             // User logged in but pending approval
             return (
                 <div style={{ textAlign: 'center', marginTop: '80px', color: '#445cf3'}}>
                     <h1>Account Pending Approval</h1>
                     <p>Your account registration is awaiting admin approval. Please check back later.</p>
-                    {/* Optional: Add logout button */}
+                    {/* This button now correctly calls the handleLogout defined above */}
+                    <ButtonEndSession onClick={handleLogout} />
                 </div>
             );
         } else {
@@ -31,9 +48,10 @@ const UserDataPage = () => {
                 <div style={{ textAlign: 'center', marginTop: '80px', color: '#445cf3'}}>
                     <h1>Account Access Denied</h1>
                     <p>There was an issue with your account status ({userProfile.status}). Please contact support.</p>
-                     {/* Optional: Add logout button */}
+                     {/* This button now correctly calls the handleLogout defined above */}
+                    <ButtonEndSession onClick={handleLogout} />
                 </div>
-            );
+             );
         }
     } else {
         // User is not logged in
