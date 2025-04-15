@@ -1,20 +1,13 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
-const ButtonTypeTwo = ({ onClick, children }) => {
-    const navigate = useNavigate();
-
-    const handleClick = async () => {
-        if (onClick) {
-            await onClick();
-        }
-        navigate('/user-data-page');
-    };
+const ButtonTypeTwo = ({ onClick, children, type = "button", disabled = false }) => {
 
     return (
         <button
-            onClick={handleClick}
+            onClick={onClick}
+            type={type}
+            disabled={disabled}
             className="button-type-two"
         >
             {children}

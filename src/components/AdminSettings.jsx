@@ -1,5 +1,4 @@
-// src/components/AdminSettings.js
-import React, { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo just in case
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import '../App.css';
@@ -7,16 +6,15 @@ import '../App.css';
 const AdminSettings = () => {
     console.log("AdminSettings: Component rendering or re-rendering.");
 
-    // Define initial settings structure (should be stable)
-    const initialSettings = useMemo(() => ({ // Wrap in useMemo for guaranteed stability
+    const initialSettings = useMemo(() => ({
         fifo: true,
         sjf: true,
         pnp: true,
         pp: true,
         rr: true,
-    }), []); // Empty dependency array - created once
+    }), []);
 
-    const settingKeys = useMemo(() => Object.keys(initialSettings), [initialSettings]); // Stable keys
+    const settingKeys = useMemo(() => Object.keys(initialSettings), [initialSettings]);
 
     const [settings, setSettings] = useState(initialSettings);
     const [loading, setLoading] = useState(true);
@@ -24,14 +22,10 @@ const AdminSettings = () => {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
 
-    // Stable reference to the Firestore document
-    const settingsDocRef = useMemo(() => doc(db, "appConfig", "visibility"), []); // Stable ref
+    const settingsDocRef = useMemo(() => doc(db, "appConfig", "visibility"), []);
 
-    // Fetch settings function - REMOVED useCallback as it's only called by useEffect now
     const fetchSettings = async () => {
         console.log("AdminSettings: fetchSettings called.");
-        // Ensure loading is true if called again manually (though not planned now)
-        // setLoading(true); // Not needed for initial load as it starts true
         setError('');
         setMessage('');
         try {
@@ -42,7 +36,6 @@ const AdminSettings = () => {
             if (docSnap.exists()) {
                 const fetchedData = docSnap.data();
                 console.log("AdminSettings: Fetched data:", fetchedData);
-                // Merge defaults and fetched data
                 const completeSettings = { ...initialSettings };
                 settingKeys.forEach(key => {
                     if (fetchedData.hasOwnProperty(key) && typeof fetchedData[key] === 'boolean') {
@@ -61,18 +54,15 @@ const AdminSettings = () => {
             setSettings(initialSettings);
         } finally {
             console.log("AdminSettings: fetchSettings finally block. Setting loading false.");
-            setLoading(false); // Set loading false AFTER fetch attempt
+            setLoading(false);
         }
     };
 
-    // useEffect to run fetchSettings ONLY ONCE on component mount
     useEffect(() => {
         console.log("AdminSettings: useEffect mounting, calling fetchSettings.");
         fetchSettings();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // <<-- EMPTY DEPENDENCY ARRAY HERE
+    }, []);
 
-    // Handle checkbox changes (remains the same)
     const handleCheckboxChange = (event) => {
         const { name, checked } = event.target;
         console.log(`AdminSettings: Checkbox changed - Name: ${name}, Checked: ${checked}`);
@@ -82,7 +72,6 @@ const AdminSettings = () => {
         }));
     };
 
-    // Save settings to Firestore (remains the same)
     const handleSaveChanges = async () => {
         console.log("AdminSettings: handleSaveChanges called. Saving data:", settings);
         setSaving(true);
@@ -107,7 +96,6 @@ const AdminSettings = () => {
         return <div>Loading settings...</div>;
     }
 
-    // Render the settings form... (JSX remains the same as previous version)
     return (
         <div className="AdminSettings-page">
             <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>Application Settings</h2>

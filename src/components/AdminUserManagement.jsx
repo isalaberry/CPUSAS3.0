@@ -1,48 +1,41 @@
-// src/components/AdminUserManagement.js
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
-import { db } from '../config/firebase'; // Ajuste o caminho se necessário
-import { UserContext } from './UserContext'; // Ajuste o caminho se necessário
-import '../App.css'; // Certifique-se que App.css está a ser importado algures
+import { db } from '../config/firebase';
+import { UserContext } from './UserContext';
+import '../App.css';
 
 const AdminUserManagement = () => {
-    // State for storing users list, loading status, and errors
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Get the currently logged-in user's profile from context
     const { userProfile } = useContext(UserContext);
 
-    // Function to fetch all users from Firestore, ordered by email
     const fetchUsers = useCallback(async () => {
         setLoading(true);
-        setError(''); // Clear previous errors on fetch
+        setError('');
         try {
             const usersQuery = query(collection(db, "users"), orderBy("email"));
             const querySnapshot = await getDocs(usersQuery);
             const usersList = querySnapshot.docs.map(docSnapshot => ({
-                id: docSnapshot.id, // The user's Auth UID, used as document ID
-                ...docSnapshot.data() // Spread the rest of the user data (email, role, status, etc.)
+                id: docSnapshot.id,
+                ...docSnapshot.data()
             }));
             setUsers(usersList);
         } catch (err) {
             console.error("Error fetching users:", err);
             setError("Falha ao carregar utilizadores.");
         } finally {
-            setLoading(false); // Stop loading indicator regardless of success/failure
+            setLoading(false);
         }
-    }, []); // Empty dependency array means this function doesn't change between renders
+    }, []);
 
-    // Fetch users when the component mounts for the first time
     useEffect(() => {
         fetchUsers();
-    }, [fetchUsers]); // Dependency array includes fetchUsers (defined with useCallback)
+    }, [fetchUsers]);
 
-    // Function to update a specific field (like 'status' or 'role') for a user
     const updateUserField = async (userId, field, value) => {
-        setError(''); // Clear previous errors
-        // Prevent updating if it's the logged-in admin trying to modify their own crucial fields
+        setError('');
         if (userProfile && userId === userProfile.uid) {
              if ((field === 'status' && value !== 'approved') || (field === 'role' && value !== 'admin')) {
                  console.warn("Admin attempted to modify own status/role in an invalid way.");
@@ -54,9 +47,8 @@ const AdminUserManagement = () => {
         try {
             const userDocRef = doc(db, "users", userId);
             await updateDoc(userDocRef, {
-                [field]: value // Use computed property name to set the field dynamically
+                [field]: value
             });
-            // Refresh the user list view after a successful update
             fetchUsers();
         } catch (err) {
             console.error(`Error updating user ${field}:`, err);
@@ -64,27 +56,21 @@ const AdminUserManagement = () => {
         }
     };
 
-    // Render loading state
     if (loading) return <div>A carregar utilizadores...</div>;
-
-    // Render error message if something went wrong
     if (error) return <div className="AdminUserManagement-error-message">{error}</div>;
 
-    // Render the main component UI
     return (
-        <div className="AdminUserManagement-page"> {/* Use prefixed class */}
+        <div className="AdminUserManagement-page">
             <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>Gestão de Utilizadores</h2>
 
-            {/* Refresh Button */}
             <button
                 onClick={fetchUsers}
                 disabled={loading}
-                className="AdminUserManagement-refresh-button" /* Use prefixed class */
+                className="AdminUserManagement-refresh-button"
             >
                 Atualizar Lista
             </button>
 
-            {/* Users Table */}
             <table className="AdminUserManagement-table">
                 <thead>
                     <tr>

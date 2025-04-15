@@ -206,7 +206,7 @@
 }
 
 .nav-link:active {
-  color: inherit; /* Mantém a cor original ao clicar */
+  color: inherit
 }
 
 .table {

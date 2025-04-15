@@ -3,87 +3,87 @@ import InputTypeOne from './InputTypeOne';
 import ButtonTypeTwo from './ButtonTypeTwo';
 import ArrowToUserDataPage from './ArrowToUserDataPage';
 import { auth, db } from '../config/firebase';
+import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-// Import doc and setDoc instead of addDoc and collection (if only using for this)
 import { doc, setDoc } from 'firebase/firestore';
 import '../App.css';
 
 const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const navigate = useNavigate();
 
     const register = async () => {
-        // Basic validation (add password confirmation check here too)
-        if (!email || !password) {
-             setError('Email and password are required.');
-             return;
+        if (!email || !password || !confirmPassword) {
+            alert('Please enter your email address and password.');
+            return;
         }
-        setError(''); // Clear previous errors
+        if (password !== confirmPassword) {
+            alert('Passwords don\'t match.');
+            return;
+        }
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user; // The authenticated user object from Firebase Auth
-
-            // --- Firestore Document Creation ---
-            // 1. Create a DocumentReference with the specific Auth UID as the document ID
+            const user = userCredential.user;
             const userDocRef = doc(db, 'users', user.uid);
-
-            // 2. Use setDoc to create the document at that reference
             await setDoc(userDocRef, {
-                // uid: user.uid, // Optional: You can omit storing uid as a field now
                 email: user.email,
                 createdAt: new Date(),
-                role: "user",       // Default role
-                status: "pending"   // Default status
+                role: "user",
+                status: "pending"
             });
 
-            console.log('User registered and profile created in Firestore with ID:', user.uid);
-            // Optionally navigate user or clear form here
-
+            alert('Registration successful! Your account is pending approval.');
+            navigate('/user-data-page');
         } catch (error) {
             console.error('Error signing up:', error);
-            // Provide more specific errors if possible
             if (error.code === 'auth/email-already-in-use') {
-                 setError('This email address is already registered.');
+                alert('This e-mail address is already registered.');
             } else if (error.code === 'auth/weak-password') {
-                 setError('Password should be at least 6 characters.');
+                alert('The password must be at least 6 characters long.');
+            } else if (error.code === 'auth/invalid-email') {
+                alert('Invalid email format.');
             } else {
-                 setError('Error signing up: ' + error.message);
+                alert('Registration error: ' + error.message);
             }
         }
     };
 
-    const closeErrorPopup = () => {
-        setError('');
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Evita o comportamento padrão de recarregar a página
+        register(); // Chama a função de registro
     };
 
     return (
         <div>
             <ArrowToUserDataPage />
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <h1 className='lprp-title'>Insert your data</h1>
+                <h1 className='lprp-title'>Insira os seus dados</h1>
 
-                {/* Add password confirmation input and state */}
-                <form>
-                    <InputTypeOne type="text" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <InputTypeOne type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    {/* <InputTypeOne type="password" placeholder="Confirm Password" /> */}
+                <form onSubmit={handleSubmit}>
+                    <InputTypeOne
+                        type="text"
+                        placeholder="E-mail"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <InputTypeOne
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <InputTypeOne
+                        type="password"
+                        placeholder="Confirmar Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <ButtonTypeTwo type="submit">Registar</ButtonTypeTwo>
                 </form>
-
-                <div>
-                    <ButtonTypeTwo onClick={register}>Register</ButtonTypeTwo>
-                </div>
             </div>
-
-            {error && (
-                <div className="error-popup">
-                    <div className="error-popup-content">
-                        <span className="error-popup-message">{error}</span>
-                        <button className="error-popup-close" onClick={closeErrorPopup}>Close</button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
