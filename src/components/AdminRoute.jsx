@@ -1,20 +1,19 @@
 import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { UserContext } from './UserContext';
+import '../App.css';
+
 
 const AdminRoute = () => {
     const { userProfile, loadingAuth } = useContext(UserContext);
 
-    if (loadingAuth) {
-        return <div>Loading...</div>; // Or a proper loading spinner
-    }
+    if (loadingAuth) return <div className="loading-container"><div className="loading-spinner"></div></div>;
 
-    // Redirect if not loading, not logged in, or not an admin
+
     if (!userProfile || userProfile.role !== 'admin') {
         return <Navigate to="/" replace />; // Or to login page
     }
 
-    // Render child route if user is an admin
     return <Outlet />;
 };
 

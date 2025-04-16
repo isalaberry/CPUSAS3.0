@@ -681,3 +681,32 @@
   text-align: center;
 }
 
+/* Adicione isto ao seu App.css */
+
+/* Contentor para centralizar o spinner */
+.loading-container {
+  display: flex;            /* Usa Flexbox para alinhar */
+  justify-content: center;  /* Centraliza horizontalmente */
+  align-items: center;      /* Centraliza verticalmente */
+  width: 100%;              /* Ocupa a largura disponível */
+  min-height: 300px;        /* Altura mínima para permitir centralização vertical */
+                              /* Pode ajustar esta altura conforme necessário */
+  padding: 40px 0;          /* Espaçamento vertical */
+}
+
+/* O spinner (círculo giratório) */
+.loading-spinner {
+  width: 50px;              /* Largura do spinner */
+  height: 50px;             /* Altura do spinner */
+  border: 6px solid #f0f0f0; /* Cor da borda base (cinza claro) */
+  border-top-color: #8c7ccc; /* Cor da parte que gira (seu azul) */
+  border-radius: 50%;       /* Torna-o um círculo */
+  animation: spin 1s linear infinite; /* Aplica a animação 'spin' */
+}
+
+/* Animação de rotação */
+@keyframes spin {
+  to {
+    transform: rotate(360deg); /* Gira 360 graus */
+  }
+}

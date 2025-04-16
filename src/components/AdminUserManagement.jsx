@@ -56,7 +56,7 @@ const AdminUserManagement = () => {
         }
     };
 
-    if (loading) return <div>A carregar utilizadores...</div>;
+    if (loading) return <div className="loading-container"><div className="loading-spinner"></div></div>;
     if (error) return <div className="AdminUserManagement-error-message">{error}</div>;
 
     return (

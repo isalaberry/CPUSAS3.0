@@ -92,9 +92,8 @@ const AdminSettings = () => {
 
     console.log("AdminSettings: Rendering component. Loading state:", loading);
 
-    if (loading) {
-        return <div>Loading settings...</div>;
-    }
+    if (loading) return <div className="loading-container"><div className="loading-spinner"></div></div>;
+
 
     return (
         <div className="AdminSettings-page">
