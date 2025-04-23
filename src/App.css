@@ -85,24 +85,24 @@
 .grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  
 
 }
 
 .process-grid {
-  padding-top: 50px;
+  padding-top: 100px;
   background-color: #ebf8ff;
   margin: 10px;
   border-radius: 0.375rem;
   grid-column: 1 / span 3;
-  grid-row: 1;
+  grid-row: 1 / span 1;
   display: grid;
-  grid-auto-rows: minmax(50px, 100px);
-  grid-auto-columns: minmax(50px, 1fr); /* Ajuste a largura mínima conforme necessário */
+  grid-auto-rows: minmax(50px, 60px); /*original 50 100*/
+  grid-auto-columns: minmax(50px, 1fr);
   grid-template-columns: repeat(minmax(50px, 1fr));
   overflow-x: scroll;
   overflow-y: hidden;
   position: relative;
-
   
 }
 
@@ -160,11 +160,9 @@
 .labels {
   display: flex;
   justify-content: space-between;
-  padding: 12px;
-  height: 50%;
+  padding-top: 12px;
   grid-column: span 3;
-  position: absolute;
-  bottom: 0;
+  align-items: flex-end;
   width: 100%;
   color: gray;
 }
@@ -419,7 +417,7 @@
 }
 
 .button-type-one, .button-type-two {
-  background-color: #CADEED;
+  background-color: #8494f4;
   border-radius: 20px;
   color: white;
   padding: 10px 20px;
@@ -575,16 +573,6 @@
 }
 
 
-.AdminUserManagement-error-message {
-  color: #8c7ccc; 
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
 
 /* ============================= */
 /* Admin Settings Styles      */
@@ -660,26 +648,6 @@
 }
 
 
-/* Shared Admin Messages (Optional - keep prefixed or make generic) */
-.AdminSettings-error-message {
-  color: #8c7ccc;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 15px 0;
-  text-align: center;
-}
-
-.AdminSettings-success-message {
-  color: #155724; /* Green */
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 15px 0;
-  text-align: center;
-}
 
 /* Adicione isto ao seu App.css */
 

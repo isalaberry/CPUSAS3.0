@@ -11,6 +11,9 @@ export function Title() {
     if (!user) {
       navigate('/');
     }
+    if(user) {
+      navigate('/user-data-page');
+    }
   };
 
   return (

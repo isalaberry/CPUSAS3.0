@@ -163,6 +163,10 @@ class InputTable extends Component {
                  isValid = false; break;
             }
         }
+        if (arrivalTime == 0){
+
+        }
+
         if (this.props.algorithm === 'RR') {
             if (isNaN(quantum) || quantum <= 0) {
                  alert(`Process ${process.id}: Quantum must be a positive number.`);
@@ -184,7 +188,6 @@ class InputTable extends Component {
         return;
     }
 
-    //this.saveDataToFirestore(tempProcesses);
 
     const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
     this.saveHistoryToCookies(updatedHistory);

@@ -22,7 +22,7 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     };
 
     const handleNextColumn = () => {
-        setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, totalRunningTime+1));
+        setCurrentColumn((prevColumn) => Math.min(prevColumn + 1, lastEndTime));
     };
 
     const handlePreviousColumn = () => {
@@ -34,15 +34,13 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
     };
     
     const handleLastColumn = () => { //fix: timebar must end on the maximum time of process+not process - tem que ser a soma  do startTime do último processo + (se for RR OU PP (minimo entre o remainingtime e o running time do último processo)) ou (se for outro, runningTime do último processo)
-        const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
-        setCurrentColumn(totalRunningTime+1);
+        setCurrentColumn(lastEndTime);
     };
 
     const handleAutoIncrement = () => {
-        const totalRunningTime = tableInfos.reduce((sum, process) => sum + process.runningTime, 0);
         const intervalId = setInterval(() => {
             setCurrentColumn((prevColumn) => {
-                if (prevColumn >= totalRunningTime + 1) {
+                if (prevColumn >= lastEndTime) {
                     clearInterval(intervalId);
                     return prevColumn;
                 }
@@ -55,10 +53,10 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
         let sorted = [];
         let currentTime = 0;
 
-        while (tableInfos.length > 0) {
+        while (tableInfos.length > 0) { //ordena por tempo de chegada
             let availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
 
-            if (availableProcesses.length === 0) {
+            if (availableProcesses.length === 0) { 
                 currentTime = Math.min(...tableInfos.map(process => process.arrivalTime));
                 availableProcesses = tableInfos.filter(process => process.arrivalTime <= currentTime);
             }
@@ -221,6 +219,7 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
         return (
             <div className='process' style={{
                 gridColumnStart: colStart,
+            
                 gridColumnEnd: `span ${colSpan}`,
                 position: 'relative',
                 gridRowStart: processData.idQueue,
@@ -379,13 +378,16 @@ export const GridProcess = ({ tableInfos, algorithm, saveDataToFirestore }) => {
                     return (
                         <div key={`arrival-${process.id}`} className='arrival-indicator' style={arrivalStyle}></div>
                     );
-                })}
 
-                <div className="labels" style={{ gridRowStart: sortedProcesses.length + 1 }}>
-                    {[...Array(totalRunningTime + 1)].map((_, i) => (
+                    
+                })}
+                                                        {/* vai ate sortedprocesslenght+1 - lastEndTime*/}
+                        <div className="labels" style={{ gridRowStart: tableInfos.length + 1 }}> {/* Basear rowStart no número original de processos */}
+                            {[...Array(lastEndTime + 1)].map((_, i) => (
                         <div key={i} className="label">{i.toString().padStart(2, '0')}</div>
                     ))}
                 </div>
+
 
             </div>
 
