@@ -11,7 +11,7 @@ const AdminRoute = () => {
 
 
     if (!userProfile || userProfile.role !== 'admin') {
-        return <Navigate to="/" replace />; // Or to login page
+        return <Navigate to="/" replace />;
     }
 
     return <Outlet />;

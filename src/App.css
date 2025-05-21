@@ -678,3 +678,38 @@
     transform: rotate(360deg); /* Gira 360 graus */
   }
 }
+
+.file-importer {
+  display: inline-block;
+  padding: 10px 40px;
+  background-color: #fce4b4; /* Cor do botão */
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+
+}
+
+.file-importer:hover {
+  background-color: #d1be99; /* Cor ao passar o mouse */
+}
+
+
+
+.file-exporter {
+  display: inline-block;
+  padding: 10px 40px;
+  background-color: #fce4b4; /* Cor do botão */
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  margin-left: 1%;
+}
+
+.file-exporter:hover {
+  background-color: #d1be99; /* Cor ao passar o mouse */
+}
+

@@ -5,8 +5,11 @@ import { db } from '../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import Table from './Table';
 import { auth } from '../config/firebase';
+import './../App.css';
+
 
 class InputTable extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -222,6 +225,89 @@ class InputTable extends Component {
        };
     });
   }
+  
+/* -------------lógica botões de exportação e importação-[down]------------------*/
+  handleFileImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const fileContent = e.target.result;
+        try {
+            const parsedProcesses = this.parseTxtContentToProcesses(fileContent);
+            const processesWithDefaults = parsedProcesses.map((p, index) => ({
+                id: index + 1,
+                arrivalTime: parseInt(p.arrivalTime, 10) || 0,
+                runningTime: parseInt(p.runningTime, 10) || 1,
+                priority: parseInt(p.priority, 10) || 0,
+                quantum: parseInt(p.quantum, 10) || 1,
+            }));
+
+            this.setState({
+                tempProcesses: processesWithDefaults,
+                totalProcess: processesWithDefaults.length,
+                showGanttChart: false,
+                processes: [],
+            });
+            alert('Scenario successfully imported!');
+        } catch (error) {
+            console.error("Error analysing the .txt file:", error);
+            alert(`Error importing file: ${error.message}`);
+        }
+    };
+    reader.onerror = () => {
+        alert('Error reading the file.');
+    };
+    reader.readAsText(file);
+    event.target.value = null;
+}
+
+parseTxtContentToProcesses = (txtContent) => {
+    const lines = txtContent.trim().split('\n');
+    const processes = [];
+    lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('#') || trimmedLine === '') {
+            return;
+        }
+        const parts = trimmedLine.split(',');
+        if (parts.length < 2 || parts.length > 4) { // Arrival, Running, [Priority, Quantum]
+            throw new Error(`Invalid format in the line ${index + 1}: "${trimmedLine}". 2 to 4 values expected.`);
+        }
+        processes.push({
+            arrivalTime: parts[0]?.trim(), // Remover espaços extra
+            runningTime: parts[1]?.trim(),
+            priority: parts[2]?.trim() || '0',
+            quantum: parts[3]?.trim() || '1',
+        });
+    });
+    return processes;
+}
+
+handleExportToTxt = () => {
+    const { tempProcesses } = this.state;
+    if (tempProcesses.length === 0) {
+        alert("There is no data in the table to export.");
+        return;
+    }
+    const header = "#arrivalTime,runningTime,priority,quantum\n";
+    const fileContent = header + tempProcesses.map(p =>
+        `${p.arrivalTime},${p.runningTime},${p.priority === undefined ? 0 : p.priority},${p.quantum === undefined ? 1 : p.quantum}`
+    ).join('\n');
+
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    const fileName = `table_cpusas_${new Date().toISOString().slice(0,10)}.txt`;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+}
+/* -------------lógica botões de exportação e importação-[up]------------------*/
+
 
   render() {
     const { tempProcesses, showGanttChart, processes } = this.state;
@@ -229,15 +315,49 @@ class InputTable extends Component {
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
     const showQuantum = algorithm === 'RR';
 
+
     return (
       <div className="screen">
         <div className="container mx-auto p-4">
+
             <Table
                 processes={tempProcesses}
                 handleInputChange={this.handleInputChange}
                 showPriority={showPriority}
                 showQuantum={showQuantum}
             />
+
+
+            
+            {/* -------------botões de exportação e importação-[down]------------------*/}
+            <div style={{ display: 'flex', justifyContent: 'right', marginTop: '20px' }}>
+                <div>
+                <input
+                    type="file"
+                    id="fileImporter"
+                    accept=".txt"
+                    onChange={this.handleFileImport}
+                    style={{ display: 'none' }}
+                />
+                <label
+                  htmlFor="fileImporter"
+                  className="file-importer"
+                >
+                  Import (.txt)
+                </label>
+                </div>
+
+                <button
+                    onClick={this.handleExportToTxt} 
+                    className="file-exporter"
+                    
+                >
+                    Export (.txt)
+                </button>  
+            </div>
+
+            {/* -------------botões de exportação e importação-[up]------------------*/}
+          
         </div>
 
         <div className="button-container my-4 flex justify-center gap-4">
