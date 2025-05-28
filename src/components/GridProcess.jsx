@@ -6,7 +6,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
     const processGridRef = useRef(null);
     const { user, userProfile } = useContext(UserContext);
 
-    // Estado para a cópia local dos dados de entrada e reset
+    // Estado para a cópia local dos dados de entrada
     const [tableInfos, setTableInfos] = useState([]);
 
     // Estados para a visualização da simulação
@@ -28,10 +28,12 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
     const recIsRecordingStateRef = useRef(recIsRecording);
     const recCurrentCapturingTickRef = useRef(1);
 
+    //mantem o estado de recIsRecording atualizado para uso em recTriggerNextFrame
     useEffect(() => {
         recIsRecordingStateRef.current = recIsRecording;
     }, [recIsRecording]);
 
+    //reseta os estados quando a tabela inicial muda ou o algoritmo é alterado
     useEffect(() => {
         setTableInfos(initialTableInfos ? JSON.parse(JSON.stringify(initialTableInfos)) : []);
         setCurrentColumn(1);
@@ -43,23 +45,47 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
     }, [initialTableInfos, algorithm]);
 
 
+    // useEffect para calcular a simulação
+    /*
+    Verifica se há processos definidos:
+        Se não houver, limpa os resultados (darkBlueSquares e simulationLastEndTime) e sai.
+
+    Prepara os dados:
+        Cria uma cópia dos processos e inicializa propriedades auxiliares para a simulação (tempo restante, início, término, etc).
+
+    Simula o escalonamento:
+        Usa um laço while para simular o avanço do tempo.
+        Em cada ciclo, adiciona processos que chegaram à fila de prontos.
+        Se não há processos prontos, avança o tempo para a próxima chegada.
+        Seleciona o próximo processo a ser executado conforme o algoritmo (FIFO, SJF, PNP, PP, RR).
+        Calcula quanto tempo o processo vai executar (considerando preempção, quantum, etc).
+        Atualiza os blocos de execução (calculatedBlocks) e o tempo atual.
+        Marca processos como finalizados quando terminam.
+
+    Atualiza o estado visual:
+        Ao final, define os blocos calculados (setDarkBlueSquares) e o tempo final da simulação (setSimulationLastEndTime).
+     */
     useEffect(() => {
+        //se nao houver processos definidos, limpa o darkBlueSquares e simulationLastEndTime
         if (!tableInfos || tableInfos.length === 0) {
+            console.log(`GRIDPROCESS_SIM_LOGIC: Iniciando cálculo para algoritmo: ${algorithm}`); // LOG ADICIONAL
             setDarkBlueSquares([]);
             setSimulationLastEndTime(0);
             return;
         }
 
+        //guarda os resultados da simulação
         let calculatedBlocks = [];
         let calculatedEndTime = 0;
         let currentSimTime = 0;
         let completedProcessesCount = 0;
 
+        //cria uma copia profunda das tablesinfos e pra cada processo inicializa props
         let processesForSim = JSON.parse(JSON.stringify(tableInfos));
         processesForSim.forEach(p => {
             p.remainingTime = p.runningTime;
-            p.finishedAt = -1;
-            p.startedAt = -1; // Para calcular tempo de espera corretamente
+            p.finishedAt = -1; //marcador de processo terminado (-1 nao terminou)
+            p.startedAt = -1; // marca quando o processo começou a ser executado (-1 nao começou)
             p.timeInReadyQueueSince = p.arrivalTime; // Para FIFO em RR e desempate
         });
 
@@ -67,24 +93,26 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
 
         // Loop principal da simulação
         // Continua enquanto houver processos não concluídos ou processos na fila de prontos
+        // Cada iteração do while representa uma decisão de escalonamento ou um avanço no tempo. - SDD
         while (completedProcessesCount < processesForSim.length) {
-            // Adicionar processos que chegaram à fila de prontos
+            
+            // Adicionar processos que chegaram na readyQueue
             processesForSim.forEach(p => {
                 if (p.arrivalTime <= currentSimTime && p.remainingTime > 0 && p.finishedAt === -1 && !readyQueue.find(rq => rq.id === p.id)) {
-                    p.enteredReadyQueueAtTick = currentSimTime; // Para desempate e lógica RR
+                    p.enteredReadyQueueAtTick = currentSimTime;
                     readyQueue.push(p);
                 }
             });
 
             if (readyQueue.length === 0) {
-                // Se não há processos prontos, avançar o tempo para a próxima chegada
+                // Se não tem processos prontos, avançar o tempo para a próxima chegada
                 let nextArrivalTimes = processesForSim
                     .filter(p => p.remainingTime > 0 && p.finishedAt === -1 && p.arrivalTime > currentSimTime)
                     .map(p => p.arrivalTime);
 
                 if (nextArrivalTimes.length === 0) {
                     if (processesForSim.every(p => p.remainingTime === 0 || p.finishedAt !== -1)) break; // Todos terminaram
-                    console.warn("GRIDPROCESS_DEBUG: Loop de simulação preso. Fila de prontos vazia, sem chegadas futuras, mas processos incompletos.");
+                    console.log("loop de simulação preso - fila de prontos vazia, sem chegadas futuras, mas processos incompletos.");
                     break; 
                 }
                 currentSimTime = Math.min(...nextArrivalTimes);
@@ -96,16 +124,16 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
             if (algorithm === 'FIFO') {
                 readyQueue.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'SJF') { // Não Preemptivo
+            } else if (algorithm === 'SJF') {
                 readyQueue.sort((a, b) => a.runningTime - b.runningTime || a.arrivalTime - b.arrivalTime || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'PNP') { // Prioridade Não Preemptivo
+            } else if (algorithm === 'PNP') {
                 readyQueue.sort((a, b) => a.priority - b.priority || a.arrivalTime - b.arrivalTime || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'PP') { // Prioridade Preemptivo
+            } else if (algorithm === 'PP') {
                 readyQueue.sort((a, b) => a.priority - b.priority || a.arrivalTime - b.arrivalTime || a.id - b.id);
                 nextProcessToRun = readyQueue[0]; // Pega, mas não remove para PP (será removido se terminar ou outro o preemptir)
-            } else if (algorithm === 'RR') { // Round Robin
+            } else if (algorithm === 'RR') {
                 readyQueue.sort((a,b) => a.timeInReadyQueueSince - b.timeInReadyQueueSince || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
             } else {
@@ -149,7 +177,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
             if (execSpan <= 0 && nextProcessToRun.runningTime > 0) execSpan = 1; // Garante progresso mínimo
             if (nextProcessToRun.runningTime === 0) execSpan = 0;
 
-            if (execSpan > 0) {
+            if (execSpan > 0) {// Se o processo vai executar, adiciona ao calculatedBlocks
                 calculatedBlocks.push({
                     id: `block-${nextProcessToRun.id}-${execStartTime}`,
                     colStart: execStartTime + 1,
@@ -197,6 +225,12 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
 
 
     // useEffect para descriptions
+    /*
+    Atualiza o status textual e a cor de cada processo (ex: "aguarda", "executando", "terminou") conforme o 
+    tempo (currentColumn) avança na simulação.
+    Usa os blocos de execução (darkBlueSquares) para saber se o processo está executando, esperando ou já terminou.
+    O resultado é exibido na tabela de descrições da interface.
+    */
     useEffect(() => {
         const newDescriptions = {};
         if (!initialTableInfos || initialTableInfos.length === 0) { // Usar initialTableInfos para iterar
@@ -243,7 +277,11 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
         setDescriptions(newDescriptions);
     }, [currentColumn, darkBlueSquares, initialTableInfos, simulationLastEndTime, algorithm]);
 
-    // useEffect para métricas
+    // useEffect o cálculo de Average Waiting Time e Turnaround Time
+    /*
+    Calcula o tempo médio de espera e o tempo médio de turnaround dos processos, usando os blocos de execução (darkBlueSquares).
+    Atualiza esses valores sempre que a simulação muda.
+    */
     useEffect(() => {
         if (!initialTableInfos || initialTableInfos.length === 0 ) { // Usar initialTableInfos
             setAverageWaitingTime(0); setAverageTurnaroundTime(0); return;
@@ -264,7 +302,6 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
                 const lastSegment = segments.sort((a, b) => (a.colStart + a.colSpan) - (b.colStart + b.colSpan)).pop();
                 completion = (lastSegment.colStart -1) + lastSegment.colSpan;
             } else {
-                console.warn(`GRIDPROCESS_DEBUG: P${processInfo.id} (burst ${burst}) não tem blocos para métricas.`);
                 return; 
             }
             
@@ -276,8 +313,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
         });
         setAverageTurnaroundTime(processesCountedForMetrics > 0 ? (totalTurnaroundTime / processesCountedForMetrics) : 0);
         setAverageWaitingTime(processesCountedForMetrics > 0 ? (totalWaitingTime / processesCountedForMetrics) : 0);
-    }, [darkBlueSquares, initialTableInfos]); // Usar initialTableInfos
-
+    }, [darkBlueSquares, initialTableInfos]); 
 
     // Funções de controlo da barra de tempo
     const handleNextColumn = () => setCurrentColumn((prev) => Math.min(prev + 1, simulationLastEndTime + 1));
@@ -310,51 +346,112 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
         }
     };
 
-    // --- Funções de Gravação (rec) ---
-    const recHandleStart = async () => {
-        console.log("REC_DEBUG: recHandleStart chamado.");
+    // --- Gravação ------------------------------------------------------------------------------------------------
+
+
+    // Função recHandleStart:
+    /*
+    */
+     const recHandleStart = async () => {
         if (!processGridRef.current || !recOffScreenCanvasRef.current || tableInfos.length === 0) {
-            console.log("REC_DEBUG: Condição de início de gravação falhou - refs ou tableInfos ausentes.");
-            alert("Dados da simulação não disponíveis ou sem processos para gravar."); return;
+            alert("Dados da simulação não disponíveis ou sem processos para gravar.");
+            return;
         }
+        // Garante que a simulação foi calculada e tem um tempo final válido.
         if (simulationLastEndTime <= 0 && tableInfos.length > 0) {
-            console.log("REC_DEBUG: simulationLastEndTime inválido:", simulationLastEndTime);
-            alert("Tempo final da simulação inválido. Tente novamente."); return;
+            alert("Tempo final da simulação inválido ou não calculado. Verifique os dados de entrada ou aguarde o cálculo da simulação antes de gravar.");
+            return;
         }
-        alert("A gravação irá começar. A simulação será reiniciada e percorrerá automaticamente.");
+
+        alert("A gravação vai começar. A simulação será reiniciada e avançará automaticamente.\n\nPor favor, NÃO MUDE DE ABA OU JANELA durante a gravação.\nSe o conteúdo for maior que a tela, pode ser necessário rolar manualmente para capturar toda a área desejada.\n\nObrigada!");
         
         setRecIsRecording(true);
         recChunksRef.current = [];
-        recCurrentCapturingTickRef.current = 1;
-        setCurrentColumn(1); 
-        console.log("REC_DEBUG: Estados de gravação inicializados. currentColumn definido para 1.");
+        // recCurrentCapturingTickRef.current = 1; // Esta ref parece não ser utilizada atualmente. Considere remover se não tiver um propósito futuro.
+        setCurrentColumn(1); // Reinicia a visualização para o início da simulação
 
-        await new Promise(resolve => setTimeout(resolve, 100)); 
-        console.log("REC_DEBUG: Delay após setCurrentColumn(1) concluído.");
+        // Delay para permitir que o React processe a atualização de setCurrentColumn(1) e o DOM seja atualizado.
+        await new Promise(resolve => setTimeout(resolve, 150)); 
 
         const gridElement = processGridRef.current;
         const targetCanvas = recOffScreenCanvasRef.current;
-        if (!gridElement || !targetCanvas) {
-            console.error("REC_DEBUG: gridElement ou targetCanvas é null após delay!");
-            setRecIsRecording(false); return;
-        }
         targetCanvas.width = gridElement.scrollWidth;
         targetCanvas.height = gridElement.scrollHeight;
+
+        if (!gridElement || !targetCanvas) {
+            alert("Erro interno: Elemento do grid ou canvas de gravação não encontrado. Não é possível gravar.");
+            setRecIsRecording(false);
+            return;
+        }
+
+        // Configurar dimensões do canvas de gravação
+        try {
+            targetCanvas.width = gridElement.scrollWidth;
+            targetCanvas.height = gridElement.scrollHeight;
+            // Verifica se as dimensões são válidas
+            if (targetCanvas.width === 0 || targetCanvas.height === 0) {
+                alert("Erro: As dimensões do conteúdo a ser gravado são zero. Verifique o layout ou os dados da simulação.");
+                setRecIsRecording(false);
+                return;
+            }
+        } catch (error) {
+            alert("Erro ao configurar as dimensões do canvas de gravação.");
+            setRecIsRecording(false);
+            return;
+        }
+        
+        const offCtx = targetCanvas.getContext('2d', { willReadFrequently: true }); 
+        if (!offCtx) {
+            alert("Erro interno: Não foi possível preparar o canvas para gravação (falha ao obter contexto 2D).");
+            setRecIsRecording(false);
+            return;
+        }
         console.log(`REC_DEBUG: Canvas off-screen configurado: ${targetCanvas.width}x${targetCanvas.height}`);
 
-        const recStream = targetCanvas.captureStream(25);
-        console.log("REC_DEBUG: Stream do canvas capturado.");
+        const recStream = targetCanvas.captureStream(25); // FPS para o stream
+        
+        if (!recStream || recStream.getVideoTracks().length === 0) {
+            console.error("REC_DEBUG: No video tracks found in captureStream ou o stream é null!");
+            alert("Erro interno: Não foi possível iniciar a captura de vídeo do canvas (nenhuma faixa de vídeo encontrada).");
+            setRecIsRecording(false);
+            return;
+        }
+
+        const track = recStream.getVideoTracks()[0];
+        console.log(`REC_DEBUG: Video track state: ${track.readyState}, muted: ${track.muted}`);
+        track.onended = () => console.log("REC_DEBUG: Video track ended!");
+        track.onmute = () => console.log("REC_DEBUG: Video track muted!");
+        track.onunmute = () => console.log("REC_DEBUG: Video track unmuted!");
+
+        let chosenMimeType = 'video/webm;codecs=vp9';
+        if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
+            console.warn(`REC_DEBUG: mimeType '${chosenMimeType}' não suportado. Tentando 'video/webm;codecs=vp8'.`);
+            chosenMimeType = 'video/webm;codecs=vp8';
+            if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
+                console.warn(`REC_DEBUG: mimeType '${chosenMimeType}' não suportado. Tentando 'video/webm'.`);
+                chosenMimeType = 'video/webm';
+                if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
+                    console.error("REC_DEBUG: Nenhum mimeType suportado encontrado (vp9, vp8, genérico webm).");
+                    alert("Seu navegador não suporta os formatos de vídeo WebM necessários para gravação. Tente um navegador diferente ou atualize o seu.");
+                    setRecIsRecording(false);
+                    return;
+                }
+            }
+        }
 
         try {
-            recMediaRecorderRef.current = new MediaRecorder(recStream, { mimeType: 'video/webm;codecs=vp9' });
-            console.log("REC_DEBUG: MediaRecorder instanciado.");
+            recMediaRecorderRef.current = new MediaRecorder(recStream, { mimeType: chosenMimeType });
+            console.log("REC_DEBUG: MediaRecorder instanciado com mimeType:", recMediaRecorderRef.current.mimeType);
         } catch (e) {
             console.error("REC_DEBUG: Erro ao instanciar MediaRecorder:", e);
-            alert("Erro ao iniciar o gravador de vídeo. Verifique se o seu navegador suporta video/webm com vp9.");
-            setRecIsRecording(false); return;
+            alert(`Erro ao iniciar o gravador de vídeo: ${e.message}. Verifique as permissões do navegador ou tente um navegador diferente.`);
+            setRecIsRecording(false);
+            return;
         }
 
         recMediaRecorderRef.current.ondataavailable = (event) => {
+            // ... (seu código existente para ondataavailable)
+            console.log("REC_DEBUG: ondataavailable chamado depois da criacao de MediaRecorder.");
             console.log(`REC_DEBUG: ondataavailable - Tamanho do chunk: ${event.data.size}`);
             if (event.data.size > 0) {
                 recChunksRef.current.push(event.data);
@@ -364,12 +461,14 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
             }
         };
         recMediaRecorderRef.current.onstop = () => {
+            // ... (seu código existente para onstop)
             console.log("REC_DEBUG: onstop chamado. Total de chunks:", recChunksRef.current.length);
             if (recChunksRef.current.length === 0) {
-                alert("Nenhum dado de vídeo foi gravado. Verifique a consola para mais detalhes.");
-                setRecIsRecording(false); return;
+                alert("Nenhum dado de vídeo foi gravado. Verifique a consola para mais detalhes. A gravação pode ter sido interrompida ou o conteúdo não mudou.");
+                setRecIsRecording(false); 
+                return;
             }
-            const recVideoBlob = new Blob(recChunksRef.current, { type: 'video/webm' });
+            const recVideoBlob = new Blob(recChunksRef.current, { type: recMediaRecorderRef.current.mimeType });
             const recVideoUrl = URL.createObjectURL(recVideoBlob);
             const recDownloadLink = document.createElement('a');
             recDownloadLink.href = recVideoUrl;
@@ -384,82 +483,162 @@ export const GridProcess = ({ tableInfos: initialTableInfos, algorithm, saveData
             console.log("REC_DEBUG: Download do vídeo iniciado.");
         };
         recMediaRecorderRef.current.onerror = (event) => {
+            // ... (seu código existente para onerror)
             console.error("REC_DEBUG: Erro no MediaRecorder:", event.error);
             alert(`Erro durante a gravação: ${event.error.name} - ${event.error.message}`);
-            recHandleStop();
+            recHandleStop(); // Chama recHandleStop para limpeza e resetar o estado
         };
-        recMediaRecorderRef.current.start();
+        
+        recMediaRecorderRef.current.start(1000); 
         console.log("REC_DEBUG: Gravação iniciada (MediaRecorder.start() chamado). simulationLastEndTime:", simulationLastEndTime);
-        recTriggerNextFrame(1);
+        recTriggerNextFrame(1); // Inicia o loop de captura de frames
     };
 
-    const recTriggerNextFrame = (tickToSet) => {
-        console.log(`REC_DEBUG: recTriggerNextFrame chamado para o tick: ${tickToSet}. Está a gravar: ${recIsRecordingStateRef.current}. Limite: ${simulationLastEndTime + 1}`);
-        if (!recIsRecordingStateRef.current || tickToSet > simulationLastEndTime + 1) {
-            console.log("REC_DEBUG: Condição de paragem do recTriggerNextFrame atingida.");
-            if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
-                console.log("REC_DEBUG: Parando MediaRecorder a partir do recTriggerNextFrame.");
-                recMediaRecorderRef.current.stop();
-            }
+    // Função recTriggerNextFrame:
+    /*
+    Recebe o tick (tempo) que deve ser exibido na simulação (tickToSet).
+    Verifica se a gravação ainda está ativa (recIsRecordingStateRef.current) e se ainda não passou do tempo final da simulação (tickToSet > simulationLastEndTime + 1).
+    Se a gravação acabou ou chegou ao fim da simulação, para o MediaRecorder (se ainda estiver gravando) e encerra a função.
+    Atualiza o tick atual:
+        Salva o tick atual em recCurrentCapturingTickRef.current.
+        Atualiza o estado currentColumn para mostrar esse tick na interface.
+        Chama a si mesma para o próximo tick usando requestAnimationFrame, criando assim um loop automático que avança a simulação e captura os frames até o final.
+    */
+    const recTriggerNextFrame = async (tickToSet) => {
+    if (!recIsRecordingStateRef.current || tickToSet > simulationLastEndTime + 1) {
+
+        if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
+            console.log("REC_DEBUG: Parando MediaRecorder a partir do recTriggerNextFrame (fim da simulação ou gravação parada).");
+            recMediaRecorderRef.current.stop();
+        }
+        return;
+    }
+
+   
+    // 1. ATUALIZE O ESTADO QUE CAUSA MUDANÇAS VISUAIS NO SEU GRID
+    setCurrentColumn(tickToSet); 
+    console.log(`REC_DEBUG_SIM: Tick ${tickToSet} - setCurrentColumn chamado.`);
+
+    // 2. ESPERE O NAVEGADOR PROCESSAR A ATUALIZAÇÃO DO REACT E PINTAR O DOM
+    await new Promise(resolve => requestAnimationFrame(() => {
+        requestAnimationFrame(resolve); 
+    }));   
+
+    // 3. (OPCIONAL) PEQUENO DELAY ADICIONAL SE requestAnimationFrame NÃO FOR SUFICIENTE
+    // await new Promise(resolve => setTimeout(resolve, 30)); // Ex: 30ms. Teste sem primeiro.
+
+    // Log para verificar o estado do DOM ANTES de html2canvas
+    if (processGridRef.current && recIsRecordingStateRef.current) {
+        // ... (existing DOM log)
+        const timeBarEl = processGridRef.current.querySelector('.time-bar');
+        if (timeBarEl) {
+            const computedStyle = window.getComputedStyle(timeBarEl);
+            console.log(`REC_HTML2CANVAS_PREP: Tick ${tickToSet}, TimeBar Computed gridColumnStart: ${computedStyle.gridColumnStart}`);
+        } else {
+            console.warn(`REC_HTML2CANVAS_PREP: Tick ${tickToSet}, TimeBar element not found!`);
+        }
+    }
+
+
+// 4. CAPTURE COM HTML2CANVAS (MODIFIED APPROACH)
+    if (recIsRecordingStateRef.current &&
+        processGridRef.current && // Make sure gridEl exists
+        recOffScreenCanvasRef.current &&
+        recMediaRecorderRef.current?.state === "recording") {
+        
+        const gridEl = processGridRef.current;
+        const offCanvas = recOffScreenCanvasRef.current; // This is the canvas being streamed
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+        if (!offCtx) {
+            console.error("REC_DEBUG_DRAW: Não foi possível obter contexto 2D do offCanvas no Tick:", tickToSet);
+            recHandleStop();
             return;
         }
-        recCurrentCapturingTickRef.current = tickToSet;
-        setCurrentColumn(tickToSet); 
-        console.log(`REC_DEBUG: currentColumn definido para ${tickToSet} em recTriggerNextFrame.`);
-        recAnimationFrameIdRef.current = requestAnimationFrame(() => recTriggerNextFrame(tickToSet + 1));
-    };
-
-    useEffect(() => { // useEffect para captura de frame
-        const captureFrame = async () => {
-            if (!recIsRecordingStateRef.current) return;
-            if (currentColumn === recCurrentCapturingTickRef.current &&
-                processGridRef.current &&
-                recOffScreenCanvasRef.current &&
-                recMediaRecorderRef.current?.state === "recording") {
-                console.log(`REC_DEBUG: useEffect Captura - Tentando capturar frame para tick ${currentColumn}. Tick esperado: ${recCurrentCapturingTickRef.current}`);
-                try {
-                    const gridEl = processGridRef.current;
-                    const offCanvas = recOffScreenCanvasRef.current;
-                    if (offCanvas.width !== gridEl.scrollWidth || offCanvas.height !== gridEl.scrollHeight) {
-                        offCanvas.width = gridEl.scrollWidth;
-                        offCanvas.height = gridEl.scrollHeight;
-                        console.log(`REC_DEBUG: Canvas off-screen redimensionado para ${offCanvas.width}x${offCanvas.height} no useEffect de captura.`);
-                    }
-                    await html2canvas(gridEl, {
-                        canvas: offCanvas, useCORS: true, logging: false, x:0, y:0,
-                        width: gridEl.scrollWidth, height: gridEl.scrollHeight,
-                    });
-                    console.log(`REC_DEBUG: Frame capturado com html2canvas para tick ${currentColumn}`);
-                } catch (error) {
-                    console.error('REC_DEBUG: Erro no html2canvas dentro do useEffect de captura:', error);
-                    recHandleStop();
-                }
+        try {
+            // Ensure offCanvas (the one being streamed) has the correct dimensions
+            // These should be set in recHandleStart and ideally not change,
+            // but good to be aware of if gridEl could resize.
+            if (offCanvas.width !== gridEl.scrollWidth || offCanvas.height !== gridEl.scrollHeight) {
+                 console.warn(`REC_DEBUG: Dimensões do offCanvas (${offCanvas.width}x${offCanvas.height}) não correspondem ao gridElement (${gridEl.scrollWidth}x${gridEl.scrollHeight}) no tick ${tickToSet}. Reajustando.`);
+                 offCanvas.width = gridEl.scrollWidth;
+                 offCanvas.height = gridEl.scrollHeight;
             }
-        };
-        const captureTimeoutId = setTimeout(() => { captureFrame(); }, 150);
-        return () => clearTimeout(captureTimeoutId);
-    }, [currentColumn, recIsRecording]);
 
-    const recHandleStop = () => {
-        console.log("REC_DEBUG: recHandleStop chamado.");
-        if (recAnimationFrameIdRef.current) {
-            cancelAnimationFrame(recAnimationFrameIdRef.current);
-            recAnimationFrameIdRef.current = null;
-            console.log("REC_DEBUG: requestAnimationFrame cancelado.");
+
+            // Let html2canvas render to its own, new canvas
+            const h2cCanvas = await html2canvas(gridEl, {
+                useCORS: true,
+                logging: true, // Keep logging for html2canvas for now
+                width: gridEl.scrollWidth, // Explicitly set width/height for html2canvas
+                height: gridEl.scrollHeight,
+                backgroundColor: null,
+                
+            });
+            console.log(`REC_DEBUG_DRAW: Tick ${tickToSet} - html2canvas renderizou para canvas INTERNO.`);
+
+            // Now, draw the result from html2canvas (h2cCanvas) onto your offScreenCanvas (offCanvas)
+            offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height); // Clear the streamed canvas
+            offCtx.drawImage(h2cCanvas, 0, 0); // Draw the captured image onto the streamed canvas
+            console.log(`REC_DEBUG_DRAW: Tick ${tickToSet} - Imagem do html2canvas copiada para offCanvas.`);
+
+
+            // Mantenha o requestData()
+            if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
+                console.log(`REC_DEBUG: Tick ${tickToSet} (html2canvas - copiado) - Chamando requestData()`);
+                recMediaRecorderRef.current.requestData();
+            }
+
+        } catch (error) {
+            console.error(`REC_DEBUG_DRAW: Erro ao capturar com html2canvas (abordagem de cópia) para o tick ${tickToSet}:`, error);
+            recHandleStop(); 
+            return;
         }
-        if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
-            console.log("REC_DEBUG: Parando MediaRecorder a partir do recHandleStop.");
-            recMediaRecorderRef.current.stop();
-        } else {
-            setRecIsRecording(false);
-            console.log("REC_DEBUG: MediaRecorder não estava a gravar ou já parado. Definindo recIsRecording para false.");
-        }
-    };
-    // --- FIM DAS FUNÇÕES DE GRAVAÇÃO ---
+    }
+
+    // 5. CONTINUE O LOOP DE GRAVAÇÃO
+    if (recIsRecordingStateRef.current) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
+        recTriggerNextFrame(tickToSet + 1);
+    }
+};
+
+
+
+    // Função recHandleStop:
+    /*
+    Cancela o próximo frame da animação, se estiver agendado, usando cancelAnimationFrame e limpa o id salvo.
+    Para o MediaRecorder (que grava o vídeo) se ele ainda estiver gravando.
+    Se o MediaRecorder já não está gravando, apenas define o estado de gravação (recIsRecording) como falso.
+    */
+const recHandleStop = () => {
+    console.log("REC_DEBUG: recHandleStop chamado.");
+    // recAnimationFrameIdRef.current is not used by the recTriggerNextFrame loop,
+    // as it uses setTimeout. This block can likely be removed or adapted if
+    // requestAnimationFrame is used elsewhere for recording control.
+    if (recAnimationFrameIdRef.current) {
+        cancelAnimationFrame(recAnimationFrameIdRef.current);
+        recAnimationFrameIdRef.current = null;
+        console.log("REC_DEBUG: requestAnimationFrame cancelado (se aplicável).");
+    }
+    if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
+        console.log("REC_DEBUG: Parando MediaRecorder a partir do recHandleStop.");
+        recMediaRecorderRef.current.stop(); // This will trigger 'onstop'
+    } else {
+        // If already stopped or never started, ensure UI state is correct
+        setRecIsRecording(false);
+        console.log("REC_DEBUG: MediaRecorder não estava a gravar ou já parado. Definindo recIsRecording para false.");
+    }
+};
+    // --- Fim da Gravação --------------------------------------------------------------------------------------------
 
     return (
         <div className='grid-container'>
-            <canvas ref={recOffScreenCanvasRef} style={{ display: 'none' }}></canvas>
+        {/* <canvas ref={recOffScreenCanvasRef} style={{ display: 'none' }}></canvas> */}
+        <canvas 
+            ref={recOffScreenCanvasRef} 
+            style={{ width: '400px', height: '150px', position: 'fixed', top: '10px', right: '10px', zIndex: 9999 }}
+        ></canvas>
             <div className='process-grid' style={{ position: 'relative' }} ref={processGridRef}>
                 <div className="time-bar" style={{
                     position: 'absolute', width: '10px', height: '100%',
