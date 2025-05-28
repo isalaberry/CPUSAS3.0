@@ -712,3 +712,18 @@
   background-color: #d1be99; /* Cor ao passar o mouse */
 }
 
+.button-add-interruption {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #fce4b4;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.button-add-interruption:hover {
+  background-color: #faddaa; /* Um tom de laranja um pouco mais escuro para o hover */
+  /* Ou qualquer outra cor de hover que você preferir, por exemplo: */
+  /* background-color: #e7c898; */
+}

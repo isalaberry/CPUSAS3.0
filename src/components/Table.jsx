@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
+const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPrefix = "P", nameColumnHeader = "Name"}) => {
   if (!Array.isArray(processes)) {
     console.error("Processes must be an array");
     console.log(processes);
@@ -20,10 +20,11 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
       <tbody>
         {processes.map((process, index) => (
           <tr key={index}>
-            <td>P{process.id}</td>
+            <td>{idPrefix}{process.id}</td>
             <td>
               <input
                 type="number"
+                min="0"
                 value={process.arrivalTime}
                 onChange={(e) => handleInputChange && handleInputChange(index, "arrivalTime", Number(e.target.value))}
                 className="input-table"
@@ -33,6 +34,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
             <td>
               <input
                 type="number"
+                min={nameColumnHeader === "ID" ? "1" : "1"}
                 value={process.runningTime}
                 onChange={(e) => handleInputChange && handleInputChange(index, "runningTime", Number(e.target.value))}
                 className="input-table"
@@ -43,6 +45,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
               <td>
                 <input
                   type="number"
+                  min="0"
                   value={process.priority}
                   onChange={(e) => handleInputChange && handleInputChange(index, "priority", Number(e.target.value))}
                   className="input-table"
@@ -54,6 +57,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum }) => {
               <td>
                 <input
                   type="number"
+                  min="1"
                   value={process.quantum}
                   onChange={(e) => handleInputChange && handleInputChange(index, "quantum", Number(e.target.value))}
                   className="input-table"

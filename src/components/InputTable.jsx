@@ -7,6 +7,10 @@ import Table from './Table';
 import { auth } from '../config/firebase';
 import './../App.css';
 
+  /* TO DO
+  salvar as interrupcoes no firestore e disponibilizar no userTables
+  */
+
 
 class InputTable extends Component {
 
@@ -16,7 +20,9 @@ class InputTable extends Component {
       totalProcess: 0,
       processes: [],
       tempProcesses: [],
-      history: [[]],
+      interruptions: [],
+      tempInterruptions: [],
+      history: [{ processes: [], interruptions: [] }],
       time: 0,
       showGanttChart: false,
       user: null,
@@ -24,55 +30,68 @@ class InputTable extends Component {
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.addInterruption = this.addInterruption.bind(this);
+    this.deleteLastInterruption = this.deleteLastInterruption.bind(this);
+    this.handleInterruptionInputChange = this.handleInterruptionInputChange.bind(this);
     this.saveHistoryToCookies = this.saveHistoryToCookies.bind(this);
     this.prepareAndShowGanttChart = this.prepareAndShowGanttChart.bind(this);
     this.generateRandomData = this.generateRandomData.bind(this);
     this.saveDataToFirestore = this.saveDataToFirestore.bind(this);
   }
 
-  async saveDataToFirestore(processesToSave) {
+  async saveDataToFirestore(processesToSave, interruptionsToSave) {
     if (this.state.user) {
       try {
         await addDoc(collection(db, 'tables'), {
           processes: processesToSave,
+          interruptions: interruptionsToSave || [],
           timestamp: new Date(),
           userId: this.state.user.uid,
           algorithm: this.props.algorithm
         });
-        console.log('Table data successfully saved to Firestore.');
       } catch (error) {
-        console.error('Error adding table to Firestore:', error);
       }
-    } else {
-      console.log('User not logged in. Skipping Firestore save.');
-    }
+    } 
   }
 
   componentDidMount() {
     const savedHistory = Cookies.get('history');
     let initialProcesses = [];
+    let initialInterruptions = [];
     if (savedHistory) {
         try {
-            const history = JSON.parse(savedHistory);
-            if (Array.isArray(history) && history.length > 0 && Array.isArray(history[0])) {
-                initialProcesses = history[0];
+            const parsedHistory = JSON.parse(savedHistory);
+            if (Array.isArray(parsedHistory) && parsedHistory.length > 0 && typeof parsedHistory[0] === 'object' && parsedHistory[0] !== null) {
+                const latestScenario = parsedHistory[0];
+                initialProcesses = latestScenario.processes || [];
+                initialInterruptions = latestScenario.interruptions || [];
                 this.setState({
-                  history,
+                  history: parsedHistory,
                   processes: initialProcesses,
                   tempProcesses: initialProcesses,
+                  interruptions: initialInterruptions,
+                  tempInterruptions: initialInterruptions,
+                  totalProcess: initialProcesses.length,
+                });
+            } else if (Array.isArray(parsedHistory) && parsedHistory.length > 0 && Array.isArray(parsedHistory[0])) {
+                initialProcesses = parsedHistory[0];
+                 this.setState({
+                  history: parsedHistory.map(p_array => ({ processes: p_array, interruptions: [] })),
+                  processes: initialProcesses,
+                  tempProcesses: initialProcesses,
+                  interruptions: [],
+                  tempInterruptions: [],
                   totalProcess: initialProcesses.length,
                 });
             } else {
-                 this.setState({ history: [[]] });
+                 this.setState({ history: [{ processes: [], interruptions: [] }] });
             }
         } catch(e) {
-             console.error("Error parsing history cookie:", e);
              Cookies.remove('history');
-             this.setState({ history: [[]] });
+             this.setState({ history: [{ processes: [], interruptions: [] }] });
         }
     }
-
-    this.authUnsubscribe = auth.onAuthStateChanged((user) => {
+        this.authUnsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         this.setState({ user });
       } else {
@@ -87,8 +106,8 @@ class InputTable extends Component {
       }
   }
 
-  saveHistoryToCookies(history) {
-    const limitedHistory = history.slice(0, 10);
+  saveHistoryToCookies(historyToSave) {
+    const limitedHistory = historyToSave.slice(0, 10);
     Cookies.set('history', JSON.stringify(limitedHistory), { expires: 7 });
   }
 
@@ -127,7 +146,7 @@ class InputTable extends Component {
   handleInputChange(index, field, value) {
     const numericValue = value === '' ? '' : Number(value);
 
-    if (numericValue < 0) {
+    if (numericValue < 0 && field !== 'id') {
       alert(`${field} cannot be negative`);
       return;
     }
@@ -139,8 +158,50 @@ class InputTable extends Component {
     });
   }
 
+  
+  addInterruption() {
+    this.setState((prevState) => {
+      const nextId = prevState.tempInterruptions.length > 0
+                     ? Math.max(0, ...prevState.tempInterruptions.map(i => i.id)) + 1
+                     : 1;
+      const newInterruption = {
+        id: nextId,
+        arrivalTime: 0,
+        runningTime: 1,
+      };
+      const updatedInterruptions = [...prevState.tempInterruptions, newInterruption];
+      return {
+        tempInterruptions: updatedInterruptions,
+      };
+    });
+  }
+
+  deleteLastInterruption() {
+  this.setState((prevState) => {
+    if (prevState.tempInterruptions.length === 0) return {};
+    const interruptions = prevState.tempInterruptions.slice(0, -1);
+    return {
+      tempInterruptions: interruptions,
+    };
+  });
+  }
+
+  handleInterruptionInputChange(index, field, value) {
+    const numericValue = value === '' ? '' : Number(value);
+    if (numericValue < 0) {
+      alert(`${field} cannot be negative`);
+      return;
+    }
+    this.setState((prevState) => {
+      const tempInterruptions = [...prevState.tempInterruptions];
+      tempInterruptions[index] = { ...tempInterruptions[index], [field]: numericValue };
+      return { tempInterruptions };
+    });
+  }
+
   prepareAndShowGanttChart() {
     const tempProcesses = [...this.state.tempProcesses];
+    const tempInterruptions = [...this.state.tempInterruptions];
 
     let isValid = true;
     let commonQuantum = null;
@@ -153,26 +214,23 @@ class InputTable extends Component {
         const quantum = Number(process.quantum);
 
         if (isNaN(arrivalTime) || arrivalTime < 0) {
-             alert(`Process ${process.id}: Arrival Time must be a non-negative number.`);
+             alert(`Process P${process.id}: Arrival Time must be a non-negative number.`);
              isValid = false; break;
         }
         if (isNaN(runningTime) || runningTime <= 0) {
-            alert(`Process ${process.id}: Running Time must be a positive number.`);
+            alert(`Process P${process.id}: Running Time must be a positive number.`);
             isValid = false; break;
         }
         if (this.props.algorithm === 'PP' || this.props.algorithm === 'PNP') {
             if (isNaN(priority) || priority < 0) {
-                 alert(`Process ${process.id}: Priority must be a non-negative number.`);
+                 alert(`Process P${process.id}: Priority must be a non-negative number.`);
                  isValid = false; break;
             }
-        }
-        if (arrivalTime == 0){
-
         }
 
         if (this.props.algorithm === 'RR') {
             if (isNaN(quantum) || quantum <= 0) {
-                 alert(`Process ${process.id}: Quantum must be a positive number.`);
+                 alert(`Process P${process.id}: Quantum must be a positive number.`);
                  isValid = false; break;
             }
             if (commonQuantum === null) {
@@ -186,17 +244,39 @@ class InputTable extends Component {
         tempProcesses[i] = { ...process, arrivalTime, runningTime, priority, quantum };
     }
 
+    for (let i = 0; i < tempInterruptions.length; i++) {
+        const interruption = tempInterruptions[i];
+        const arrivalTime = Number(interruption.arrivalTime);
+        const runningTime = Number(interruption.runningTime);
+
+        if (isNaN(arrivalTime) || arrivalTime < 0) {
+            alert(`Interruption I${interruption.id}: Arrival Time must be a non-negative number.`);
+            isValid = false; break;
+        }
+        if (isNaN(runningTime) || runningTime <= 0) {
+            alert(`Interruption I${interruption.id}: Running Time must be a positive number.`);
+            isValid = false; break;
+        }
+        tempInterruptions[i] = { ...interruption, arrivalTime, runningTime };
+    }
+
     if (!isValid) {
         this.setState({ showGanttChart: false });
         return;
     }
 
+    const currentScenario = { processes: tempProcesses, interruptions: tempInterruptions };
+    
+    const filteredOldHistory = this.state.history.filter(
+        h => h && ((h.processes && h.processes.length > 0) || (h.interruptions && h.interruptions.length > 0))
+    );
 
-    const updatedHistory = [tempProcesses, ...this.state.history.slice(1)];
+    const updatedHistory = [currentScenario, ...filteredOldHistory].slice(0, 10);
     this.saveHistoryToCookies(updatedHistory);
 
     this.setState({
         processes: tempProcesses,
+        interruptions: tempInterruptions,
         history: updatedHistory,
         showGanttChart: true,
     });
@@ -204,29 +284,30 @@ class InputTable extends Component {
 
   generateRandomData() {
     this.setState((prevState) => {
-      const numProcesses = prevState.tempProcesses.length || Math.floor(Math.random() * 5) + 3;
-      const tempProcesses = [];
-      const commonQuantum = this.props.algorithm === 'RR' ? Math.floor(Math.random() * 5) + 1 : null;
+      if (prevState.tempProcesses.length === 0 && prevState.tempInterruptions.length === 0) {return {};}
 
-      for (let i = 0; i < numProcesses; i++) {
-          const id = (prevState.tempProcesses[i]?.id) || i + 1;
-          tempProcesses.push({
-               id: id,
-               arrivalTime: Math.floor(Math.random() * 10),
-               runningTime: Math.floor(Math.random() * 10) + 1,
-               priority: Math.floor(Math.random() * 10),
-               quantum: commonQuantum !== null ? commonQuantum : Math.floor(Math.random() * 5) + 1
-           });
-      }
+      const commonQuantum = this.props.algorithm === 'RR' ? Math.floor(Math.random() * 5) + 1 : null;
+      const randomizedProcesses = prevState.tempProcesses.map(process => ({
+        ...process,
+        arrivalTime: Math.floor(Math.random() * 10),
+        runningTime: Math.floor(Math.random() * 10) + 1,
+        priority: Math.floor(Math.random() * 10),
+        quantum: commonQuantum !== null ? commonQuantum : (Math.floor(Math.random() * 5) + 1),
+      }));
+
+      const randomizedInterruptions = prevState.tempInterruptions.map(interrupt => ({
+        ...interrupt,
+        arrivalTime: Math.floor(Math.random() * 15),
+        runningTime: Math.floor(Math.random() * 3) + 1,
+      }));
 
       return {
-          tempProcesses,
-          totalProcess: tempProcesses.length
-       };
+        tempProcesses: randomizedProcesses,
+        tempInterruptions: randomizedInterruptions,
+      };
     });
   }
   
-/* -------------lógica botões de exportação e importação-[down]------------------*/
   handleFileImport = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -235,24 +316,30 @@ class InputTable extends Component {
     reader.onload = (e) => {
         const fileContent = e.target.result;
         try {
-            const parsedProcesses = this.parseTxtContentToProcesses(fileContent);
+            const { processes: parsedProcesses, interruptions: parsedInterruptions } = this.parseTxtContent(fileContent);
             const processesWithDefaults = parsedProcesses.map((p, index) => ({
-                id: index + 1,
+                id: p.id || index + 1,
                 arrivalTime: parseInt(p.arrivalTime, 10) || 0,
                 runningTime: parseInt(p.runningTime, 10) || 1,
                 priority: parseInt(p.priority, 10) || 0,
                 quantum: parseInt(p.quantum, 10) || 1,
             }));
 
-            this.setState({
-                tempProcesses: processesWithDefaults,
-                totalProcess: processesWithDefaults.length,
-                showGanttChart: false,
-                processes: [],
-            });
+            const interruptionsWithDefaults = parsedInterruptions.map((i, index) => ({
+                id: i.id || index + 1,
+                arrivalTime: parseInt(i.arrivalTime, 10) || 0,
+                runningTime: parseInt(i.runningTime, 10) || 1,
+            }));
+        this.setState({
+            tempProcesses: processesWithDefaults,
+            totalProcess: processesWithDefaults.length,
+            tempInterruptions: interruptionsWithDefaults,
+            showGanttChart: false,
+            processes: [],
+            interruptions: [],
+        });
             alert('Scenario successfully imported!');
         } catch (error) {
-            console.error("Error analysing the .txt file:", error);
             alert(`Error importing file: ${error.message}`);
         }
     };
@@ -261,43 +348,94 @@ class InputTable extends Component {
     };
     reader.readAsText(file);
     event.target.value = null;
-}
+  }
 
-parseTxtContentToProcesses = (txtContent) => {
+  parseTxtContent = (txtContent) => {
     const lines = txtContent.trim().split('\n');
     const processes = [];
+    const interruptions = [];
+    let currentSection = null;
+
     lines.forEach((line, index) => {
         const trimmedLine = line.trim();
         if (trimmedLine.startsWith('#') || trimmedLine === '') {
             return;
         }
-        const parts = trimmedLine.split(',');
-        if (parts.length < 2 || parts.length > 4) { // Arrival, Running, [Priority, Quantum]
-            throw new Error(`Invalid format in the line ${index + 1}: "${trimmedLine}". 2 to 4 values expected.`);
+        if (trimmedLine.toUpperCase() === '[PROCESSES]') {
+            currentSection = 'PROCESSES';
+            return;
         }
-        processes.push({
-            arrivalTime: parts[0]?.trim(), // Remover espaços extra
-            runningTime: parts[1]?.trim(),
-            priority: parts[2]?.trim() || '0',
-            quantum: parts[3]?.trim() || '1',
-        });
-    });
-    return processes;
-}
+        if (trimmedLine.toUpperCase() === '[INTERRUPTIONS]') {
+            currentSection = 'INTERRUPTIONS';
+            return;
+        }
 
-handleExportToTxt = () => {
-    const { tempProcesses } = this.state;
-    if (tempProcesses.length === 0) {
+        if (!currentSection) {
+            if (index === 0 && !trimmedLine.startsWith('[')) currentSection = 'PROCESSES';
+            else if (!trimmedLine.startsWith('[')) {
+                  if (!lines.some(l => l.trim().toUpperCase() === '[PROCESSES]' || l.trim().toUpperCase() === '[INTERRUPTIONS]')) {
+                    currentSection = 'PROCESSES';
+                  } else {
+                    return;
+                  }
+            } else return;
+        }
+        
+        const parts = trimmedLine.split(',');
+        if (currentSection === 'PROCESSES') {
+            if (parts.length < 2 || parts.length > 4) {
+                throw new Error(`Invalid process format in line ${index + 1}: "${trimmedLine}". Expected 2 to 4 values.`);
+            }
+            processes.push({
+                arrivalTime: parts[0]?.trim(),
+                runningTime: parts[1]?.trim(),
+                priority: parts[2]?.trim() || '0',
+                quantum: parts[3]?.trim() || '1',
+            });
+        } else if (currentSection === 'INTERRUPTIONS') {
+            if (parts.length !== 2) {
+                throw new Error(`Invalid interruption format in line ${index + 1}: "${trimmedLine}". Expected 2 values.`);
+            }
+            interruptions.push({
+                arrivalTime: parts[0]?.trim(),
+                runningTime: parts[1]?.trim(),
+            });
+        }
+    });
+    if (!lines.some(l => l.trim().toUpperCase() === '[PROCESSES]' || l.trim().toUpperCase() === '[INTERRUPTIONS]') && processes.length > 0 && interruptions.length === 0) {
+        return { processes, interruptions: [] };
+    }
+    return { processes, interruptions };
+  }
+
+  handleExportToTxt = () => {
+    const { tempProcesses, tempInterruptions } = this.state;
+    if (tempProcesses.length === 0 && tempInterruptions.length === 0) {
         alert("There is no data in the table to export.");
         return;
     }
-    const header = "#arrivalTime,runningTime,priority,quantum\n";
-    const fileContent = header + tempProcesses.map(p =>
-        `${p.arrivalTime},${p.runningTime},${p.priority === undefined ? 0 : p.priority},${p.quantum === undefined ? 1 : p.quantum}`
-    ).join('\n');
+    
+    let fileContent = "";
 
-    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-    const fileName = `table_cpusas_${new Date().toISOString().slice(0,10)}.txt`;
+    if (tempProcesses.length > 0) {
+        fileContent += "[PROCESSES]\n";
+        fileContent += "#arrivalTime,runningTime,priority,quantum\n";
+        fileContent += tempProcesses.map(p =>
+            `${p.arrivalTime},${p.runningTime},${p.priority === undefined ? 0 : p.priority},${p.quantum === undefined ? 1 : p.quantum}`
+        ).join('\n');
+        fileContent += "\n";
+    }
+
+    if (tempInterruptions.length > 0) {
+        fileContent += "\n[INTERRUPTIONS]\n";
+        fileContent += "#arrivalTime,runningTime\n";
+        fileContent += tempInterruptions.map(i =>
+            `${i.arrivalTime},${i.runningTime}`
+        ).join('\n');
+    }
+
+    const blob = new Blob([fileContent.trim()], { type: 'text/plain;charset=utf-8' });
+    const fileName = `cpusas_scenario_${new Date().toISOString().slice(0,10)}.txt`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
@@ -305,12 +443,11 @@ handleExportToTxt = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
-}
-/* -------------lógica botões de exportação e importação-[up]------------------*/
+  }
 
 
   render() {
-    const { tempProcesses, showGanttChart, processes } = this.state;
+    const { tempProcesses, showGanttChart, processes, tempInterruptions, interruptions } = this.state;
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
     const showQuantum = algorithm === 'RR';
@@ -328,8 +465,27 @@ handleExportToTxt = () => {
             />
 
 
+            {tempInterruptions.length > 0 && (
+                <Table
+                    processes={tempInterruptions}
+                    handleInputChange={this.handleInterruptionInputChange}
+                    showPriority={false}
+                    showQuantum={false}
+                    idPrefix="I"
+                    nameColumnHeader="ID"
+                />
+            )}
+            <div className="button-container my-4 flex justify-start gap-4">
+                <button className="button-add-interruption" onClick={this.addInterruption}>
+                    Add Interruption
+                </button>
+                {tempInterruptions.length > 0 && (
+                    <button className="button-add-interruption" onClick={this.deleteLastInterruption}>
+                        Delete Last Interruption
+                    </button>
+                )}
+            </div>
             
-            {/* -------------botões de exportação e importação-[down]------------------*/}
             <div style={{ display: 'flex', justifyContent: 'right', marginTop: '20px' }}>
                 <div>
                 <input
@@ -355,22 +511,20 @@ handleExportToTxt = () => {
                     Export (.txt)
                 </button>  
             </div>
-
-            {/* -------------botões de exportação e importação-[up]------------------*/}
           
         </div>
 
         <div className="button-container my-4 flex justify-center gap-4">
-            <button className="button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={this.addProcess}>
+            <button className="button" onClick={this.addProcess}>
                 Add Process
             </button>
-            <button className="button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50" onClick={this.deleteProcess} disabled={tempProcesses.length === 0}>
+            <button className="button" onClick={this.deleteProcess} disabled={tempProcesses.length === 0}>
                 Delete Last
             </button>
-            <button className="button bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded" onClick={this.generateRandomData}>
+            <button className="button" onClick={this.generateRandomData}>
                 Random Data
             </button>
-            <button className="button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50" onClick={this.prepareAndShowGanttChart} disabled={tempProcesses.length === 0}>
+            <button className="button" onClick={this.prepareAndShowGanttChart} disabled={tempProcesses.length === 0}>
                 Generate Gantt Chart
             </button>
         </div>
@@ -379,6 +533,7 @@ handleExportToTxt = () => {
             <div className='bg-white p-4 shadow-lg rounded'>
                 <GridProcess
                     tableInfos={processes}
+                    interruptionsData={interruptions}
                     algorithm={algorithm}
                     saveDataToFirestore={this.saveDataToFirestore}
                 />
@@ -391,6 +546,7 @@ handleExportToTxt = () => {
       </div>
     );
   }
+
 }
 
 export default InputTable;
