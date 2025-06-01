@@ -202,8 +202,10 @@
   color: #0c2cec;
 }
 
-.nav-link:active {
-  color: inherit
+.nav-link.active {
+  color: white;
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 .table {

@@ -9,6 +9,7 @@ import './../App.css';
 
   /* TO DO
   quero que o programa inicialmente ja tenha duas linhas de processos zeradas
+  quero que a navbar marque qual algoritmmo está selecionado
   */
 
 

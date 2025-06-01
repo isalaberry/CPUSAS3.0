@@ -21,7 +21,7 @@ export function NavBar() {
                 const docSnap = await getDoc(configDocRef);
                 if (docSnap.exists()) {
                     const fetchedData = docSnap.data();
-                    setVisibility(prev => ({ ...prev, ...fetchedData })); // Merge defaults
+                    setVisibility(prev => ({ ...prev, ...fetchedData }));
                 } else {
                     setVisibility({ fifo: true, sjf: true, pnp: true, pp: true, rr: true });
                 }
