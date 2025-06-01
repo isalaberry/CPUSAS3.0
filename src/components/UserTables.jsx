@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { collection, getDocs, deleteDoc, doc, addDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { FaTimes } from 'react-icons/fa';
 import ButtonEndSession from './ButtonEndSession';
 import Table from './Table';
@@ -12,7 +12,7 @@ import './../App.css';
 const UserTables = ({ user }) => {
     const [tables, setTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState(null);
-    const [selectedAlgorithm, setSelectedAlgorithm] = useState('FIFO'); // Estado para o algoritmo selecionado
+    //const [selectedAlgorithm, setSelectedAlgorithm] = useState('FIFO');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,7 +26,6 @@ const UserTables = ({ user }) => {
                         id: doc.id,
                     }));
                     setTables(filteredData);
-                    console.log(filteredData);
                 }
             } catch (error) {
                 console.error('Error getting tables:', error);
@@ -46,12 +45,11 @@ const UserTables = ({ user }) => {
                 id: doc.id,
             }));
             setTables(filteredData);
-            console.log('Table deleted and data reloaded');
         } catch (error) {
             console.error('Error deleting table:', error);
         }
     };
-
+/*
     const handleAddTable = async (newTableData) => {
         if (!user) {
             console.error('No user logged in. Cannot add table.');
@@ -77,7 +75,7 @@ const UserTables = ({ user }) => {
             console.error('Error adding table:', error);
         }
     };
-
+*/
     const handleLogout = async () => {
         try {
             await signOut(auth);
@@ -87,12 +85,17 @@ const UserTables = ({ user }) => {
         }
     };
 
-    const handleImportTable = (tableId) => {
+   const handleImportTable = (tableId) => {
         const tableToImport = tables.find(table => table.id === tableId);
         if (tableToImport) {
-            console.log('Selected Table:', tableToImport);
-            setSelectedTable({ ...tableToImport, algorithm: selectedAlgorithm }); // Inclui o algoritmo selecionado
-            console.log('Table imported successfully');
+            console.log('Selected Table for import:', tableToImport);
+            setSelectedTable({ 
+                processes: tableToImport.processes || [], 
+                interruptions: tableToImport.interruptions || [],
+                algorithm: tableToImport.algorithm || 'FIFO',
+                id: tableToImport.id 
+            });
+            console.log('Table imported successfully with processes and interruptions');
         } else {
             console.error('Table not found for import');
         }
@@ -100,9 +103,13 @@ const UserTables = ({ user }) => {
 
     if (selectedTable) {
         return (
-            <div className='bg-white h-screen'>
-                <GridProcess tableInfos={selectedTable.processes} algorithm={selectedTable.algorithm} />
-                <button onClick={() => setSelectedTable(null)} className="button">
+            <div className='bg-white h-screen p-4'>
+                <GridProcess 
+                    tableInfos={selectedTable.processes} 
+                    interruptionsData={selectedTable.interruptions}
+                    algorithm={selectedTable.algorithm} 
+                />
+                <button onClick={() => setSelectedTable(null)} className="button mt-4">
                     Back to Tables
                 </button>
             </div>
@@ -110,36 +117,51 @@ const UserTables = ({ user }) => {
     }
 
     return (
-        <div>
-            <h2 className='usertables-title'>your tables</h2>
+        <div className="p-4">
+            <h2 className='usertables-title'>Your Saved Scenarios</h2>
+            {tables.length === 0 && <p>No scenarios saved yet.</p>}
             {tables.map((table) => (
                 <div key={table.id} className="usertables-card">
                     <div className="usertables-card-header">
+                        <span>
+                            Algorithm: {table.algorithm || 'N/A'} -  Scenario from: {table.timestamp?.toDate().toLocaleString()}
+                        </span>
+
                         <button className="usertables-delete-button" onClick={() => handleDeleteTable(table.id)}>
                             <FaTimes />
                         </button>
                     </div>
-                    {/* Dropdown para selecionar o algoritmo */}
-                    <select
-                        value={selectedAlgorithm}
-                        onChange={(e) => setSelectedAlgorithm(e.target.value)}
-                        className="user-tables-algorithm-dropdown"
+
+                    <h4 className="font-semibold mt-2">Processes:</h4>
+                    <Table 
+                        processes={table.processes || []} 
+                        // Condiciona showPriority com base no algoritmo da tabela
+                        showPriority={table.algorithm === 'PP' || table.algorithm === 'PNP'} 
+                        // Condiciona showQuantum com base no algoritmo da tabela
+                        showQuantum={table.algorithm === 'RR'}
+                        readOnly={true} // Adiciona readOnly para visualização
+                    />
+
+                    {(table.interruptions && table.interruptions.length > 0) && (
+                        <>
+                            <h4 className="font-semibold mt-4">Interruptions:</h4>
+                            <Table 
+                                processes={table.interruptions} 
+                                showPriority={false} // Interrupções não têm prioridade
+                                showQuantum={false}  // Interrupções não têm quantum
+                                idPrefix="I"
+                                nameColumnHeader="Interrupt ID"
+                                readOnly={true} // Adiciona readOnly para visualização
+                            />
+                        </>
+                    )}
+                    
+                    <button 
+                        className="user-tables-button-import mt-2"
+                        onClick={() => handleImportTable(table.id)}
                     >
-                        <option value="FIFO">FIFO</option>
-                        <option value="SJF">SJF</option>
-                        <option value="PNP">PNP</option>
-                        <option value="PP">PP</option>
-                        <option value="RR">RR</option>
-                        
-                    </select>
-
-                    <button className="user-tables-button-import" onClick={() => handleImportTable(table.id)}>
-                        Import
+                        View Scenario
                     </button>
-                    
-                    <Table processes={table.processes} showPriority={true} showQuantum={true} />
-
-                    
                 </div>
             ))}
             <ButtonEndSession onClick={handleLogout} />

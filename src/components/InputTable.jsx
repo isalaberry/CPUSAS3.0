@@ -8,7 +8,7 @@ import { auth } from '../config/firebase';
 import './../App.css';
 
   /* TO DO
-  salvar as interrupcoes no firestore e disponibilizar no userTables
+  quero que o programa inicialmente ja tenha duas linhas de processos zeradas
   */
 
 
