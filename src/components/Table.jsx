@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPrefix = "P", nameColumnHeader = "Name"}) => {
+    const { t } = useTranslation();
   if (!Array.isArray(processes)) {
     console.error("Processes must be an array");
     console.log(processes);
@@ -10,11 +12,11 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
     <table className="table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Arrival Time</th>
-          <th>Running Time</th>
-          {showPriority && <th>Priority</th>}
-          {showQuantum && <th>Quantum</th>}
+          <th>{nameColumnHeader}</th>
+          <th>{t('table.headerArrivalTime')}</th>
+          <th>{t('table.headerRunningTime')}</th>
+          {showPriority && <th>{t('table.headerPriority')}</th>}
+          {showQuantum && <th>{t('table.headerQuantum')}</th>}
         </tr>
       </thead>
       <tbody>

@@ -6,15 +6,17 @@ import ArrowToUserDataPage from './ArrowToUserDataPage';
 import { auth } from '../config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import '../App.css';
+import { useTranslation } from 'react-i18next';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const login = async () => {
         if (!email || !password) {
-            alert('Please enter your email address and password.');
+            alert(t('loginPage.alertEnterEmailPassword'));
             return;
         }
 
@@ -24,11 +26,11 @@ const LoginPage = () => {
         } catch (error) {
             console.error('Error logging in:', error);
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                alert('Invalid email or password.');
+                alert(t('loginPage.alertInvalidEmailPassword'));
             } else if (error.code === 'auth/invalid-email') {
-                alert('Invalid email format.');
+                alert(t('loginPage.alertInvalidEmailFormat'));
             } else {
-                alert('Error logging in. Please try again.');
+                alert(t('loginPage.alertLoginError'));
             }
         }
     };
@@ -42,22 +44,22 @@ const LoginPage = () => {
         <div>
             <ArrowToUserDataPage />
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <h1 className='lprp-title'>Enter your credentials</h1>
+                <h1 className='lprp-title'>{t('loginTitle')}</h1>
 
                 <form onSubmit={handleSubmit}>
                     <InputTypeOne
                         type="text"
-                        placeholder="E-mail"
+                        placeholder={t('emailPlaceholder')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <InputTypeOne
                         type="password"
-                        placeholder="Password"
+                        placeholder={t('passwordPlaceholder')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    <ButtonTypeTwo type="submit">Login</ButtonTypeTwo>
+                    <ButtonTypeTwo type="submit">{t('loginButton')}</ButtonTypeTwo>
                 </form>
             </div>
         </div>

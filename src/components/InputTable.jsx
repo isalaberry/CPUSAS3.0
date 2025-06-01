@@ -6,10 +6,11 @@ import { collection, addDoc } from 'firebase/firestore';
 import Table from './Table';
 import { auth } from '../config/firebase';
 import './../App.css';
+import { withTranslation } from 'react-i18next';
 
   /* TO DO
   quero que o programa inicialmente ja tenha duas linhas de processos zeradas
-  quero que a navbar marque qual algoritmmo está selecionado
+  intenacionalizacao
   */
 
 
@@ -51,6 +52,7 @@ class InputTable extends Component {
           algorithm: this.props.algorithm
         });
       } catch (error) {
+          console.error("Error saving data to Firestore: ", error);
       }
     } 
   }
@@ -145,10 +147,18 @@ class InputTable extends Component {
   }
 
   handleInputChange(index, field, value) {
+    const { t } = this.props;
     const numericValue = value === '' ? '' : Number(value);
 
+    let translatedField = field;
+    if (field === 'arrivalTime') translatedField = t('inputTable.fieldNameArrivalTime');
+    else if (field === 'runningTime') translatedField = t('inputTable.fieldNameRunningTime');
+    else if (field === 'priority') translatedField = t('inputTable.fieldNamePriority');
+    else if (field === 'quantum') translatedField = t('inputTable.fieldNameQuantum');
+
+
     if (numericValue < 0 && field !== 'id') {
-      alert(`${field} cannot be negative`);
+      alert(t('inputTable.alertFieldNegative', { field: translatedField }));
       return;
     }
 
@@ -188,9 +198,15 @@ class InputTable extends Component {
   }
 
   handleInterruptionInputChange(index, field, value) {
+    const { t } = this.props;
     const numericValue = value === '' ? '' : Number(value);
-    if (numericValue < 0) {
-      alert(`${field} cannot be negative`);
+
+    let translatedField = field;
+    if (field === 'arrivalTime') translatedField = t('inputTable.fieldNameArrivalTime');
+    else if (field === 'runningTime') translatedField = t('inputTable.fieldNameRunningTime');
+
+    if (numericValue < 0 && field !== 'id') { // Assuming interruptions don't have negative IDs
+      alert(t('inputTable.alertFieldNegative', { field: translatedField }));
       return;
     }
     this.setState((prevState) => {
@@ -201,6 +217,7 @@ class InputTable extends Component {
   }
 
   prepareAndShowGanttChart() {
+    const { t } = this.props;
     const tempProcesses = [...this.state.tempProcesses];
     const tempInterruptions = [...this.state.tempInterruptions];
 
@@ -215,29 +232,29 @@ class InputTable extends Component {
         const quantum = Number(process.quantum);
 
         if (isNaN(arrivalTime) || arrivalTime < 0) {
-             alert(`Process P${process.id}: Arrival Time must be a non-negative number.`);
+             alert(t('inputTable.alertProcessArrivalTimeNegative', { id: process.id }));
              isValid = false; break;
         }
         if (isNaN(runningTime) || runningTime <= 0) {
-            alert(`Process P${process.id}: Running Time must be a positive number.`);
+            alert(t('inputTable.alertProcessRunningTimePositive', { id: process.id }));
             isValid = false; break;
         }
         if (this.props.algorithm === 'PP' || this.props.algorithm === 'PNP') {
             if (isNaN(priority) || priority < 0) {
-                 alert(`Process P${process.id}: Priority must be a non-negative number.`);
+                 alert(t('inputTable.alertProcessPriorityNegative', { id: process.id }));
                  isValid = false; break;
             }
         }
 
         if (this.props.algorithm === 'RR') {
             if (isNaN(quantum) || quantum <= 0) {
-                 alert(`Process P${process.id}: Quantum must be a positive number.`);
+                 alert(t('inputTable.alertProcessQuantumPositive', { id: process.id }));
                  isValid = false; break;
             }
             if (commonQuantum === null) {
                 commonQuantum = quantum;
             } else if (commonQuantum !== quantum) {
-                alert("All Quantum values must be the same for the Round Robin algorithm.");
+                alert(t('inputTable.alertRRQuantumSame'));
                 isValid = false; break;
             }
         }
@@ -352,6 +369,7 @@ class InputTable extends Component {
   }
 
   parseTxtContent = (txtContent) => {
+    const { t } = this.props;
     const lines = txtContent.trim().split('\n');
     const processes = [];
     const interruptions = [];
@@ -385,7 +403,7 @@ class InputTable extends Component {
         const parts = trimmedLine.split(',');
         if (currentSection === 'PROCESSES') {
             if (parts.length < 2 || parts.length > 4) {
-                throw new Error(`Invalid process format in line ${index + 1}: "${trimmedLine}". Expected 2 to 4 values.`);
+                throw new Error(t('inputTable.errorParseProcessFormat', { lineNumber: index + 1, lineContent: trimmedLine }));
             }
             processes.push({
                 arrivalTime: parts[0]?.trim(),
@@ -395,7 +413,7 @@ class InputTable extends Component {
             });
         } else if (currentSection === 'INTERRUPTIONS') {
             if (parts.length !== 2) {
-                throw new Error(`Invalid interruption format in line ${index + 1}: "${trimmedLine}". Expected 2 values.`);
+                throw new Error(t('inputTable.errorParseInterruptionFormat', { lineNumber: index + 1, lineContent: trimmedLine }));
             }
             interruptions.push({
                 arrivalTime: parts[0]?.trim(),
@@ -410,6 +428,7 @@ class InputTable extends Component {
   }
 
   handleExportToTxt = () => {
+    //const { t } = this.props;
     const { tempProcesses, tempInterruptions } = this.state;
     if (tempProcesses.length === 0 && tempInterruptions.length === 0) {
         alert("There is no data in the table to export.");
@@ -448,6 +467,7 @@ class InputTable extends Component {
 
 
   render() {
+    const { t } = this.props;
     const { tempProcesses, showGanttChart, processes, tempInterruptions, interruptions } = this.state;
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
@@ -478,11 +498,11 @@ class InputTable extends Component {
             )}
             <div className="button-container my-4 flex justify-start gap-4">
                 <button className="button-add-interruption" onClick={this.addInterruption}>
-                    Add Interruption
+                    {t('inputTable.buttonAddInterruption')}
                 </button>
                 {tempInterruptions.length > 0 && (
                     <button className="button-add-interruption" onClick={this.deleteLastInterruption}>
-                        Delete Last Interruption
+                    {t('inputTable.buttonDeleteLastInterruption')}
                     </button>
                 )}
             </div>
@@ -517,16 +537,16 @@ class InputTable extends Component {
 
         <div className="button-container my-4 flex justify-center gap-4">
             <button className="button" onClick={this.addProcess}>
-                Add Process
+                {t('inputTable.buttonAddProcess')}
             </button>
             <button className="button" onClick={this.deleteProcess} disabled={tempProcesses.length === 0}>
-                Delete Last
+                {t('inputTable.buttonDeleteLastProcess')}
             </button>
             <button className="button" onClick={this.generateRandomData}>
-                Random Data
+                {t('inputTable.buttonRandomData')}
             </button>
             <button className="button" onClick={this.prepareAndShowGanttChart} disabled={tempProcesses.length === 0}>
-                Generate Gantt Chart
+                {t('inputTable.buttonGenerateGantt')}
             </button>
         </div>
 
@@ -550,4 +570,4 @@ class InputTable extends Component {
 
 }
 
-export default InputTable;
+export default withTranslation()(InputTable); // New export

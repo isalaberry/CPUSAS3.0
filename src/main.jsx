@@ -16,6 +16,7 @@ import { UserProvider } from '../src/components/UserContext';
 import AdminRoute from './components/AdminRoute'; // Import
 import AdminUserManagement from './components/AdminUserManagement'; // Example admin component
 import AdminSettings from './components/AdminSettings'; // Example admin component
+import './i18n/i18n';
 
 const router = createBrowserRouter([
   {
@@ -60,18 +61,17 @@ const router = createBrowserRouter([
         element: <RegisterPage />,
       },
       {
-      path: '/admin',       // Parent route for admin section
-        element: <AdminRoute />, // Protects all nested routes
+      path: '/admin',
+        element: <AdminRoute />,
         children: [
             {
-                path: 'users', // Becomes /admin/users
+                path: 'users', // /admin/users
                 element: <AdminUserManagement />
             },
             {
-                path: 'settings', // Becomes /admin/settings
+                path: 'settings', // /admin/settings
                 element: <AdminSettings />
             }
-            // Add other admin routes here
         ]
       },
     ]
@@ -85,37 +85,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </UserProvider>
   </React.StrictMode>,
 );
-
-
-/*
-// main.jsx
-import AdminRoute from './components/AdminRoute'; // Import
-import AdminUserManagement from './components/AdminUserManagement'; // Example admin component
-import AdminSettings from './components/AdminSettings'; // Example admin component
-
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <App />,
-        // ... other children routes
-        children: [
-            // ... existing routes
-            {
-                path: '/admin',       // Parent route for admin section
-                element: <AdminRoute />, // Protects all nested routes
-                children: [
-                    {
-                        path: 'users', // Becomes /admin/users
-                        element: <AdminUserManagement />
-                    },
-                    {
-                        path: 'settings', // Becomes /admin/settings
-                        element: <AdminSettings />
-                    }
-                    // Add other admin routes here
-                ]
-            }
-        ]
-    },
-]);
-*/

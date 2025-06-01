@@ -1,14 +1,14 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore'; // Import Firestore functions
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null); // Firebase Auth user
-    const [userProfile, setUserProfile] = useState(null); // Firestore user profile (role, status, etc.)
-    const [loadingAuth, setLoadingAuth] = useState(true); // Loading state
+    const [user, setUser] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
+    const [loadingAuth, setLoadingAuth] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -23,29 +23,20 @@ export const UserProvider = ({ children }) => {
                         setUserProfile({ uid: currentUser.uid, ...profileData });
                     } else {
                         setUserProfile({ uid: currentUser.uid, status: profileData.status });
-                        // Optional: Sign out user automatically if not approved
-                        // await signOut(auth);
-                        // setUser(null);
                     }
                 } else {
-                    // User logged in via Auth but no profile found in Firestore (edge case?)
                     console.error("User profile not found in Firestore!");
                     setUserProfile(null);
-                    // Optional: Sign out user
-                    // await signOut(auth);
-                    // setUser(null);
                 }
             } else {
-                // User is logged out
                 setUserProfile(null);
             }
-            setLoadingAuth(false); // Finished loading auth state
+            setLoadingAuth(false);
         });
 
         return () => unsubscribe();
     }, []);
 
-    // Pass down user (Auth), userProfile (Firestore), and loading state
     return (
         <UserContext.Provider value={{ user, userProfile, loadingAuth }}>
             {children}

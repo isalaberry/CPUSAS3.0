@@ -4,8 +4,10 @@ import { UserContext } from './UserContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import '../App.css';
+import { useTranslation } from 'react-i18next';
 
 export function NavBar() {
+    const { t } = useTranslation(); // Add this line
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
     const [visibility, setVisibility] = useState({
@@ -15,11 +17,8 @@ export function NavBar() {
     const location = useLocation();
 
     useEffect(() => {
-        // Extrai o nome do caminho da URL (ex: "/fifo" -> "fifo")
-        // Ou para rotas aninhadas (ex: "/admin/users" -> "admin/users")
         const currentPath = location.pathname.substring(1); 
 
-        // Lógica para definir activeItem com base no currentPath
         if (currentPath === 'fifo' && visibility.fifo) {
             setActiveItem('fifo');
         } else if (currentPath === 'sjf' && visibility.sjf) {
@@ -34,16 +33,11 @@ export function NavBar() {
             setActiveItem('admin-users');
         } else if (currentPath === 'admin/settings' && userProfile?.role === 'admin') {
             setActiveItem('admin-settings');
-        } else if (currentPath === '' || currentPath === 'login') { // Exemplo para página inicial ou login
-            setActiveItem(''); // Nenhum item ativo ou um item padrão se desejar
+        } else if (currentPath === '' || currentPath === 'login') {
+            setActiveItem('');
         }
-        // Adicione mais 'else if' conforme necessário para outras rotas
-        // Se nenhuma rota corresponder, activeItem pode permanecer como está ou ser resetado
-        // else {
-        // setActiveItem(''); // Opcional: resetar se nenhuma rota corresponder
-        // }
 
-    }, [location, visibility, userProfile]); // Dependências do useEffect
+    }, [location, visibility, userProfile]);
 
     useEffect(() => {
         setLoadingVisibility(true);
@@ -71,7 +65,7 @@ export function NavBar() {
     };
 
     if (loadingVisibility) {
-        return <nav className="navbar"><ul className="nav-list"><li>Loading Nav...</li></ul></nav>;
+        return <nav className="navbar"><ul className="nav-list"><li>{t('navLoading', 'Loading Nav...')}</li></ul></nav>;
      }
 
     return (
@@ -84,7 +78,7 @@ export function NavBar() {
                             className={`nav-link ${activeItem === 'fifo' ? 'active' : ''}`}
                             onClick={() => handleSetActive('fifo')}
                         >
-                            First-In-First-Out
+                            {t('navFifo')}
                         </Link>
                     </li>
                 )}
@@ -95,7 +89,7 @@ export function NavBar() {
                             className={`nav-link ${activeItem === 'sjf' ? 'active' : ''}`}
                             onClick={() => handleSetActive('sjf')}
                         >
-                            Shortest Job First
+                            {t('navSjf')}
                         </Link>
                     </li>
                  )}
@@ -106,7 +100,7 @@ export function NavBar() {
                             className={`nav-link ${activeItem === 'pnp' ? 'active' : ''}`}
                             onClick={() => handleSetActive('pnp')}
                         >
-                            Priorities no preemptive
+                            {t('navPnp')}
                         </Link>
                     </li>
                  )}
@@ -117,7 +111,7 @@ export function NavBar() {
                             className={`nav-link ${activeItem === 'pp' ? 'active' : ''}`}
                             onClick={() => handleSetActive('pp')}
                         >
-                            Priorities Preemptive
+                            {t('navPp')}
                         </Link>
                     </li>
                  )}
@@ -128,7 +122,7 @@ export function NavBar() {
                             className={`nav-link ${activeItem === 'rr' ? 'active' : ''}`}
                             onClick={() => handleSetActive('rr')}
                         >
-                            Round Robin
+                            {t('navRr')}
                         </Link>
                     </li>
                  )}
@@ -141,7 +135,7 @@ export function NavBar() {
                                 className={`nav-link ${activeItem === 'admin-users' ? 'active' : ''}`}
                                 onClick={() => handleSetActive('admin-users')}
                             >
-                                Manage Users
+                                {t('navAdminUsers')}
                             </Link>
                         </li>
                         <li className="nav-item">
@@ -150,7 +144,7 @@ export function NavBar() {
                                 className={`nav-link ${activeItem === 'admin-settings' ? 'active' : ''}`}
                                 onClick={() => handleSetActive('admin-settings')}
                             >
-                                Settings
+                                {t('navAdminSettings')}
                             </Link>
                         </li>
                     </>

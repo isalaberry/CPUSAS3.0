@@ -740,3 +740,16 @@
   color: #555;
 }
 
+.language-switcher {
+  position: relative;
+  top:20px;
+  right: 20px;
+  z-index: 1000; /* Ensure it's above other content */
+  padding: 5px;}
+
+.language-switcher button {
+  background-color: transparent;
+  margin-left: 5px;
+  cursor: pointer;
+  border: none;
+}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { UserContext } from './UserContext';
 import html2canvas from 'html2canvas';
+import '../App.css';
+import { useTranslation } from 'react-i18next';
 
 export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: initialInterruptionsData, algorithm, saveDataToFirestore }) => {
     const processGridRef = useRef(null);
@@ -34,6 +36,8 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
     const interruptRowIds = (initialInterruptionsData || []).map(i => maxProcessId + i.id);
     const allRowIds = [...processRowIds, ...interruptRowIds].filter(id => typeof id === 'number');
     const totalRowsForGrid = allRowIds.length > 0 ? Math.max(1, ...allRowIds) : 1;
+
+    const { t } = useTranslation();
 
 
     useEffect(() => {
@@ -267,7 +271,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         const effectiveCurrentTick = currentColumn > 0 ? currentColumn - 1 : 0;
 
         allItemsToDescribe.forEach(item => {
-            let status = "Não iniciado";
+            let status =  t('gridProcess.statusNotStarted');
             let color = "grey";
             
             const segmentsForItem = darkBlueSquares.filter(sq => {
@@ -277,7 +281,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             });
 
             if (effectiveCurrentTick < item.arrivalTime) {
-                status = `${item.displayPrefix}${item.id} aguarda chegada (em ${item.arrivalTime})`;
+                status =  t('gridProcess.statusAwaitingArrival', { prefix: item.displayPrefix, id: item.id, time: item.arrivalTime });
             } else {
                 let isExecutingNow = false;
                 let hasFinished = false;
@@ -296,17 +300,22 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 }
 
                 if (isExecutingNow) {
-                    status = `${item.displayPrefix}${item.id} está a executar`;
+                    status = t('gridProcess.statusExecuting', { prefix: item.displayPrefix, id: item.id });
                     color = item.itemType === 'interrupt' ? 'red' : 'blue';
                 } else if (hasFinished) {
-                    status = `${item.displayPrefix}${item.id} terminou`;
+                    if (item.runningTime === 0 && item.itemType === 'process') {
+                        status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id });
+                    } else if (item.runningTime === 0 && item.itemType === 'interrupt') {
+                        status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id });
+                    }
+                    else {
+                        status = t('gridProcess.statusFinished', { prefix: item.displayPrefix, id: item.id });
+                    }
                     color = "darkgray";
                 } else if (item.itemType === 'process' && effectiveCurrentTick >= item.arrivalTime) {
-                    status = `${item.displayPrefix}${item.id} está em espera`; color = "orange";
+                    status = t('gridProcess.statusWaiting', { prefix: item.displayPrefix, id: item.id }); color = "orange";
                 } else if (item.itemType === 'interrupt' && effectiveCurrentTick >= item.arrivalTime && segmentsForItem.length === 0 && item.runningTime > 0) {
-                    status = `${item.displayPrefix}${item.id} pendente`; color = "purple";
-                } else if (item.itemType === 'interrupt' && item.runningTime === 0 && effectiveCurrentTick >= item.arrivalTime) {
-                    status = `${item.displayPrefix}${item.id} terminou (sem execução)`; color = "darkgray";
+                    status = t('gridProcess.statusPending', { prefix: item.displayPrefix, id: item.id }); color = "purple";
                 }
             }
             newDescriptions[`${item.itemType}-${item.id}`] = <span style={{ color }}>{status}</span>;
@@ -350,7 +359,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
     const handleAutoIncrementOriginal = () => {
         if (recIsRecording) return;
         if (simulationLastEndTime === 0 && ((initialTableInfos && initialTableInfos.length > 0) || (initialInterruptionsData && initialInterruptionsData.length > 0))) {
-            alert("Aguarde o cálculo da simulação."); return;
+            alert(t('gridProcess.alertWaitForCalculation')); return;
         }
         const intervalId = setInterval(() => {
             setCurrentColumn((prevColumn) => {
@@ -365,23 +374,23 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
     const handleSaveTable = () => {
         if (user && userProfile?.status === 'approved' && saveDataToFirestore && typeof saveDataToFirestore === 'function') {
             saveDataToFirestore(initialTableInfos, initialInterruptionsData);
-            alert('Cenário guardado com sucesso!');
+            alert(t('gridProcess.alertScenarioSavedSuccess'));
         } else {
-            alert('Erro: Não foi possível guardar o cenário. Verifique se está logado e aprovado.');
+            alert(t('gridProcess.alertScenarioSaveError'));
         }
     };
     
      const recHandleStart = async () => {
         if (!processGridRef.current || !recOffScreenCanvasRef.current || ((!initialTableInfos || initialTableInfos.length === 0) && (!initialInterruptionsData || initialInterruptionsData.length === 0))) {
-            alert("Dados da simulação não disponíveis ou sem processos/interrupções para gravar.");
+            alert(t('gridProcess.alertNoDataToRecord'));
             return;
         }
         if (simulationLastEndTime <= 0 && ((initialTableInfos && initialTableInfos.length > 0) || (initialInterruptionsData && initialInterruptionsData.length > 0))) {
-            alert("Tempo final da simulação inválido. Verifique os dados ou aguarde o cálculo.");
+            alert(t('gridProcess.alertInvalidSimEndTime'));
             return;
         }
 
-        alert("A gravação vai começar. A simulação será reiniciada e avançará automaticamente.\n\nPor favor, NÃO MUDE DE ABA OU JANELA durante a gravação.");
+        alert(t('gridProcess.alertRecordingStartWarning'));
         
         setRecIsRecording(true);
         recChunksRef.current = [];
@@ -393,7 +402,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         const targetCanvas = recOffScreenCanvasRef.current;
         
         if (!gridElement || !targetCanvas) {
-            alert("Erro interno: Elemento do grid ou canvas de gravação não encontrado.");
+            alert(t('gridProcess.alertGridCanvasNotFound'));
             setRecIsRecording(false);
             return;
         }
@@ -402,19 +411,19 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             targetCanvas.width = gridElement.scrollWidth;
             targetCanvas.height = gridElement.scrollHeight;
             if (targetCanvas.width === 0 || targetCanvas.height === 0) {
-                alert("Erro: Dimensões do conteúdo a ser gravado são zero.");
+                alert(t('gridProcess.alertZeroRecordDimensions'));
                 setRecIsRecording(false);
                 return;
             }
         } catch (error) {
-            alert("Erro ao configurar as dimensões do canvas de gravação.");
+            alert(t('gridProcess.alertCanvasSetupError'));
             setRecIsRecording(false);
             return;
         }
         
         const offCtx = targetCanvas.getContext('2d', { willReadFrequently: true }); 
         if (!offCtx) {
-            alert("Erro interno: Não foi possível preparar o canvas para gravação.");
+            alert(t('gridProcess.alertCanvasContextError'));
             setRecIsRecording(false);
             return;
         }
@@ -422,7 +431,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         const recStream = targetCanvas.captureStream(25);
         
         if (!recStream || recStream.getVideoTracks().length === 0) {
-            alert("Erro interno: Não foi possível iniciar a captura de vídeo do canvas.");
+            alert(t('gridProcess.alertVideoCaptureError'));
             setRecIsRecording(false);
             return;
         }
@@ -443,7 +452,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         try {
             recMediaRecorderRef.current = new MediaRecorder(recStream, { mimeType: chosenMimeType });
         } catch (e) {
-            alert(`Erro ao iniciar o gravador de vídeo: ${e.message}.`);
+            alert(t('gridProcess.alertMediaRecorderStartError', { message: e.message }));
             setRecIsRecording(false);
             return;
         }
@@ -455,7 +464,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         };
         recMediaRecorderRef.current.onstop = () => {
             if (recChunksRef.current.length === 0) {
-                alert("Nenhum dado de vídeo foi gravado.");
+                alert(t('gridProcess.alertNoVideoDataRecorded'));
                 setRecIsRecording(false); 
                 return;
             }
@@ -470,10 +479,10 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             URL.revokeObjectURL(recVideoUrl);
             setRecIsRecording(false);
             setCurrentColumn(1);
-            alert("Gravação concluída e download iniciado!");
+            alert(t('gridProcess.alertRecordingComplete'));
         };
         recMediaRecorderRef.current.onerror = (event) => {
-            alert(`Erro durante a gravação: ${event.error.name} - ${event.error.message}`);
+            alert(t('gridProcess.alertRecordingError', { errorName: event.error.name, errorMessage: event.error.message }));
             recHandleStop();
         };
         
@@ -621,12 +630,12 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     <tbody>
                         {(initialTableInfos || []).map((process) => (
                             <tr key={`desc-process-${process.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`process-${process.id}`] || `P${process.id} aguarda`}</td>
+                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`process-${process.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'P', id: process.id })}</td>
                             </tr>
                         ))}
                         {(initialInterruptionsData || []).map((interrupt) => (
                             <tr key={`desc-interrupt-${interrupt.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`interrupt-${interrupt.id}`] || `I${interrupt.id} aguarda`}</td>
+                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`interrupt-${interrupt.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'I', id: interrupt.id })}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -641,18 +650,18 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             
                 {user && userProfile?.status === 'approved' && saveDataToFirestore && (
                     <button onClick={handleSaveTable} className="button" style={{ minWidth: '30%' }} disabled={recIsRecording}>
-                        Guardar Cenário
+                        {t('gridProcess.buttonSaveScenario')}
                     </button>
                 )}
                 {recIsRecording ? (
-                    <button onClick={recHandleStop} className="button" >Parar Gravação</button>
+                    <button onClick={recHandleStop} className="button" >{t('gridProcess.buttonStopRecording')}</button>
                 ) : (
-                    <button onClick={recHandleStart} className="button" >Gravar Simulação</button>
+                    <button onClick={recHandleStart} className="button" >{t('gridProcess.buttonStartRecording')}</button>
                 )}
             </div>
             <div className="ttwt-container">
-                <div>Average Waiting Time: {averageWaitingTime.toFixed(2)}</div>
-                <div>Turnaround Time: {averageTurnaroundTime.toFixed(2)}</div>
+                <div>{t('gridProcess.avgWaitingTimeLabel')}{averageWaitingTime.toFixed(2)}</div>
+                <div>{t('gridProcess.avgTurnaroundTimeLabel')} {averageTurnaroundTime.toFixed(2)}</div>
             </div>
         </div>
     );

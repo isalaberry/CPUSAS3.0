@@ -6,9 +6,11 @@ import { auth, db } from '../config/firebase';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next'; // Add this line
 import '../App.css';
 
 const RegisterPage = () => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,11 +18,11 @@ const RegisterPage = () => {
 
     const register = async () => {
         if (!email || !password || !confirmPassword) {
-            alert('Please enter your email address and password.');
+            alert(t('registerPage.alertAllFieldsRequired'));
             return;
         }
         if (password !== confirmPassword) {
-            alert('Passwords don\'t match.');
+            alert(t('registerPage.alertPasswordsNoMatch'));
             return;
         }
 
@@ -40,13 +42,13 @@ const RegisterPage = () => {
         } catch (error) {
             console.error('Error signing up:', error);
             if (error.code === 'auth/email-already-in-use') {
-                alert('This e-mail address is already registered.');
+                alert(t('registerPage.alertEmailInUse'));
             } else if (error.code === 'auth/weak-password') {
-                alert('The password must be at least 6 characters long.');
+                alert(t('registerPage.alertWeakPassword'));
             } else if (error.code === 'auth/invalid-email') {
-                alert('Invalid email format.');
+                alert(t('registerPage.alertInvalidEmail'));
             } else {
-                alert('Registration error: ' + error.message);
+                alert(t('registerPage.alertRegistrationError', { message: error.message }));
             }
         }
     };
@@ -60,28 +62,28 @@ const RegisterPage = () => {
         <div>
             <ArrowToUserDataPage />
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <h1 className='lprp-title'>Insira os seus dados</h1>
+                <h1 className='lprp-title'>{t('registerPage.title')}</h1>
 
                 <form onSubmit={handleSubmit}>
                     <InputTypeOne
                         type="text"
-                        placeholder="E-mail"
+                        placeholder={t('registerPage.placeholderEmail')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <InputTypeOne
                         type="password"
-                        placeholder="Password"
+                        placeholder={t('registerPage.placeholderPassword')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <InputTypeOne
                         type="password"
-                        placeholder="Confirmar Password"
+                        placeholder={t('registerPage.placeholderConfirmPassword')}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
-                    <ButtonTypeTwo type="submit">Registar</ButtonTypeTwo>
+                    <ButtonTypeTwo type="submit">{t('registerPage.buttonRegister')}</ButtonTypeTwo>
                 </form>
             </div>
         </div>
