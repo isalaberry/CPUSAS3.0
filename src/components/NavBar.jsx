@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; 
 import { UserContext } from './UserContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -12,6 +12,38 @@ export function NavBar() {
         fifo: true, sjf: true, pnp: true, pp: true, rr: true,
     });
     const [loadingVisibility, setLoadingVisibility] = useState(true);
+    const location = useLocation();
+
+    useEffect(() => {
+        // Extrai o nome do caminho da URL (ex: "/fifo" -> "fifo")
+        // Ou para rotas aninhadas (ex: "/admin/users" -> "admin/users")
+        const currentPath = location.pathname.substring(1); 
+
+        // Lógica para definir activeItem com base no currentPath
+        if (currentPath === 'fifo' && visibility.fifo) {
+            setActiveItem('fifo');
+        } else if (currentPath === 'sjf' && visibility.sjf) {
+            setActiveItem('sjf');
+        } else if (currentPath === 'pnp' && visibility.pnp) {
+            setActiveItem('pnp');
+        } else if (currentPath === 'pp' && visibility.pp) {
+            setActiveItem('pp');
+        } else if (currentPath === 'rr' && visibility.rr) {
+            setActiveItem('rr');
+        } else if (currentPath === 'admin/users' && userProfile?.role === 'admin') {
+            setActiveItem('admin-users');
+        } else if (currentPath === 'admin/settings' && userProfile?.role === 'admin') {
+            setActiveItem('admin-settings');
+        } else if (currentPath === '' || currentPath === 'login') { // Exemplo para página inicial ou login
+            setActiveItem(''); // Nenhum item ativo ou um item padrão se desejar
+        }
+        // Adicione mais 'else if' conforme necessário para outras rotas
+        // Se nenhuma rota corresponder, activeItem pode permanecer como está ou ser resetado
+        // else {
+        // setActiveItem(''); // Opcional: resetar se nenhuma rota corresponder
+        // }
+
+    }, [location, visibility, userProfile]); // Dependências do useEffect
 
     useEffect(() => {
         setLoadingVisibility(true);
