@@ -493,7 +493,6 @@ class InputTable extends Component {
                     showPriority={false}
                     showQuantum={false}
                     idPrefix="I"
-                    nameColumnHeader="ID"
                 />
             )}
             <div className="button-container my-4 flex justify-start gap-4">

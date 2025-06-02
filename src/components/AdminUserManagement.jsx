@@ -25,7 +25,7 @@ const AdminUserManagement = () => {
             }));
             setUsers(usersList);
         } catch (err) {
-            setError(t('adminUserManagementError'));
+            setError(t('adminUserManagement.error'));
         } finally {
             setLoading(false);
         }
@@ -39,7 +39,7 @@ const AdminUserManagement = () => {
         setError('');
         if (userProfile && userId === userProfile.uid) {
              if ((field === 'status' && value !== 'approved') || (field === 'role' && value !== 'admin')) {
-                 setError(t('adminUserManagementCannotChangeOwnStatusOrRole'));
+                 setError(t('adminUserManagement.cannotChangeOwnStatusOrRole'));
                  return;
              }
         }
@@ -51,20 +51,20 @@ const AdminUserManagement = () => {
             });
             fetchUsers();
         } catch (err) {
-            setError(t('adminUserManagementUpdateUserFieldError', { field: t(`adminUserManagement${field.charAt(0).toUpperCase() + field.slice(1)}Header`) || field }));
+            setError(t('adminUserManagement.updateUserFieldError', { field: t(`adminUserManagement.${field.charAt(0) + field.slice(1)}Header`) || field }));
         }
     };
 
         // Helper function to get translated status
     const getTranslatedStatus = (statusKey) => {
-        const key = `adminUserManagementStatus${statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}`;
+        const key = `adminUserManagement.status${statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}`;
         // Fallback to statusKey if translation not found, though ideally all statuses should be translated
         return t(key, { defaultValue: statusKey });
     };
 
     // Helper function to get translated role
     const getTranslatedRole = (roleKey) => {
-        const key = `adminUserManagementRole${roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}`;
+        const key = `adminUserManagement.role${roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}`;
         // Fallback to roleKey if translation not found
         return t(key, { defaultValue: roleKey });
     };
@@ -74,23 +74,23 @@ const AdminUserManagement = () => {
 
     return (
         <div className="AdminUserManagement-page">
-            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>{t('adminUserManagementTitle')}</h2>
+            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>{t('adminUserManagement.title')}</h2>
 
             <button
                 onClick={fetchUsers}
                 disabled={loading}
                 className="AdminUserManagement-refresh-button"
             >
-                {t('adminUserManagementRefreshButton')}
+                {t('adminUserManagement.refreshButton')}
             </button>
 
             <table className="AdminUserManagement-table">
                 <thead>
                     <tr>
-                        <th>{t('adminUserManagementEmailHeader')}</th>
-                        <th>{t('adminUserManagementRoleHeader')}</th>
-                        <th>{t('adminUserManagementStatusHeader')}</th>
-                        <th>{t('adminUserManagementActionsHeader')}</th>
+                        <th>{t('adminUserManagement.emailHeader')}</th>
+                        <th>{t('adminUserManagement.roleHeader')}</th>
+                        <th>{t('adminUserManagement.statusHeader')}</th>
+                        <th>{t('adminUserManagement.actionsHeader')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,13 +106,13 @@ const AdminUserManagement = () => {
                                             onClick={() => updateUserField(user.id, 'status', 'approved')}
                                             className="AdminUserManagement-action-button approve"
                                         >
-                                            {t('adminUserManagementApproveButton')}
+                                            {t('adminUserManagement.approveButton')}
                                         </button>
                                         <button
                                             onClick={() => updateUserField(user.id, 'status', 'rejected')}
                                             className="AdminUserManagement-action-button reject"
                                         >
-                                            {t('adminUserManagementRejectButton')}
+                                            {t('adminUserManagement.rejectButton')}
                                         </button>
                                     </>
                                 )}
@@ -123,7 +123,7 @@ const AdminUserManagement = () => {
                                                 onClick={() => updateUserField(user.id, 'role', 'admin')}
                                                 className="AdminUserManagement-action-button promote"
                                             >
-                                                {t('adminUserManagementMakeAdminButton')}
+                                                {t('adminUserManagement.makeAdminButton')}
                                             </button>
                                         )}
                                         {user.role === 'admin' && user.id !== userProfile.uid && (
@@ -131,19 +131,19 @@ const AdminUserManagement = () => {
                                                 onClick={() => updateUserField(user.id, 'role', 'user')}
                                                 className="AdminUserManagement-action-button demote"
                                             >
-                                                {t('adminUserManagementMakeUserButton')}
+                                                {t('adminUserManagement.makeUserButton')}
                                             </button>
                                         )}
                                         {user.role === 'admin' && user.id === userProfile.uid && (
-                                            <span className="AdminUserManagement-current-admin-indicator">{t('adminUserManagementYouIndicator')}</span>
+                                            <span className="AdminUserManagement-current-admin-indicator">{t('adminUserManagement.youIndicator')}</span>
                                         )}
                                         {user.id !== userProfile.uid && (
                                             <button
                                                 onClick={() => updateUserField(user.id, 'status', 'rejected')}
                                                 className="AdminUserManagement-action-button reject"
-                                                title={t('adminUserManagementDeactivateTitle')}
+                                                title={t('adminUserManagement.deactivateTitle')}
                                             >
-                                                 {t('adminUserManagementDeactivateButton')}
+                                                 {t('adminUserManagement.deactivateButton')}
                                             </button>
                                         )}
                                     </>
@@ -154,7 +154,7 @@ const AdminUserManagement = () => {
                                         className="AdminUserManagement-action-button reconsider"
                                         title={t('adminUserManagementReconsiderTitle')}
                                     >
-                                        {t('adminUserManagementReconsiderButton')}
+                                        {t('adminUserManagement.reconsiderButton')}
                                     </button>
                                 )}
                             </td>

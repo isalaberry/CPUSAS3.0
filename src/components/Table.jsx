@@ -12,7 +12,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
     <table className="table">
       <thead>
         <tr>
-          <th>{nameColumnHeader}</th>
+          <th>ID</th>
           <th>{t('table.headerArrivalTime')}</th>
           <th>{t('table.headerRunningTime')}</th>
           {showPriority && <th>{t('table.headerPriority')}</th>}
@@ -36,7 +36,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
             <td>
               <input
                 type="number"
-                min={nameColumnHeader === "ID" ? "1" : "1"}
+          //      min={nameColumnHeader === "ID" ? "1" : "1"}
                 value={process.runningTime}
                 onChange={(e) => handleInputChange && handleInputChange(index, "runningTime", Number(e.target.value))}
                 className="input-table"

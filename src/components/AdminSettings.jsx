@@ -46,7 +46,7 @@ const AdminSettings = () => {
                 setSettings(initialSettings);
             }
         } catch (err) {
-            setError(t('adminSettingsErrorLoad'));
+            setError(t('adminSettings.errorLoad'));
             setSettings(initialSettings);
         } finally {
             setLoading(false);
@@ -71,9 +71,9 @@ const AdminSettings = () => {
         setMessage('');
         try {
             await setDoc(settingsDocRef, settings);
-            setMessage(t('adminSettingsSuccessSave'));
+            setMessage(t('adminSettings.successSave'));
         } catch (err) {
-            setError(t('adminSettingsErrorSave'));
+            setError(t('adminSettings.errorSave'));
         } finally {
             setSaving(false);
         }
@@ -85,8 +85,8 @@ const AdminSettings = () => {
 
     return (
         <div className="AdminSettings-page">
-            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>{t('adminSettingsTitle')}</h2>
-            <h3 style={{ marginTop: '70px'}}>{t('adminSettingsVisibilityTitle')}</h3>
+            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 300, margin: 30 }}>{t('adminSettings.title')}</h2>
+            <h3 style={{ marginTop: '70px'}}>{t('adminSettings.visibilityTitle')}</h3>
 
             {error && <div className="AdminSettings-error-message">{error}</div>}
             {message && <div className="AdminSettings-success-message">{message}</div>}
@@ -102,7 +102,7 @@ const AdminSettings = () => {
                                 onChange={handleCheckboxChange}
                                 disabled={saving}
                             />
-                            {t('adminSettingsShowLabel', { algorithm: key.toUpperCase() })}
+                            {t('adminSettings.showLabel', { algorithm: key.toUpperCase() })}
                         </label>
                     </div>
                 ))}

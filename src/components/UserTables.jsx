@@ -123,7 +123,6 @@ const UserTables = ({ user }) => {
                                 showPriority={false} // Interrupções não têm prioridade
                                 showQuantum={false}  // Interrupções não têm quantum
                                 idPrefix="I"
-                                nameColumnHeader="Interrupt ID"
                                // readOnly={true}
                             />
                         </>
