@@ -69,83 +69,70 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             ...JSON.parse(JSON.stringify(p)),
             remainingTime: p.runningTime,
             finishedAt: -1,
-            startedAt: -1,
             timeInReadyQueueSince: p.arrivalTime,
             type: 'process',
             displayId: `P${p.id}`
         }));
-        let completedProcessesCount = 0;
-
         let interruptionsForSim = interruptions.map(i => ({
             ...JSON.parse(JSON.stringify(i)),
             processed: false,
             type: 'interrupt',
             displayId: `I${i.id}`
         }));
-
+        
         let readyQueue = [];
-        const maxProcessIdInSim = tableInfos.length > 0 ? Math.max(0, ...tableInfos.map(p => p.id)) : 0;
+        let completedProcessesCount = 0;
 
         while (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed)) {
-            let eventOccurred = false;
 
-            interruptionsForSim.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
+            interruptionsForSim.sort((a, b) => a.arrivalTime - b.arrivalTime);
+            let interruptHandledInThisPass = false;
             for (let interrupt of interruptionsForSim) {
                 if (!interrupt.processed && interrupt.arrivalTime <= currentSimTime) {
                     const execStartTimeInterrupt = Math.max(currentSimTime, interrupt.arrivalTime);
                     currentSimTime = execStartTimeInterrupt;
-
                     const interruptSpan = interrupt.runningTime;
                     calculatedBlocks.push({
                         id: `interrupt-block-${interrupt.id}-${currentSimTime}`,
                         colStart: currentSimTime + 1,
                         colSpan: interruptSpan,
-                        rowStart: maxProcessIdInSim + interrupt.id,
+                        rowStart: maxProcessId + interrupt.id,
                         type: 'interrupt',
                         displayId: interrupt.displayId,
                         color: 'rgba(146, 107, 252, 0.7)'
                     });
                     currentSimTime += interruptSpan;
                     interrupt.processed = true;
-                    eventOccurred = true;
+                    interruptHandledInThisPass = true;
                 }
             }
-            if (eventOccurred) continue;
+            if (interruptHandledInThisPass) continue;
 
             processesForSim.forEach(p => {
                 if (p.arrivalTime <= currentSimTime && p.remainingTime > 0 && p.finishedAt === -1 && !readyQueue.find(rq => rq.id === p.id)) {
-                    p.enteredReadyQueueAtTick = currentSimTime;
                     p.timeInReadyQueueSince = currentSimTime;
                     readyQueue.push(p);
                 }
             });
 
             if (readyQueue.length === 0) {
-                let nextProcessArrivalTimes = processesForSim
-                    .filter(p => p.remainingTime > 0 && p.finishedAt === -1 && p.arrivalTime > currentSimTime)
-                    .map(p => p.arrivalTime);
-                let nextInterruptArrivalTimes = interruptionsForSim
-                    .filter(i => !i.processed && i.arrivalTime > currentSimTime)
-                    .map(i => i.arrivalTime);
-                
-                const allNextEventTimes = [...nextProcessArrivalTimes, ...nextInterruptArrivalTimes].filter(t => t !== undefined && t !== null);
-
-                if (allNextEventTimes.length === 0) {
-                     if (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed)) {
-                        // Potential issue if stuck
-                     }
+                let nextEventTimes = [
+                    ...processesForSim.filter(p => p.finishedAt === -1 && p.arrivalTime > currentSimTime).map(p => p.arrivalTime),
+                    ...interruptionsForSim.filter(i => !i.processed && i.arrivalTime > currentSimTime).map(i => i.arrivalTime)
+                ];
+                if (nextEventTimes.length === 0 && (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed))) {
+                     break;
+                } else if (nextEventTimes.length === 0) {
                     break;
                 }
-                currentSimTime = Math.min(...allNextEventTimes);
-                eventOccurred = true;
-                if (eventOccurred) continue;
+                currentSimTime = Math.min(...nextEventTimes);
+                continue;
             }
-            
-            if (eventOccurred) continue;
+
 
             let nextProcessToRun;
             if (algorithm === 'FIFO') {
-                readyQueue.sort((a, b) => a.timeInReadyQueueSince - b.timeInReadyQueueSince || a.id - b.id);
+                readyQueue.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
             } else if (algorithm === 'SJF') {
                 readyQueue.sort((a, b) => a.runningTime - b.runningTime || a.arrivalTime - b.arrivalTime || a.id - b.id);
@@ -155,62 +142,55 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 nextProcessToRun = readyQueue.shift();
             } else if (algorithm === 'PP') {
                 readyQueue.sort((a, b) => a.priority - b.priority || a.arrivalTime - b.arrivalTime || a.id - b.id);
-                nextProcessToRun = readyQueue[0];
+                nextProcessToRun = readyQueue.length > 0 ? readyQueue[0] : null;
             } else if (algorithm === 'RR') {
-                readyQueue.sort((a,b) => a.timeInReadyQueueSince - b.timeInReadyQueueSince || a.id - b.id);
                 nextProcessToRun = readyQueue.shift();
-            } else {
-                break; 
-            }
+            } else { break; }
 
-            if (!nextProcessToRun) {
-                 if (interruptionsForSim.some(i => !i.processed && i.arrivalTime <= currentSimTime)) {
-                    continue;
-                }
-                currentSimTime++;
-                continue;
-            }
+            if (!nextProcessToRun) {continue;}
 
             const execStartTimeForProcess = Math.max(currentSimTime, nextProcessToRun.arrivalTime);
             if (currentSimTime < execStartTimeForProcess) {
+                if (algorithm !== 'PP') {
+                    readyQueue.unshift(nextProcessToRun);
+                }
                 currentSimTime = execStartTimeForProcess;
                 continue;
             }
-            
-            if (nextProcessToRun.startedAt === -1) {
-                nextProcessToRun.startedAt = currentSimTime;
-            }
-            
+
             let baseExecSpan;
             if (algorithm === 'PP') {
-                baseExecSpan = 1;
+                baseExecSpan = 1; 
             } else if (algorithm === 'RR') {
                 baseExecSpan = Math.min(nextProcessToRun.remainingTime, nextProcessToRun.quantum);
             } else {
                 baseExecSpan = nextProcessToRun.remainingTime;
             }
-            if (baseExecSpan <= 0 && nextProcessToRun.runningTime > 0) baseExecSpan = 1;
-            if (nextProcessToRun.runningTime === 0) baseExecSpan = 0;
 
-            let timeOfNextPendingInterrupt = Infinity;
+            let timeOfNextEvent = Infinity;
             interruptionsForSim.forEach(i => {
                 if (!i.processed && i.arrivalTime > currentSimTime) {
-                    timeOfNextPendingInterrupt = Math.min(timeOfNextPendingInterrupt, i.arrivalTime);
+                    timeOfNextEvent = Math.min(timeOfNextEvent, i.arrivalTime);
                 }
             });
-
-            let actualExecSpan = baseExecSpan;
-            if (timeOfNextPendingInterrupt !== Infinity) {
-                const maxSpanBeforeInterrupt = timeOfNextPendingInterrupt - currentSimTime;
-                if (maxSpanBeforeInterrupt < actualExecSpan) {
-                    actualExecSpan = maxSpanBeforeInterrupt;
-                }
+            if (algorithm === 'PP') {
+                 processesForSim.forEach(p => {
+                    if (p.id !== nextProcessToRun.id && p.finishedAt === -1 && p.arrivalTime > currentSimTime && p.priority < nextProcessToRun.priority) {
+                        timeOfNextEvent = Math.min(timeOfNextEvent, p.arrivalTime);
+                    }
+                });
             }
+
+            const maxSpanBeforeEvent = timeOfNextEvent - currentSimTime;
+            const effectiveMaxSpan = maxSpanBeforeEvent > 0 ? maxSpanBeforeEvent : Infinity; 
+            const actualExecSpan = Math.min(baseExecSpan, effectiveMaxSpan);
+
+            if (algorithm === 'RR') console.log(`RR_DEBUG @ t=${currentSimTime}: P${nextProcessToRun.id} selecionado. Executará por ${actualExecSpan} ticks. (Quantum: ${nextProcessToRun.quantum}, Restante: ${nextProcessToRun.remainingTime})`);
             
             if (actualExecSpan <= 0 && nextProcessToRun.remainingTime > 0) {
-                actualExecSpan = 0;
+                continue;
             }
-
+            
             if (actualExecSpan > 0) {
                 calculatedBlocks.push({
                     id: `block-${nextProcessToRun.id}-${currentSimTime}`,
@@ -219,42 +199,52 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     rowStart: nextProcessToRun.id,
                     type: 'process',
                     displayId: nextProcessToRun.displayId,
-                    color: 'rgba(0, 0, 255, 0.7)'
+                    color: 'rgba(68, 92, 243, 0.9)'
                 });
-                nextProcessToRun.remainingTime -= actualExecSpan;
-                eventOccurred = true;
             }
-            
-            const prevSimTime = currentSimTime;
-            currentSimTime += actualExecSpan;
 
-            if (nextProcessToRun.remainingTime <= 0) {
-                nextProcessToRun.finishedAt = currentSimTime;
+            const processJustRan = nextProcessToRun;
+            processJustRan.remainingTime -= actualExecSpan;
+            const timeSliceEnded = currentSimTime + actualExecSpan;
+            currentSimTime = timeSliceEnded;
+
+            let newArrivalsProcessedThisCycle = false;
+            processesForSim.forEach(p => {
+                if (p.id !== processJustRan.id &&
+                    p.arrivalTime <= currentSimTime &&
+                    p.remainingTime > 0 && p.finishedAt === -1 &&
+                    !readyQueue.find(rq => rq.id === p.id) &&
+                    (algorithm === 'PP' ? p.id !== processJustRan.id : true)
+                    ) {
+                    p.timeInReadyQueueSince = currentSimTime;
+                    readyQueue.push(p);
+                    newArrivalsProcessedThisCycle = true;
+                }
+            });
+
+            if (processJustRan.remainingTime <= 0) {
+                processJustRan.finishedAt = currentSimTime;
                 completedProcessesCount++;
-                if (algorithm === 'PP' && readyQueue.includes(nextProcessToRun)) {
-                     readyQueue = readyQueue.filter(p => p.id !== nextProcessToRun.id);
+                if (algorithm === 'PP' && readyQueue.length > 0 && readyQueue[0].id === processJustRan.id) {
+                    readyQueue.shift();
                 }
             } else {
                 if (algorithm === 'RR') {
-                    nextProcessToRun.timeInReadyQueueSince = currentSimTime;
-                    readyQueue.push(nextProcessToRun);
+                    processJustRan.timeInReadyQueueSince = currentSimTime;
+                    readyQueue.push(processJustRan);
+                    if (algorithm === 'RR') console.log(`RR_DEBUG @ t=${currentSimTime}: P${processJustRan.id} voltou para a readyQueue.`);
+                } else if (algorithm === 'PP') {
+                    processJustRan.timeInReadyQueueSince = currentSimTime;
                 }
             }
 
-            if (!eventOccurred && prevSimTime === currentSimTime) {
-                if (completedProcessesCount === processesForSim.length && interruptionsForSim.every(i => i.processed)) {
-                    break;
-                }
-                if (readyQueue.length === 0 && interruptionsForSim.every(i => i.processed || i.arrivalTime > currentSimTime)) {
-                    break;
-                }
-            }
+
         }
 
         setDarkBlueSquares(calculatedBlocks);
         setSimulationLastEndTime(currentSimTime);
 
-    }, [tableInfos, interruptions, algorithm]);
+    }, [tableInfos, interruptions, algorithm, maxProcessId]);
 
 
     useEffect(() => {

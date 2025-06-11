@@ -17,8 +17,8 @@ const ButtonEndSession = ({ onClick }) => {
             onClick={handleClick}
             style={{
                 position: 'fixed',
-                top: '10px',
-                right: '10px',
+                top: '60px',
+                right: '50px',
                 backgroundColor: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
