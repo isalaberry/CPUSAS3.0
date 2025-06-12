@@ -19,7 +19,7 @@ return (
         >
             <img 
                 src="public\assets\flags\flag-for-flag-portugal-svgrepo-com.svg" 
-                alt="PT Flag" 
+                alt="PT Flag"
                 style={{ maxWidth: '40px', maxHeight: '20px' }}
             />    
         </button>

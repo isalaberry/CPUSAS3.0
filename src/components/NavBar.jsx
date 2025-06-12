@@ -7,7 +7,7 @@ import '../App.css';
 import { useTranslation } from 'react-i18next';
 
 export function NavBar() {
-    const { t } = useTranslation(); // Add this line
+    const { t } = useTranslation();
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
     const [visibility, setVisibility] = useState({

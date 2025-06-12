@@ -6,7 +6,7 @@ import { auth, db } from '../config/firebase';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next'; // Add this line
+import { useTranslation } from 'react-i18next';
 import '../App.css';
 
 const RegisterPage = () => {
@@ -54,8 +54,8 @@ const RegisterPage = () => {
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault(); // Evita o comportamento padrão de recarregar a página
-        register(); // Chama a função de registro
+        e.preventDefault();
+        register();
     };
 
     return (

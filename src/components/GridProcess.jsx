@@ -44,6 +44,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         recIsRecordingStateRef.current = recIsRecording;
     }, [recIsRecording]);
 
+    //cria copias profundas dos dados inciais p/ evitar corrupção; inicializa estados => basicamente, reseta o grid
     useEffect(() => {
         setTableInfos(initialTableInfos ? JSON.parse(JSON.stringify(initialTableInfos)) : []);
         setInterruptions(initialInterruptionsData ? JSON.parse(JSON.stringify(initialInterruptionsData)) : []);
@@ -55,7 +56,9 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         setAverageTurnaroundTime(0);
     }, [initialTableInfos, initialInterruptionsData, algorithm]);
 
+    //logica da simulação
     useEffect(() => {
+        //clona os dados adicionando propriedades auxiliares para a simulação
         if ((!tableInfos || tableInfos.length === 0) && (!interruptions || interruptions.length === 0)) {
             setDarkBlueSquares([]);
             setSimulationLastEndTime(0);
@@ -83,8 +86,8 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         let readyQueue = [];
         let completedProcessesCount = 0;
 
+        //interrupções sao executadas antes dos processos
         while (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed)) {
-
             interruptionsForSim.sort((a, b) => a.arrivalTime - b.arrivalTime);
             let interruptHandledInThisPass = false;
             for (let interrupt of interruptionsForSim) {
@@ -108,6 +111,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             }
             if (interruptHandledInThisPass) continue;
 
+            //adiciona os processos que chegaram na fila de prontos - (se já chegou, ainda não terminou, não tá em duplicata)
             processesForSim.forEach(p => {
                 if (p.arrivalTime <= currentSimTime && p.remainingTime > 0 && p.finishedAt === -1 && !readyQueue.find(rq => rq.id === p.id)) {
                     p.timeInReadyQueueSince = currentSimTime;
@@ -120,16 +124,18 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     ...processesForSim.filter(p => p.finishedAt === -1 && p.arrivalTime > currentSimTime).map(p => p.arrivalTime),
                     ...interruptionsForSim.filter(i => !i.processed && i.arrivalTime > currentSimTime).map(i => i.arrivalTime)
                 ];
+                //se a ready queue estiver vazia, verifica se tem algum processo ou interrupção que vai chegar no futuro
                 if (nextEventTimes.length === 0 && (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed))) {
                      break;
                 } else if (nextEventTimes.length === 0) {
                     break;
                 }
+                //se tiver, pula o tempo até o próximo evento
                 currentSimTime = Math.min(...nextEventTimes);
                 continue;
             }
 
-
+            //seleciona o proximo processo a executar dependendo do algoritmo selecionado.
             let nextProcessToRun;
             if (algorithm === 'FIFO') {
                 readyQueue.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
@@ -149,15 +155,17 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
 
             if (!nextProcessToRun) {continue;}
 
-            const execStartTimeForProcess = Math.max(currentSimTime, nextProcessToRun.arrivalTime);
-            if (currentSimTime < execStartTimeForProcess) {
-                if (algorithm !== 'PP') {
+            //verifica quando o proximo processo pode começar a executar
+            const execStartTimeForProcess = Math.max(currentSimTime, nextProcessToRun.arrivalTime); 
+            if (currentSimTime < execStartTimeForProcess) {//se o proximo processo nao chegou ainda, coloca o atual na fila novamente se nao for pp
+                if (algorithm !== 'PP') {//a lógica de pp é diferente
                     readyQueue.unshift(nextProcessToRun);
                 }
                 currentSimTime = execStartTimeForProcess;
                 continue;
             }
 
+            //calcula o tempo que o proximo processo vai executar
             let baseExecSpan;
             if (algorithm === 'PP') {
                 baseExecSpan = 1; 
@@ -167,6 +175,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 baseExecSpan = nextProcessToRun.remainingTime;
             }
 
+            //verifica se tem algum evento futuro que pode interromper o processo
             let timeOfNextEvent = Infinity;
             interruptionsForSim.forEach(i => {
                 if (!i.processed && i.arrivalTime > currentSimTime) {
@@ -181,12 +190,11 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 });
             }
 
-            const maxSpanBeforeEvent = timeOfNextEvent - currentSimTime;
+            //calcula o tempo até o próximo evento
+            const maxSpanBeforeEvent = timeOfNextEvent - currentSimTime; 
             const effectiveMaxSpan = maxSpanBeforeEvent > 0 ? maxSpanBeforeEvent : Infinity; 
             const actualExecSpan = Math.min(baseExecSpan, effectiveMaxSpan);
 
-            if (algorithm === 'RR') console.log(`RR_DEBUG @ t=${currentSimTime}: P${nextProcessToRun.id} selecionado. Executará por ${actualExecSpan} ticks. (Quantum: ${nextProcessToRun.quantum}, Restante: ${nextProcessToRun.remainingTime})`);
-            
             if (actualExecSpan <= 0 && nextProcessToRun.remainingTime > 0) {
                 continue;
             }
@@ -208,6 +216,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             const timeSliceEnded = currentSimTime + actualExecSpan;
             currentSimTime = timeSliceEnded;
 
+            //gerencia a ready queue
             let newArrivalsProcessedThisCycle = false;
             processesForSim.forEach(p => {
                 if (p.id !== processJustRan.id &&
@@ -247,16 +256,14 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
     }, [tableInfos, interruptions, algorithm, maxProcessId]);
 
 
+    // atualiza as descrições
     useEffect(() => {
         const newDescriptions = {};
         const allItemsToDescribe = [
             ...(initialTableInfos || []).map(p => ({ ...p, itemType: 'process', displayPrefix: 'P' })),
             ...(initialInterruptionsData || []).map(i => ({ ...i, itemType: 'interrupt', displayPrefix: 'I' }))
         ];
-
-        if (allItemsToDescribe.length === 0) {
-            setDescriptions({}); return;
-        }
+         if (allItemsToDescribe.length === 0) {setDescriptions({}); return;}
 
         const effectiveCurrentTick = currentColumn > 0 ? currentColumn - 1 : 0;
 
@@ -313,6 +320,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         setDescriptions(newDescriptions);
     }, [currentColumn, darkBlueSquares, initialTableInfos, initialInterruptionsData, simulationLastEndTime, maxProcessId, algorithm]);
 
+    // calcula os tempos médios de espera e turnaround
     useEffect(() => {
         if (!initialTableInfos || initialTableInfos.length === 0 ) {
             setAverageWaitingTime(0); setAverageTurnaroundTime(0); return;
@@ -370,7 +378,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         }
     };
     
-     const recHandleStart = async () => {
+    const recHandleStart = async () => {
         if (!processGridRef.current || !recOffScreenCanvasRef.current || ((!initialTableInfos || initialTableInfos.length === 0) && (!initialInterruptionsData || initialInterruptionsData.length === 0))) {
             alert(t('gridProcess.alertNoDataToRecord'));
             return;

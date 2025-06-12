@@ -8,12 +8,6 @@ import { auth } from '../config/firebase';
 import './../App.css';
 import { withTranslation } from 'react-i18next';
 
-  /* TO DO
-  quero que o programa inicialmente ja tenha duas linhas de processos zeradas
-  intenacionalizacao
-  */
-
-
 class InputTable extends Component {
 
   constructor(props) {
@@ -205,7 +199,7 @@ class InputTable extends Component {
     if (field === 'arrivalTime') translatedField = t('inputTable.fieldNameArrivalTime');
     else if (field === 'runningTime') translatedField = t('inputTable.fieldNameRunningTime');
 
-    if (numericValue < 0 && field !== 'id') { // Assuming interruptions don't have negative IDs
+    if (numericValue < 0 && field !== 'id') { 
       alert(t('inputTable.alertFieldNegative', { field: translatedField }));
       return;
     }
@@ -428,7 +422,6 @@ class InputTable extends Component {
   }
 
   handleExportToTxt = () => {
-    //const { t } = this.props;
     const { tempProcesses, tempInterruptions } = this.state;
     if (tempProcesses.length === 0 && tempInterruptions.length === 0) {
         alert("There is no data in the table to export.");
@@ -569,4 +562,4 @@ class InputTable extends Component {
 
 }
 
-export default withTranslation()(InputTable); // New export
+export default withTranslation()(InputTable);

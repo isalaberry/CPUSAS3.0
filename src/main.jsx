@@ -13,9 +13,9 @@ import UserDataPage from './components/UserDataPage'
 import LoginPage from './components/LoginPage'
 import RegisterPage from './components/RegisterPage'
 import { UserProvider } from '../src/components/UserContext';
-import AdminRoute from './components/AdminRoute'; // Import
-import AdminUserManagement from './components/AdminUserManagement'; // Example admin component
-import AdminSettings from './components/AdminSettings'; // Example admin component
+import AdminRoute from './components/AdminRoute';
+import AdminUserManagement from './components/AdminUserManagement';
+import AdminSettings from './components/AdminSettings';
 import './i18n/i18n';
 
 const router = createBrowserRouter([
@@ -65,11 +65,11 @@ const router = createBrowserRouter([
         element: <AdminRoute />,
         children: [
             {
-                path: 'users', // /admin/users
+                path: 'users',
                 element: <AdminUserManagement />
             },
             {
-                path: 'settings', // /admin/settings
+                path: 'settings',
                 element: <AdminSettings />
             }
         ]

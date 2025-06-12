@@ -36,8 +36,8 @@ const LoginPage = () => {
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault(); // Evita o comportamento padrão de recarregar a página
-        login(); // Chama a função de login
+        e.preventDefault();
+        login();
     };
 
     return (

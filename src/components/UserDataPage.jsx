@@ -47,7 +47,6 @@ const UserDataPage = () => {
              );
         }
     } else {
-        // User is not logged in
         return <NotLoggedPage />;
     }
 };
