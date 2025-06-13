@@ -10,6 +10,7 @@ const AdminSettings = () => {
     const initialSettings = useMemo(() => ({
         fifo: true,
         sjf: true,
+        srtf: true,
         pnp: true,
         pp: true,
         rr: true,

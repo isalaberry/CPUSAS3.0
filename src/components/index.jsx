@@ -1,5 +1,6 @@
 export * from "./Fifo"
 export * from "./Sjf"
+export * from "./Srtf"
 export * from "./Pnp"
 export * from "./Pp"
 export * from "./Rr"
