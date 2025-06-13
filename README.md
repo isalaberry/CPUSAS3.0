@@ -29,7 +29,7 @@ Para rodar o projeto, você precisa ter o **Node.js** instalado. Você pode faze
 
 - Clone o repositório do projeto para a sua máquina local:
 ```bash
-git clone https://github.com/isabelsalaberry/CPUSAS.git
+git clone https://github.com/isabelsalaberry/CPUSAS3.0.git
 ```
 Instale as dependências
 ```bash
@@ -43,7 +43,7 @@ npm run dev
 
 O projeto está hospedado no Firebase Hosting e pode ser acessado através do seguinte link:
 
-[https://cpusas.web.app](https://cpusas.web.app)
+[https://cpusas-3-0.vercel.app](https://cpusas-3-0.vercel.app)
 
 
 ---
@@ -80,7 +80,7 @@ To run the project, you need to have **Node.js** installed. You can download and
 
 - Clone the project repository to your local machine:
 ```bash
-git clone https://github.com/isabelsalaberry/CPUSAS.git
+git clone https://github.com/isabelsalaberry/CPUSAS3.0.git
 ```
 - Install the dependencies
 ```bash
@@ -94,4 +94,4 @@ npm run dev
 
 The project is hosted on Firebase Hosting and can be accessed via the following link:
 
-[https://cpusas.web.app](https://cpusas.web.app)
+[https://cpusas-3-0.vercel.app](https://cpusas-3-0.vercel.app)
