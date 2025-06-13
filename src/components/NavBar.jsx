@@ -11,7 +11,7 @@ export function NavBar() {
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
     const [visibility, setVisibility] = useState({
-        fifo: true, sjf: true, pnp: true, pp: true, rr: true,
+        fifo: true, sjf: true, srtf: true, pnp: true, pp: true, rr: true,
     });
     const [loadingVisibility, setLoadingVisibility] = useState(true);
     const location = useLocation();
@@ -23,6 +23,8 @@ export function NavBar() {
             setActiveItem('fifo');
         } else if (currentPath === 'sjf' && visibility.sjf) {
             setActiveItem('sjf');
+        } else if (currentPath === 'srtf' && visibility.sjf) {
+            setActiveItem('srtf');
         } else if (currentPath === 'pnp' && visibility.pnp) {
             setActiveItem('pnp');
         } else if (currentPath === 'pp' && visibility.pp) {
@@ -90,6 +92,17 @@ export function NavBar() {
                             onClick={() => handleSetActive('sjf')}
                         >
                             {t('navSjf')}
+                        </Link>
+                    </li>
+                 )}
+                 {visibility.srtf && (
+                    <li className="nav-item">
+                        <Link
+                            to="/srtf"
+                            className={`nav-link ${activeItem === 'srtf' ? 'active' : ''}`}
+                            onClick={() => handleSetActive('srtf')}
+                        >
+                            {t('navSrtf')}
                         </Link>
                     </li>
                  )}

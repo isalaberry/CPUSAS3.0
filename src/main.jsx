@@ -6,6 +6,7 @@ import {BrowserRouter, createBrowserRouter, RouterProvider} from "react-router-d
 import UniversalInitial from './components/UniversalInitial'
 import {Fifo} from './components/Fifo'
 import {Sjf} from './components/Sjf'
+import {Srtf} from './components/Srtf'
 import {Pnp} from './components/Pnp'
 import {Pp} from './components/Pp'
 import {Rr} from './components/Rr'
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: '/sjf',
         element: <Sjf />,
+      },
+      {
+        path: '/srtf',
+        element: <Srtf />,
       },
       {
         path: '/pnp',

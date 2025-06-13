@@ -23,6 +23,7 @@
   "navFifo": "First-In-First-Out",
   "navSjf": "Shortest Job First",
   "navPnp": "Priorities no preemptive",
+  "navSrtf": "Shortest Remaining Time First",
   "navPp": "Priorities Preemptive",
   "navRr": "Round Robin",
   "navAdminUsers": "Manage Users",

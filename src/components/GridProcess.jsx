@@ -4,12 +4,18 @@ import html2canvas from 'html2canvas';
 import '../App.css';
 import { useTranslation } from 'react-i18next';
 
+// Import scheduler functions
+import { runFifoSimulation } from '../algorithms/fifoScheduler';
+import { runSjfSimulation } from '../algorithms/sjfScheduler';
+import { runSrtfSimulation } from '../algorithms/srtfScheduler';
+import { runPnpSimulation } from '../algorithms/pnpScheduler';
+import { runPpSimulation } from '../algorithms/ppScheduler';
+import { runRrSimulation } from '../algorithms/rrScheduler';
+
 export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: initialInterruptionsData, algorithm, saveDataToFirestore }) => {
     const processGridRef = useRef(null);
     const { user, userProfile } = useContext(UserContext);
 
-    const [tableInfos, setTableInfos] = useState([]);
-    const [interruptions, setInterruptions] = useState([]);
 
     const [currentColumn, setCurrentColumn] = useState(1);
     const [descriptions, setDescriptions] = useState({});
@@ -18,6 +24,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
 
     const [darkBlueSquares, setDarkBlueSquares] = useState([]);
     const [simulationLastEndTime, setSimulationLastEndTime] = useState(0);
+    const [processedProcesses, setProcessedProcesses] = useState([]);
 
     const [recIsRecording, setRecIsRecording] = useState(false);
     const recMediaRecorderRef = useRef(null);
@@ -44,48 +51,37 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         recIsRecordingStateRef.current = recIsRecording;
     }, [recIsRecording]);
 
+<<<<<<< HEAD
     //cria copias profundas dos dados inciais p/ evitar corrupção; inicializa estados => basicamente, reseta o grid
+=======
+   //executa o algoritmo selecionado e atualiza o grid
+>>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
     useEffect(() => {
-        setTableInfos(initialTableInfos ? JSON.parse(JSON.stringify(initialTableInfos)) : []);
-        setInterruptions(initialInterruptionsData ? JSON.parse(JSON.stringify(initialInterruptionsData)) : []);
         setCurrentColumn(1);
         setDarkBlueSquares([]);
         setSimulationLastEndTime(0);
         setDescriptions({});
         setAverageWaitingTime(0);
         setAverageTurnaroundTime(0);
-    }, [initialTableInfos, initialInterruptionsData, algorithm]);
+        setProcessedProcesses([]);
 
+<<<<<<< HEAD
     //logica da simulação
     useEffect(() => {
         //clona os dados adicionando propriedades auxiliares para a simulação
         if ((!tableInfos || tableInfos.length === 0) && (!interruptions || interruptions.length === 0)) {
             setDarkBlueSquares([]);
             setSimulationLastEndTime(0);
+=======
+        if ((!initialTableInfos || initialTableInfos.length === 0) && (!initialInterruptionsData || initialInterruptionsData.length === 0)) {
+>>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
             return;
         }
 
-        let calculatedBlocks = [];
-        let currentSimTime = 0;
-        
-        let processesForSim = tableInfos.map(p => ({
-            ...JSON.parse(JSON.stringify(p)),
-            remainingTime: p.runningTime,
-            finishedAt: -1,
-            timeInReadyQueueSince: p.arrivalTime,
-            type: 'process',
-            displayId: `P${p.id}`
-        }));
-        let interruptionsForSim = interruptions.map(i => ({
-            ...JSON.parse(JSON.stringify(i)),
-            processed: false,
-            type: 'interrupt',
-            displayId: `I${i.id}`
-        }));
-        
-        let readyQueue = [];
-        let completedProcessesCount = 0;
+        const processesInput = initialTableInfos ? JSON.parse(JSON.stringify(initialTableInfos)) : [];
+        const interruptionsInput = initialInterruptionsData ? JSON.parse(JSON.stringify(initialInterruptionsData)) : [];
 
+<<<<<<< HEAD
         //interrupções sao executadas antes dos processos
         while (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed)) {
             interruptionsForSim.sort((a, b) => a.arrivalTime - b.arrivalTime);
@@ -171,9 +167,49 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 baseExecSpan = 1; 
             } else if (algorithm === 'RR') {
                 baseExecSpan = Math.min(nextProcessToRun.remainingTime, nextProcessToRun.quantum);
-            } else {
-                baseExecSpan = nextProcessToRun.remainingTime;
+=======
+        let simulationResult;
+
+        try {
+            switch (algorithm) {
+                case 'FIFO':
+                    simulationResult = runFifoSimulation(processesInput, interruptionsInput, maxProcessId);
+                    break;
+                case 'SJF':
+                    simulationResult = runSjfSimulation(processesInput, interruptionsInput, maxProcessId);
+                    break;
+                case 'SRTF':
+                    simulationResult = runSrtfSimulation(processesInput, interruptionsInput, maxProcessId);
+                    break;
+                case 'PNP':
+                    simulationResult = runPnpSimulation(processesInput, interruptionsInput, maxProcessId);
+                    break;
+                case 'PP':
+                    simulationResult = runPpSimulation(processesInput, interruptionsInput, maxProcessId);
+                    break;
+                case 'RR':
+                    const quantum = processesInput.length > 0 && processesInput[0].quantum !== undefined ? processesInput[0].quantum : 1; // Default quantum
+                    simulationResult = runRrSimulation(processesInput, interruptionsInput, maxProcessId, quantum);
+                    break;
+                default:
+                    console.error("Unknown algorithm:", algorithm);
+                    setDarkBlueSquares([]);
+                    setSimulationLastEndTime(0);
+                    setProcessedProcesses([]);
+                    return;
             }
+
+            if (simulationResult) {
+                setDarkBlueSquares(simulationResult.calculatedBlocks || []);
+                setSimulationLastEndTime(simulationResult.simulationLastEndTime || 0);
+                setProcessedProcesses(simulationResult.processedItems || []);
+>>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
+            } else {
+                setDarkBlueSquares([]);
+                setSimulationLastEndTime(0);
+                setProcessedProcesses([]);
+            }
+<<<<<<< HEAD
 
             //verifica se tem algum evento futuro que pode interromper o processo
             let timeOfNextEvent = Infinity;
@@ -248,13 +284,16 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             }
 
 
+=======
+        } catch (error) {
+            console.error(`Error during ${algorithm} simulation:`, error);
+            setDarkBlueSquares([]);
+            setSimulationLastEndTime(0);
+            setProcessedProcesses([]);
+>>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
         }
 
-        setDarkBlueSquares(calculatedBlocks);
-        setSimulationLastEndTime(currentSimTime);
-
-    }, [tableInfos, interruptions, algorithm, maxProcessId]);
-
+    }, [initialTableInfos, initialInterruptionsData, algorithm, maxProcessId]);
 
     // atualiza as descrições
     useEffect(() => {
@@ -292,20 +331,25 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     }
                     latestSegmentEndForItem = Math.max(latestSegmentEndForItem, segmentEndTick);
                 }
-                if (segmentsForItem.length > 0 && effectiveCurrentTick >= latestSegmentEndForItem) {
+                
+                const processedItemEquivalent = item.itemType === 'process' 
+                    ? (processedProcesses || []).find(p => p.id === item.id)
+                    : null; 
+
+                if (processedItemEquivalent && processedItemEquivalent.finishedAt !== -1 && effectiveCurrentTick >= processedItemEquivalent.finishedAt) {
+                    hasFinished = true;
+                } else if (segmentsForItem.length > 0 && effectiveCurrentTick >= latestSegmentEndForItem && !processedItemEquivalent) {
                     hasFinished = true;
                 }
+
 
                 if (isExecutingNow) {
                     status = t('gridProcess.statusExecuting', { prefix: item.displayPrefix, id: item.id });
                     color = item.itemType === 'interrupt' ? 'red' : 'blue';
                 } else if (hasFinished) {
-                    if (item.runningTime === 0 && item.itemType === 'process') {
-                        status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id });
-                    } else if (item.runningTime === 0 && item.itemType === 'interrupt') {
-                        status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id });
-                    }
-                    else {
+                    if (item.runningTime === 0) { 
+                         status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id });
+                    } else {
                         status = t('gridProcess.statusFinished', { prefix: item.displayPrefix, id: item.id });
                     }
                     color = "darkgray";
@@ -313,46 +357,51 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     status = t('gridProcess.statusWaiting', { prefix: item.displayPrefix, id: item.id }); color = "orange";
                 } else if (item.itemType === 'interrupt' && effectiveCurrentTick >= item.arrivalTime && segmentsForItem.length === 0 && item.runningTime > 0) {
                     status = t('gridProcess.statusPending', { prefix: item.displayPrefix, id: item.id }); color = "purple";
+                } else if (item.itemType === 'interrupt' && effectiveCurrentTick >= item.arrivalTime && item.runningTime === 0) {
+                    status = t('gridProcess.statusFinishedNoExecution', { prefix: item.displayPrefix, id: item.id }); color = "darkgray";
                 }
             }
             newDescriptions[`${item.itemType}-${item.id}`] = <span style={{ color }}>{status}</span>;
         });
         setDescriptions(newDescriptions);
-    }, [currentColumn, darkBlueSquares, initialTableInfos, initialInterruptionsData, simulationLastEndTime, maxProcessId, algorithm]);
 
+<<<<<<< HEAD
     // calcula os tempos médios de espera e turnaround
     useEffect(() => {
         if (!initialTableInfos || initialTableInfos.length === 0 ) {
             setAverageWaitingTime(0); setAverageTurnaroundTime(0); return;
+=======
+    }, [currentColumn, darkBlueSquares, initialTableInfos, initialInterruptionsData, simulationLastEndTime, maxProcessId, algorithm, t, processedProcesses]);
+
+    useEffect(() => { 
+        if (!processedProcesses || processedProcesses.length === 0) {
+            setAverageWaitingTime(0);
+            setAverageTurnaroundTime(0);
+            return;
+>>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
         }
         let totalTurnaroundTime = 0;
         let totalWaitingTime = 0;
         let processesCountedForMetrics = 0;
 
-        initialTableInfos.forEach(processInfo => {
-            const arrival = processInfo.arrivalTime;
-            const burst = processInfo.runningTime;
-            let completion = arrival;
-            const segments = darkBlueSquares.filter(s => s.type ==='process' && s.rowStart === processInfo.id);
+        processedProcesses.forEach(processInfo => {
+            if (processInfo.finishedAt !== undefined && processInfo.finishedAt !== -1) {
+                const turnaround = processInfo.finishedAt - processInfo.arrivalTime;
+                const waiting = turnaround - processInfo.runningTime;
 
-            if (burst === 0) {
-                completion = arrival;
-            } else if (segments.length > 0) {
-                const lastSegment = segments.sort((a, b) => (a.colStart + a.colSpan) - (b.colStart + b.colSpan)).pop();
-                completion = (lastSegment.colStart -1) + lastSegment.colSpan;
-            } else {
-                return; 
+                totalTurnaroundTime += Math.max(0, turnaround);
+                totalWaitingTime += Math.max(0, waiting);
+                processesCountedForMetrics++;
+            } else if (processInfo.runningTime === 0 && processInfo.arrivalTime !== undefined) {
+                totalTurnaroundTime += 0;
+                totalWaitingTime += 0;
+                processesCountedForMetrics++;
             }
-            
-            const turnaround = completion - arrival;
-            const waiting = turnaround - burst;
-            totalTurnaroundTime += Math.max(0, turnaround);
-            totalWaitingTime += Math.max(0, waiting);
-            processesCountedForMetrics++;
         });
+
         setAverageTurnaroundTime(processesCountedForMetrics > 0 ? (totalTurnaroundTime / processesCountedForMetrics) : 0);
         setAverageWaitingTime(processesCountedForMetrics > 0 ? (totalWaitingTime / processesCountedForMetrics) : 0);
-    }, [darkBlueSquares, initialTableInfos]); 
+    }, [processedProcesses]); 
 
     const handleAutoIncrementOriginal = () => {
         if (recIsRecording) return;
@@ -371,7 +420,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
 
     const handleSaveTable = () => {
         if (user && userProfile?.status === 'approved' && saveDataToFirestore && typeof saveDataToFirestore === 'function') {
-            saveDataToFirestore(initialTableInfos, initialInterruptionsData);
+            saveDataToFirestore(initialTableInfos, initialInterruptionsData); 
             alert(t('gridProcess.alertScenarioSavedSuccess'));
         } else {
             alert(t('gridProcess.alertScenarioSaveError'));
@@ -384,15 +433,19 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             return;
         }
         if (simulationLastEndTime <= 0 && ((initialTableInfos && initialTableInfos.length > 0) || (initialInterruptionsData && initialInterruptionsData.length > 0))) {
-            alert(t('gridProcess.alertInvalidSimEndTime'));
-            return;
+             const hasActualTasks = (initialTableInfos && initialTableInfos.some(p => p.runningTime > 0)) || 
+                                   (initialInterruptionsData && initialInterruptionsData.some(i => i.runningTime > 0));
+            if (hasActualTasks) {
+                alert(t('gridProcess.alertInvalidSimEndTime'));
+                return;
+            }
         }
 
         alert(t('gridProcess.alertRecordingStartWarning'));
         
         setRecIsRecording(true);
         recChunksRef.current = [];
-        setCurrentColumn(1);
+        setCurrentColumn(1); 
 
         await new Promise(resolve => setTimeout(resolve, 150)); 
 
@@ -414,7 +467,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 return;
             }
         } catch (error) {
-            alert(t('gridProcess.alertCanvasSetupError'));
+            alert(t('gridProcess.alertCanvasSetupError', { message: error.message }));
             setRecIsRecording(false);
             return;
         }
@@ -426,7 +479,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             return;
         }
 
-        const recStream = targetCanvas.captureStream(25);
+        const recStream = targetCanvas.captureStream(25); 
         
         if (!recStream || recStream.getVideoTracks().length === 0) {
             alert(t('gridProcess.alertVideoCaptureError'));
@@ -438,9 +491,9 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
             chosenMimeType = 'video/webm;codecs=vp8';
             if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
-                chosenMimeType = 'video/webm';
+                chosenMimeType = 'video/webm'; 
                 if (!MediaRecorder.isTypeSupported(chosenMimeType)) {
-                    alert("Seu navegador não suporta os formatos de vídeo WebM necessários para gravação.");
+                    alert(t("gridProcess.alertWebMNotSupported"));
                     setRecIsRecording(false);
                     return;
                 }
@@ -476,16 +529,18 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             document.body.removeChild(recDownloadLink);
             URL.revokeObjectURL(recVideoUrl);
             setRecIsRecording(false);
-            setCurrentColumn(1);
+            setCurrentColumn(1); 
             alert(t('gridProcess.alertRecordingComplete'));
         };
         recMediaRecorderRef.current.onerror = (event) => {
-            alert(t('gridProcess.alertRecordingError', { errorName: event.error.name, errorMessage: event.error.message }));
-            recHandleStop();
+            let errorMessage = event.error && event.error.message ? event.error.message : 'Unknown error';
+            let errorName = event.error && event.error.name ? event.error.name : 'Error';
+            alert(t('gridProcess.alertRecordingError', { errorName: errorName, errorMessage: errorMessage }));
+            recHandleStop(); 
         };
         
-        recMediaRecorderRef.current.start(1000); 
-        recTriggerNextFrame(1);
+        recMediaRecorderRef.current.start(1000/25); 
+        recTriggerNextFrame(1); 
     };
 
     const recTriggerNextFrame = async (tickToSet) => {
@@ -497,9 +552,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         }
         setCurrentColumn(tickToSet); 
 
-        await new Promise(resolve => requestAnimationFrame(() => {
-            requestAnimationFrame(resolve); 
-        }));   
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));   
 
         if (recIsRecordingStateRef.current &&
             processGridRef.current &&
@@ -511,6 +564,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
 
             if (!offCtx) {
+                console.error("Offscreen canvas context lost during recording.");
                 recHandleStop();
                 return;
             }
@@ -518,23 +572,27 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 if (offCanvas.width !== gridEl.scrollWidth || offCanvas.height !== gridEl.scrollHeight) {
                      offCanvas.width = gridEl.scrollWidth;
                      offCanvas.height = gridEl.scrollHeight;
+                     if (offCanvas.width === 0 || offCanvas.height === 0) {
+                        console.error("Grid element has zero dimensions during recording frame capture.");
+                        recHandleStop(); 
+                        return;
+                     }
                 }
 
                 const h2cCanvas = await html2canvas(gridEl, {
                     useCORS: true,
-                    logging: false,
+                    logging: false, 
                     width: gridEl.scrollWidth,
                     height: gridEl.scrollHeight,
-                    backgroundColor: null,
+                    backgroundColor: null, 
+                    scale: 1, 
                 });
 
                 offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
                 offCtx.drawImage(h2cCanvas, 0, 0);
 
-                if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
-                    recMediaRecorderRef.current.requestData();
-                }
             } catch (error) {
+                console.error("Error capturing canvas for recording frame:", error);
                 recHandleStop(); 
                 return;
             }
@@ -547,10 +605,9 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
     };
 
     const recHandleStop = () => {
+        setRecIsRecording(false); 
         if (recMediaRecorderRef.current && recMediaRecorderRef.current.state === "recording") {
             recMediaRecorderRef.current.stop(); 
-        } else {
-            setRecIsRecording(false);
         }
     };
 
@@ -558,13 +615,16 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         <div className='grid-container'>
             <canvas 
                 ref={recOffScreenCanvasRef} 
-                style={{ width: '400px', height: '150px', position: 'fixed', top: '10px', right: '10px', zIndex: 9999, display: recIsRecording ? 'block' : 'none' }}
+                style={{ width: '400px', height: '150px', position: 'fixed', top: '-9999px', left: '-9999px', zIndex: 9999, display: 'none' }}
             />
             <div className='process-grid' style={{ position: 'relative' }} ref={processGridRef}>
                 <div className="time-bar" style={{
                     position: 'absolute', width: '10px', height: '100%',
                     backgroundColor: 'yellow', zIndex: 4, top: 0, bottom: 0,
-                    gridColumnStart: currentColumn, gridColumnEnd: currentColumn + 1,
+                    gridColumnStart: currentColumn, 
+                    gridColumnEnd: currentColumn + 1,
+                    gridRowStart: 1, // Added for consistency
+                    gridRowEnd: totalRowsForGrid + 1, // Added for consistency
                 }}></div>
                 {darkBlueSquares.map((segment) => (
                     <div
@@ -574,14 +634,16 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                             gridColumnStart: segment.colStart,
                             gridColumnEnd: `span ${segment.colSpan}`,
                             gridRowStart: segment.rowStart,
-                            position: 'relative',
+                            position: 'relative', // From original
                             backgroundColor: segment.color, 
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             overflow: 'hidden',
                             fontSize: '0.8em',
+                            // border and color removed to match original segment style
                         }}
+                        title={`${segment.displayId} (${segment.colStart-1}-${segment.colStart-1+segment.colSpan})`}
                     >
                         <div style={{ zIndex: 2 }}>{segment.displayId}</div>
                     </div>
@@ -590,56 +652,79 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                      <div
                          key={`arrival-P${process.id}`} className='arrival-indicator'
                          style={{
-                             gridColumnStart: process.arrivalTime + 1, gridColumnEnd: process.arrivalTime + 2,
-                             position: 'relative', top: 0, left: 0, backgroundColor: '#cadeed', 
-                             width: '10px', height: '100%', gridRowStart: process.id, zIndex: 1,
+                             gridColumnStart: process.arrivalTime + 1, 
+                             gridColumnEnd: process.arrivalTime + 2,
+                             gridRowStart: process.id, 
+                             position: 'relative', // From original
+                             top: 0, // From original
+                             left: 0, // From original
+                             backgroundColor: '#cadeed', 
+                             width: '10px', 
+                             height: '100%', 
+                             zIndex: 1,
                              writingMode: 'vertical-rl', fontSize: '0.7em', textAlign: 'center',
+                             // borderRight removed
                          }}
+                         title={`P${process.id} Arrival: ${process.arrivalTime}`}
                      >
-                         
                      </div>
                 ))}
                 {(initialInterruptionsData || []).map((interrupt) => (
                      <div
                          key={`arrival-I${interrupt.id}`} className='arrival-indicator'
                          style={{
-                             gridColumnStart: interrupt.arrivalTime + 1, gridColumnEnd: interrupt.arrivalTime + 2,
-                             position: 'relative', top: 0, left: 0, backgroundColor: '#cadeed', 
-                             width: '10px', height: '100%', gridRowStart: maxProcessId + interrupt.id, zIndex: 1,
+                             gridColumnStart: interrupt.arrivalTime + 1, 
+                             gridColumnEnd: interrupt.arrivalTime + 2,
+                             gridRowStart: maxProcessId + interrupt.id, 
+                             position: 'relative', // From original
+                             top: 0, // From original
+                             left: 0, // From original
+                             backgroundColor: '#e6c9f0', // Color from refactored, original used #cadeed
+                             width: '10px', 
+                             height: '100%', 
+                             zIndex: 1,
                              writingMode: 'vertical-rl', fontSize: '0.7em', textAlign: 'center',
+                             // borderRight removed
                          }}
+                         title={`I${interrupt.id} Arrival: ${interrupt.arrivalTime}`}
                      >
-                        
                      </div>
                 ))}
-                <div className="labels" style={{ gridRowStart: totalRowsForGrid + 1 }}> 
+                <div className="labels" style={{ 
+                    gridRowStart: totalRowsForGrid + 1, 
+                    // Removed other inline styles to match original's simplicity for the container
+                    }}> 
                     {[...Array(Math.max(0, simulationLastEndTime + 1))].map((_, i) => ( 
-                        <div key={`label-${i}`} className="label" style={{gridColumnStart: i + 1, gridColumnEnd: i + 2}}>
-                            {i.toString().padStart(2, '0')}
+                        <div key={`label-${i}`} className="label" style={{
+                            gridColumnStart: i + 1, 
+                            gridColumnEnd: i + 2, 
+                            // Removed other inline styles to match original label style
+                            }}>
+                            {i.toString().padStart(2, '0')} {/* Kept padStart from original */}
                         </div>
                     ))}
                 </div>
             </div>
             <div className='description-table'>
-                <table style={{ width: '100%' }}>
+                <table style={{ width: '100%' }}> {/* Removed marginTop, borderCollapse */}
                     <thead>
-                        <tr><th className='description-table-title'>Description (Tick: {currentColumn > 0 ? currentColumn -1 : 0})</th></tr>
+                        <tr><th className='description-table-title' /* Removed inline style */>Description (Tick: {currentColumn > 0 ? currentColumn -1 : 0})</th></tr>
                     </thead>
                     <tbody>
                         {(initialTableInfos || []).map((process) => (
                             <tr key={`desc-process-${process.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`process-${process.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'P', id: process.id })}</td>
+                                <td style={{ padding: '8px', textAlign:'center' /* Removed border */ }}>{descriptions[`process-${process.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'P', id: process.id })}</td>
                             </tr>
                         ))}
                         {(initialInterruptionsData || []).map((interrupt) => (
                             <tr key={`desc-interrupt-${interrupt.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' }}>{descriptions[`interrupt-${interrupt.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'I', id: interrupt.id })}</td>
+                                <td style={{ padding: '8px', textAlign:'center' /* Removed border */ }}>{descriptions[`interrupt-${interrupt.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'I', id: interrupt.id })}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            <div className="button-time-container">
+            <div className="button-time-container" /* Removed inline styles */>
                 <button onClick={handleFirstColumn} className="button" disabled={recIsRecording}>{'<<'}</button>
                 <button onClick={handlePreviousColumn} className="button" disabled={recIsRecording}>{'<'}</button>
                 <button onClick={handleNextColumn} className="button" disabled={recIsRecording}>{'>'}</button>
@@ -652,12 +737,12 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     </button>
                 )}
                 {recIsRecording ? (
-                    <button onClick={recHandleStop} className="button" >{t('gridProcess.buttonStopRecording')}</button>
+                    <button onClick={recHandleStop} className="button" /* Removed inline style */ >{t('gridProcess.buttonStopRecording')}</button>
                 ) : (
-                    <button onClick={recHandleStart} className="button" >{t('gridProcess.buttonStartRecording')}</button>
+                    <button onClick={recHandleStart} className="button" /* Removed inline style */ >{t('gridProcess.buttonStartRecording')}</button>
                 )}
             </div>
-            <div className="ttwt-container">
+            <div className="ttwt-container" /* Removed inline styles */>
                 <div>{t('gridProcess.avgWaitingTimeLabel')}{averageWaitingTime.toFixed(2)}</div>
                 <div>{t('gridProcess.avgTurnaroundTimeLabel')} {averageTurnaroundTime.toFixed(2)}</div>
             </div>
