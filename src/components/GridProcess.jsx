@@ -51,11 +51,7 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         recIsRecordingStateRef.current = recIsRecording;
     }, [recIsRecording]);
 
-<<<<<<< HEAD
-    //cria copias profundas dos dados inciais p/ evitar corrupção; inicializa estados => basicamente, reseta o grid
-=======
    //executa o algoritmo selecionado e atualiza o grid
->>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
     useEffect(() => {
         setCurrentColumn(1);
         setDarkBlueSquares([]);
@@ -65,109 +61,13 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         setAverageTurnaroundTime(0);
         setProcessedProcesses([]);
 
-<<<<<<< HEAD
-    //logica da simulação
-    useEffect(() => {
-        //clona os dados adicionando propriedades auxiliares para a simulação
-        if ((!tableInfos || tableInfos.length === 0) && (!interruptions || interruptions.length === 0)) {
-            setDarkBlueSquares([]);
-            setSimulationLastEndTime(0);
-=======
         if ((!initialTableInfos || initialTableInfos.length === 0) && (!initialInterruptionsData || initialInterruptionsData.length === 0)) {
->>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
             return;
         }
 
         const processesInput = initialTableInfos ? JSON.parse(JSON.stringify(initialTableInfos)) : [];
         const interruptionsInput = initialInterruptionsData ? JSON.parse(JSON.stringify(initialInterruptionsData)) : [];
 
-<<<<<<< HEAD
-        //interrupções sao executadas antes dos processos
-        while (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed)) {
-            interruptionsForSim.sort((a, b) => a.arrivalTime - b.arrivalTime);
-            let interruptHandledInThisPass = false;
-            for (let interrupt of interruptionsForSim) {
-                if (!interrupt.processed && interrupt.arrivalTime <= currentSimTime) {
-                    const execStartTimeInterrupt = Math.max(currentSimTime, interrupt.arrivalTime);
-                    currentSimTime = execStartTimeInterrupt;
-                    const interruptSpan = interrupt.runningTime;
-                    calculatedBlocks.push({
-                        id: `interrupt-block-${interrupt.id}-${currentSimTime}`,
-                        colStart: currentSimTime + 1,
-                        colSpan: interruptSpan,
-                        rowStart: maxProcessId + interrupt.id,
-                        type: 'interrupt',
-                        displayId: interrupt.displayId,
-                        color: 'rgba(146, 107, 252, 0.7)'
-                    });
-                    currentSimTime += interruptSpan;
-                    interrupt.processed = true;
-                    interruptHandledInThisPass = true;
-                }
-            }
-            if (interruptHandledInThisPass) continue;
-
-            //adiciona os processos que chegaram na fila de prontos - (se já chegou, ainda não terminou, não tá em duplicata)
-            processesForSim.forEach(p => {
-                if (p.arrivalTime <= currentSimTime && p.remainingTime > 0 && p.finishedAt === -1 && !readyQueue.find(rq => rq.id === p.id)) {
-                    p.timeInReadyQueueSince = currentSimTime;
-                    readyQueue.push(p);
-                }
-            });
-
-            if (readyQueue.length === 0) {
-                let nextEventTimes = [
-                    ...processesForSim.filter(p => p.finishedAt === -1 && p.arrivalTime > currentSimTime).map(p => p.arrivalTime),
-                    ...interruptionsForSim.filter(i => !i.processed && i.arrivalTime > currentSimTime).map(i => i.arrivalTime)
-                ];
-                //se a ready queue estiver vazia, verifica se tem algum processo ou interrupção que vai chegar no futuro
-                if (nextEventTimes.length === 0 && (completedProcessesCount < processesForSim.length || interruptionsForSim.some(i => !i.processed))) {
-                     break;
-                } else if (nextEventTimes.length === 0) {
-                    break;
-                }
-                //se tiver, pula o tempo até o próximo evento
-                currentSimTime = Math.min(...nextEventTimes);
-                continue;
-            }
-
-            //seleciona o proximo processo a executar dependendo do algoritmo selecionado.
-            let nextProcessToRun;
-            if (algorithm === 'FIFO') {
-                readyQueue.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
-                nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'SJF') {
-                readyQueue.sort((a, b) => a.runningTime - b.runningTime || a.arrivalTime - b.arrivalTime || a.id - b.id);
-                nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'PNP') {
-                readyQueue.sort((a, b) => a.priority - b.priority || a.arrivalTime - b.arrivalTime || a.id - b.id);
-                nextProcessToRun = readyQueue.shift();
-            } else if (algorithm === 'PP') {
-                readyQueue.sort((a, b) => a.priority - b.priority || a.arrivalTime - b.arrivalTime || a.id - b.id);
-                nextProcessToRun = readyQueue.length > 0 ? readyQueue[0] : null;
-            } else if (algorithm === 'RR') {
-                nextProcessToRun = readyQueue.shift();
-            } else { break; }
-
-            if (!nextProcessToRun) {continue;}
-
-            //verifica quando o proximo processo pode começar a executar
-            const execStartTimeForProcess = Math.max(currentSimTime, nextProcessToRun.arrivalTime); 
-            if (currentSimTime < execStartTimeForProcess) {//se o proximo processo nao chegou ainda, coloca o atual na fila novamente se nao for pp
-                if (algorithm !== 'PP') {//a lógica de pp é diferente
-                    readyQueue.unshift(nextProcessToRun);
-                }
-                currentSimTime = execStartTimeForProcess;
-                continue;
-            }
-
-            //calcula o tempo que o proximo processo vai executar
-            let baseExecSpan;
-            if (algorithm === 'PP') {
-                baseExecSpan = 1; 
-            } else if (algorithm === 'RR') {
-                baseExecSpan = Math.min(nextProcessToRun.remainingTime, nextProcessToRun.quantum);
-=======
         let simulationResult;
 
         try {
@@ -203,94 +103,16 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 setDarkBlueSquares(simulationResult.calculatedBlocks || []);
                 setSimulationLastEndTime(simulationResult.simulationLastEndTime || 0);
                 setProcessedProcesses(simulationResult.processedItems || []);
->>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
             } else {
                 setDarkBlueSquares([]);
                 setSimulationLastEndTime(0);
                 setProcessedProcesses([]);
             }
-<<<<<<< HEAD
-
-            //verifica se tem algum evento futuro que pode interromper o processo
-            let timeOfNextEvent = Infinity;
-            interruptionsForSim.forEach(i => {
-                if (!i.processed && i.arrivalTime > currentSimTime) {
-                    timeOfNextEvent = Math.min(timeOfNextEvent, i.arrivalTime);
-                }
-            });
-            if (algorithm === 'PP') {
-                 processesForSim.forEach(p => {
-                    if (p.id !== nextProcessToRun.id && p.finishedAt === -1 && p.arrivalTime > currentSimTime && p.priority < nextProcessToRun.priority) {
-                        timeOfNextEvent = Math.min(timeOfNextEvent, p.arrivalTime);
-                    }
-                });
-            }
-
-            //calcula o tempo até o próximo evento
-            const maxSpanBeforeEvent = timeOfNextEvent - currentSimTime; 
-            const effectiveMaxSpan = maxSpanBeforeEvent > 0 ? maxSpanBeforeEvent : Infinity; 
-            const actualExecSpan = Math.min(baseExecSpan, effectiveMaxSpan);
-
-            if (actualExecSpan <= 0 && nextProcessToRun.remainingTime > 0) {
-                continue;
-            }
-            
-            if (actualExecSpan > 0) {
-                calculatedBlocks.push({
-                    id: `block-${nextProcessToRun.id}-${currentSimTime}`,
-                    colStart: currentSimTime + 1,
-                    colSpan: actualExecSpan,
-                    rowStart: nextProcessToRun.id,
-                    type: 'process',
-                    displayId: nextProcessToRun.displayId,
-                    color: 'rgba(68, 92, 243, 0.9)'
-                });
-            }
-
-            const processJustRan = nextProcessToRun;
-            processJustRan.remainingTime -= actualExecSpan;
-            const timeSliceEnded = currentSimTime + actualExecSpan;
-            currentSimTime = timeSliceEnded;
-
-            //gerencia a ready queue
-            let newArrivalsProcessedThisCycle = false;
-            processesForSim.forEach(p => {
-                if (p.id !== processJustRan.id &&
-                    p.arrivalTime <= currentSimTime &&
-                    p.remainingTime > 0 && p.finishedAt === -1 &&
-                    !readyQueue.find(rq => rq.id === p.id) &&
-                    (algorithm === 'PP' ? p.id !== processJustRan.id : true)
-                    ) {
-                    p.timeInReadyQueueSince = currentSimTime;
-                    readyQueue.push(p);
-                    newArrivalsProcessedThisCycle = true;
-                }
-            });
-
-            if (processJustRan.remainingTime <= 0) {
-                processJustRan.finishedAt = currentSimTime;
-                completedProcessesCount++;
-                if (algorithm === 'PP' && readyQueue.length > 0 && readyQueue[0].id === processJustRan.id) {
-                    readyQueue.shift();
-                }
-            } else {
-                if (algorithm === 'RR') {
-                    processJustRan.timeInReadyQueueSince = currentSimTime;
-                    readyQueue.push(processJustRan);
-                    if (algorithm === 'RR') console.log(`RR_DEBUG @ t=${currentSimTime}: P${processJustRan.id} voltou para a readyQueue.`);
-                } else if (algorithm === 'PP') {
-                    processJustRan.timeInReadyQueueSince = currentSimTime;
-                }
-            }
-
-
-=======
         } catch (error) {
             console.error(`Error during ${algorithm} simulation:`, error);
             setDarkBlueSquares([]);
             setSimulationLastEndTime(0);
             setProcessedProcesses([]);
->>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
         }
 
     }, [initialTableInfos, initialInterruptionsData, algorithm, maxProcessId]);
@@ -365,12 +187,6 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
         });
         setDescriptions(newDescriptions);
 
-<<<<<<< HEAD
-    // calcula os tempos médios de espera e turnaround
-    useEffect(() => {
-        if (!initialTableInfos || initialTableInfos.length === 0 ) {
-            setAverageWaitingTime(0); setAverageTurnaroundTime(0); return;
-=======
     }, [currentColumn, darkBlueSquares, initialTableInfos, initialInterruptionsData, simulationLastEndTime, maxProcessId, algorithm, t, processedProcesses]);
 
     useEffect(() => { 
@@ -378,7 +194,6 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
             setAverageWaitingTime(0);
             setAverageTurnaroundTime(0);
             return;
->>>>>>> 05eaf3ad1600af8f090e07ebc505efa300757aa1
         }
         let totalTurnaroundTime = 0;
         let totalWaitingTime = 0;
