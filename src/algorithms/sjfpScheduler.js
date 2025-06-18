@@ -1,4 +1,4 @@
-export function runSrtfSimulation(initialProcesses, initialInterruptions, maxProcessId) {
+export function runSjfpSimulation(initialProcesses, initialInterruptions, maxProcessId) {
     let calculatedBlocks = [];
     let currentSimTime = 0;
 
@@ -77,7 +77,7 @@ export function runSrtfSimulation(initialProcesses, initialInterruptions, maxPro
             }
         });
 
-        // SRTF
+        // SRTF -SJFP
         if (readyQueue.length > 0) {
             readyQueue.sort((a, b) => a.remainingTime - b.remainingTime || a.arrivalTime - b.arrivalTime || a.id - b.id);
             

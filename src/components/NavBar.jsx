@@ -11,7 +11,7 @@ export function NavBar() {
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
     const [visibility, setVisibility] = useState({
-        fcfs: true, sjf: true, srtf: true, pnp: true, pp: true, rr: true,
+        fcfs: true, sjf: true, sjfp: true, pnp: true, pp: true, rr: true,
     });
     const [loadingVisibility, setLoadingVisibility] = useState(true);
     const location = useLocation();
@@ -23,8 +23,8 @@ export function NavBar() {
             setActiveItem('fcfs');
         } else if (currentPath === 'sjf' && visibility.sjf) {
             setActiveItem('sjf');
-        } else if (currentPath === 'srtf' && visibility.sjf) {
-            setActiveItem('srtf');
+        } else if (currentPath === 'sjfp' && visibility.sjfp) {
+            setActiveItem('sjfp');
         } else if (currentPath === 'pnp' && visibility.pnp) {
             setActiveItem('pnp');
         } else if (currentPath === 'pp' && visibility.pp) {
@@ -95,14 +95,14 @@ export function NavBar() {
                         </Link>
                     </li>
                  )}
-                 {visibility.srtf && (
+                 {visibility.sjfp && (
                     <li className="nav-item">
                         <Link
-                            to="/srtf"
-                            className={`nav-link ${activeItem === 'srtf' ? 'active' : ''}`}
-                            onClick={() => handleSetActive('srtf')}
+                            to="/sjfp"
+                            className={`nav-link ${activeItem === 'sjfp' ? 'active' : ''}`}
+                            onClick={() => handleSetActive('sjfp')}
                         >
-                            {t('navSrtf')}
+                            {t('navSjfp')}
                         </Link>
                     </li>
                  )}

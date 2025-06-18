@@ -1,6 +1,6 @@
 export * from "./Fcfs"
 export * from "./Sjf"
-export * from "./Srtf"
+export * from "./Sjfp"
 export * from "./Pnp"
 export * from "./Pp"
 export * from "./Rr"

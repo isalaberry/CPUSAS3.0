@@ -94,7 +94,7 @@ const UserTables = ({ user }) => {
     return (
         <div className="p-4">
             <h2 className='usertables-title'>{t('userTables.title')}</h2>
-            {tables.length === 0 && <p>{t('userTables.noScenariosSaved')}</p>}
+            {tables.length === 0 && <p style={{ marginLeft: '50px' }}>{t('userTables.noScenariosSaved')}</p>}
             {tables.map((table) => (
                 <div key={table.id} className="usertables-card">
                     <div className="usertables-card-header">

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 // Import scheduler functions
 import { runFcfsSimulation } from '../algorithms/FcfsScheduler';
 import { runSjfSimulation } from '../algorithms/sjfScheduler';
-import { runSrtfSimulation } from '../algorithms/srtfScheduler';
+import { runSjfpSimulation } from '../algorithms/sjfpScheduler';
 import { runPnpSimulation } from '../algorithms/pnpScheduler';
 import { runPpSimulation } from '../algorithms/ppScheduler';
 import { runRrSimulation } from '../algorithms/rrScheduler';
@@ -78,8 +78,8 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 case 'SJF':
                     simulationResult = runSjfSimulation(processesInput, interruptionsInput, maxProcessId);
                     break;
-                case 'SRTF':
-                    simulationResult = runSrtfSimulation(processesInput, interruptionsInput, maxProcessId);
+                case 'SJFP':
+                    simulationResult = runSjfpSimulation(processesInput, interruptionsInput, maxProcessId);
                     break;
                 case 'PNP':
                     simulationResult = runPnpSimulation(processesInput, interruptionsInput, maxProcessId);
