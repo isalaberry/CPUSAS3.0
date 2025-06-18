@@ -23,7 +23,7 @@
   "navFcfs": "First-Come-First-Served",
   "navSjf": "Shortest Job First",
   "navPnp": "Prioridades não preemptivo",
-  "Sjfp": "Shortest Job First Preemptivo",
+  "navSjfp": "Shortest Job First Preemptivo",
   "navPp": "Prioridades Preemptivo",
   "navRr": "Round Robin",
   "navAdminUsers": "Gerir Utilizadores",
