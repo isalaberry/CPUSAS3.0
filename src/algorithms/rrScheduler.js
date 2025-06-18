@@ -20,7 +20,7 @@ export function runRrSimulation(initialProcesses, initialInterruptions, maxProce
         displayId: `I${i.id}`
     }));
 
-    let readyQueue = []; // FIFO
+    let readyQueue = [];
     const totalProcessesToTrack = processesForSim.length;
     let completedTrackedProcesses = 0;
     let currentExecutingProcess = null;

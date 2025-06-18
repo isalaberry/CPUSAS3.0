@@ -11,7 +11,7 @@ export function NavBar() {
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
     const [visibility, setVisibility] = useState({
-        fifo: true, sjf: true, srtf: true, pnp: true, pp: true, rr: true,
+        fcfs: true, sjf: true, srtf: true, pnp: true, pp: true, rr: true,
     });
     const [loadingVisibility, setLoadingVisibility] = useState(true);
     const location = useLocation();
@@ -19,8 +19,8 @@ export function NavBar() {
     useEffect(() => {
         const currentPath = location.pathname.substring(1); 
 
-        if (currentPath === 'fifo' && visibility.fifo) {
-            setActiveItem('fifo');
+        if (currentPath === 'fcfs' && visibility.fcfs) {
+            setActiveItem('fcfs');
         } else if (currentPath === 'sjf' && visibility.sjf) {
             setActiveItem('sjf');
         } else if (currentPath === 'srtf' && visibility.sjf) {
@@ -51,10 +51,10 @@ export function NavBar() {
                     const fetchedData = docSnap.data();
                     setVisibility(prev => ({ ...prev, ...fetchedData }));
                 } else {
-                    setVisibility({ fifo: true, sjf: true, pnp: true, pp: true, rr: true });
+                    setVisibility({ fcfs: true, sjf: true, pnp: true, pp: true, rr: true });
                 }
             } catch (error) {
-                setVisibility({ fifo: true, sjf: true, pnp: true, pp: true, rr: true });
+                setVisibility({ fcfs: true, sjf: true, pnp: true, pp: true, rr: true });
             } finally {
                  setLoadingVisibility(false);
             }
@@ -73,14 +73,14 @@ export function NavBar() {
     return (
         <nav className="navbar">
             <ul className="nav-list">
-                {visibility.fifo && (
+                {visibility.fcfs && (
                     <li className="nav-item">
                         <Link
-                            to="/fifo"
-                            className={`nav-link ${activeItem === 'fifo' ? 'active' : ''}`}
-                            onClick={() => handleSetActive('fifo')}
+                            to="/fcfs"
+                            className={`nav-link ${activeItem === 'fcfs' ? 'active' : ''}`}
+                            onClick={() => handleSetActive('fcfs')}
                         >
-                            {t('navFifo')}
+                            {t('navFcfs')}
                         </Link>
                     </li>
                 )}

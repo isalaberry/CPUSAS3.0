@@ -20,7 +20,7 @@
   "accountAccessDeniedTitle": "Account Access Denied",
   "accountAccessDeniedMessage": "There was an issue with your account status ({status}). Please contact support.",
   "notLoggedInTitle": "You are not logged yet! <1/> Please, login or register:",
-  "navFifo": "First-In-First-Out",
+  "navFcfs": "First-Come-First-Served",
   "navSjf": "Shortest Job First",
   "navPnp": "Priorities no preemptive",
   "navSrtf": "Shortest Remaining Time First",
@@ -33,7 +33,7 @@
   "alertInvalidEmailPassword": "Invalid email or password.",
   "alertInvalidEmailFormat": "Invalid email format.",
   "alertLoginError": "Login failed. Please check your credentials.",
-
+  "resetButton": "Reset",
   "adminSettings": {
     "title": "Application Settings",
     "visibilityTitle": "Algorithm Visibility in Navbar",

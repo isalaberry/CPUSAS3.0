@@ -20,7 +20,7 @@
   "accountAccessDeniedTitle": "Acesso à Conta Negado",
   "accountAccessDeniedMessage": "Houve um problema com o estado da sua conta ({status}). Por favor, contacte o suporte.",
   "notLoggedInTitle": "Ainda não iniciou sessão! <1/> Por favor, inicie sessão ou registe-se:",
-  "navFifo": "First-In-First-Out",
+  "navFcfs": "First-Come-First-Served",
   "navSjf": "Shortest Job First",
   "navPnp": "Prioridades não preemptivo",
   "navSrtf": "Tempo de Execução Mais Curto Primeiro",
@@ -33,7 +33,7 @@
   "alertInvalidEmailPassword": "E-mail ou palavra-passe inválidos.",
   "alertInvalidEmailFormat": "Formato de e-mail inválido.",
   "alertLoginError": "Erro ao iniciar sessão, por favor cheque as suas credenciais.",
-
+  "resetButton": "Redefinir",
   "adminSettings": {
     "title": "Configurações da Aplicação",
     "visibilityTitle": "Visibilidade dos Algoritmos na Barra de Navegação",

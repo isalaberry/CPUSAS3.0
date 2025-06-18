@@ -8,7 +8,7 @@ const AdminSettings = () => {
     console.log("AdminSettings: Component rendering or re-rendering.");
 
     const initialSettings = useMemo(() => ({
-        fifo: true,
+        fcfs: true,
         sjf: true,
         srtf: true,
         pnp: true,
@@ -73,6 +73,7 @@ const AdminSettings = () => {
         try {
             await setDoc(settingsDocRef, settings);
             setMessage(t('adminSettings.successSave'));
+            window.location.reload();
         } catch (err) {
             setError(t('adminSettings.errorSave'));
         } finally {

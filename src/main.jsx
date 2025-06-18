@@ -4,7 +4,7 @@ import { App } from './App'
 import './index.css'
 import {BrowserRouter, createBrowserRouter, RouterProvider} from "react-router-dom"
 import UniversalInitial from './components/UniversalInitial'
-import {Fifo} from './components/Fifo'
+import {Fcfs} from './components/Fcfs'
 import {Sjf} from './components/Sjf'
 import {Srtf} from './components/Srtf'
 import {Pnp} from './components/Pnp'
@@ -30,8 +30,8 @@ const router = createBrowserRouter([
         element:<UniversalInitial />,
       },
       {
-        path: '/fifo',
-        element: <Fifo />,
+        path: '/fcfs',
+        element: <Fcfs />,
       },
       {
         path: '/sjf',

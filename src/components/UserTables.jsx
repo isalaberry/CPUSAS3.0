@@ -67,7 +67,7 @@ const UserTables = ({ user }) => {
             setSelectedTable({ 
                 processes: tableToImport.processes || [], 
                 interruptions: tableToImport.interruptions || [],
-                algorithm: tableToImport.algorithm || 'FIFO',
+                algorithm: tableToImport.algorithm,
                 id: tableToImport.id 
             });
             console.log('Table imported successfully with processes and interruptions');

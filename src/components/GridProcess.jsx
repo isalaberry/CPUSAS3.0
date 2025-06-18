@@ -5,7 +5,7 @@ import '../App.css';
 import { useTranslation } from 'react-i18next';
 
 // Import scheduler functions
-import { runFifoSimulation } from '../algorithms/fifoScheduler';
+import { runFcfsSimulation } from '../algorithms/FcfsScheduler';
 import { runSjfSimulation } from '../algorithms/sjfScheduler';
 import { runSrtfSimulation } from '../algorithms/srtfScheduler';
 import { runPnpSimulation } from '../algorithms/pnpScheduler';
@@ -72,8 +72,8 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
 
         try {
             switch (algorithm) {
-                case 'FIFO':
-                    simulationResult = runFifoSimulation(processesInput, interruptionsInput, maxProcessId);
+                case 'fcfs':
+                    simulationResult = runFcfsSimulation(processesInput, interruptionsInput, maxProcessId);
                     break;
                 case 'SJF':
                     simulationResult = runSjfSimulation(processesInput, interruptionsInput, maxProcessId);

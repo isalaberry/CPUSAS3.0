@@ -1,4 +1,4 @@
-export * from "./Fifo"
+export * from "./Fcfs"
 export * from "./Sjf"
 export * from "./Srtf"
 export * from "./Pnp"

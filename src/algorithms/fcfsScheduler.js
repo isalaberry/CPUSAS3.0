@@ -1,5 +1,5 @@
 
-export function runFifoSimulation(initialProcesses, initialInterruptions, maxProcessId) {
+export function runFcfsSimulation(initialProcesses, initialInterruptions, maxProcessId) {
     let calculatedBlocks = [];
     let currentSimTime = 0;
 
@@ -79,7 +79,7 @@ export function runFifoSimulation(initialProcesses, initialInterruptions, maxPro
             continue;
         }
 
-        // FIFO: ordena por arrivalTime, e por id para desempate
+        // FCFS: ordena por arrivalTime, e por id para desempate
         readyQueue.sort((a, b) => a.arrivalTime - b.arrivalTime || a.id - b.id);
         const currentProcess = readyQueue.shift();
 

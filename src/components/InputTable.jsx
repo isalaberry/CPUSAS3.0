@@ -140,6 +140,20 @@ class InputTable extends Component {
     });
   }
 
+  resetAll = () => {
+  Cookies.remove('history');
+  this.setState({
+    totalProcess: 0,
+    processes: [],
+    tempProcesses: [],
+    interruptions: [],
+    tempInterruptions: [],
+    history: [{ processes: [], interruptions: [] }],
+    time: 0,
+    showGanttChart: false,
+  });
+};
+
   handleInputChange(index, field, value) {
     const { t } = this.props;
     const numericValue = value === '' ? '' : Number(value);
@@ -469,93 +483,101 @@ class InputTable extends Component {
 
     return (
       <div className="screen">
-        <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4">
 
-            <Table
-                processes={tempProcesses}
-                handleInputChange={this.handleInputChange}
-                showPriority={showPriority}
-                showQuantum={showQuantum}
-            />
-
-
-            {tempInterruptions.length > 0 && (
-                <Table
-                    processes={tempInterruptions}
-                    handleInputChange={this.handleInterruptionInputChange}
-                    showPriority={false}
-                    showQuantum={false}
-                    idPrefix="I"
-                />
-            )}
-            <div className="button-container my-4 flex justify-start gap-4">
-                <button className="button-add-interruption" onClick={this.addInterruption}>
-                    {t('inputTable.buttonAddInterruption')}
-                </button>
-                {tempInterruptions.length > 0 && (
-                    <button className="button-add-interruption" onClick={this.deleteLastInterruption}>
-                    {t('inputTable.buttonDeleteLastInterruption')}
-                    </button>
-                )}
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'right', marginTop: '20px' }}>
-                <div>
-                <input
-                    type="file"
-                    id="fileImporter"
-                    accept=".txt"
-                    onChange={this.handleFileImport}
-                    style={{ display: 'none' }}
-                />
-                <label
-                  htmlFor="fileImporter"
-                  className="file-importer"
-                >
-                  Import (.txt)
-                </label>
-                </div>
-
-                <button
-                    onClick={this.handleExportToTxt} 
-                    className="file-exporter"
-                    
-                >
-                    Export (.txt)
-                </button>  
-            </div>
-          
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+          onClick={this.resetAll}
+          style={{ marginBottom: '10px', background: '#8c7ccc', color: 'white', border: 'none', padding: '4px 4px', marginRight: '5px', borderRadius: '4px', cursor: 'pointer' }}
+          >
+          {t ? t('resetButton') : 'Reset'}
+          </button>
         </div>
 
-        <div className="button-container my-4 flex justify-center gap-4">
-            <button className="button" onClick={this.addProcess}>
-                {t('inputTable.buttonAddProcess')}
-            </button>
-            <button className="button" onClick={this.deleteProcess} disabled={tempProcesses.length === 0}>
-                {t('inputTable.buttonDeleteLastProcess')}
-            </button>
-            <button className="button" onClick={this.generateRandomData}>
-                {t('inputTable.buttonRandomData')}
-            </button>
-            <button className="button" onClick={this.prepareAndShowGanttChart} disabled={tempProcesses.length === 0}>
-                {t('inputTable.buttonGenerateGantt')}
-            </button>
-        </div>
+        <Table
+          processes={tempProcesses}
+          handleInputChange={this.handleInputChange}
+          showPriority={showPriority}
+          showQuantum={showQuantum}
+        />
 
-        {showGanttChart ? (
-            <div className='bg-white p-4 shadow-lg rounded'>
-                <GridProcess
-                    tableInfos={processes}
-                    interruptionsData={interruptions}
-                    algorithm={algorithm}
-                    saveDataToFirestore={this.saveDataToFirestore}
-                />
-            </div>
-        ) : (
-            <div className="flex justify-center items-center bg-blue-100 p-10 rounded-lg shadow">
-                <img src="/assets/cpusas3.jpg" alt="Insert data and generate Gantt chart" className="max-w-md rounded shadow" />
-            </div>
+        {tempInterruptions.length > 0 && (
+          <Table
+            processes={tempInterruptions}
+            handleInputChange={this.handleInterruptionInputChange}
+            showPriority={false}
+            showQuantum={false}
+            idPrefix="I"
+          />
         )}
+        <div className="button-container my-4 flex justify-start gap-4">
+          <button className="button-add-interruption" onClick={this.addInterruption}>
+            {t('inputTable.buttonAddInterruption')}
+          </button>
+          {tempInterruptions.length > 0 && (
+            <button className="button-add-interruption" onClick={this.deleteLastInterruption}>
+            {t('inputTable.buttonDeleteLastInterruption')}
+            </button>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+          <div>
+          <input
+            type="file"
+            id="fileImporter"
+            accept=".txt"
+            onChange={this.handleFileImport}
+            style={{ display: 'none' }}
+          />
+          <label
+            htmlFor="fileImporter"
+            className="file-importer"
+          >
+            Import (.txt)
+          </label>
+          </div>
+
+          <button
+            onClick={this.handleExportToTxt} 
+            className="file-exporter"
+            
+          >
+            Export (.txt)
+          </button>  
+        </div>
+        
+      </div>
+
+      <div className="button-container my-4 flex justify-center gap-4">
+        <button className="button" onClick={this.addProcess}>
+          {t('inputTable.buttonAddProcess')}
+        </button>
+        <button className="button" onClick={this.deleteProcess} disabled={tempProcesses.length === 0}>
+          {t('inputTable.buttonDeleteLastProcess')}
+        </button>
+        <button className="button" onClick={this.generateRandomData}>
+          {t('inputTable.buttonRandomData')}
+        </button>
+        <button className="button" onClick={this.prepareAndShowGanttChart} disabled={tempProcesses.length === 0}>
+          {t('inputTable.buttonGenerateGantt')}
+        </button>
+      </div>
+
+      {showGanttChart ? (
+        <div className='bg-white p-4 shadow-lg rounded'>
+          <GridProcess
+            tableInfos={processes}
+            interruptionsData={interruptions}
+            algorithm={algorithm}
+            saveDataToFirestore={this.saveDataToFirestore}
+          />
+        </div>
+      ) : (
+        <div className="flex justify-center items-center bg-blue-100 p-10 rounded-lg shadow">
+          <img src="/assets/cpusas3.jpg" alt="Insert data and generate Gantt chart" className="max-w-md rounded shadow" />
+        </div>
+      )}
       </div>
     );
   }

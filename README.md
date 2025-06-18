@@ -1,6 +1,6 @@
 # Simulador de Algoritmos de Escalonamento da CPU
 
-Este projeto é uma ferramenta web que simula o funcionamento de algoritmos de escalonamento da CPU. Seu objetivo principal é oferecer uma representação gráfica do comportamento de diferentes algoritmos de escalonamento, como FIFO, SJF, RR, Prioridades e mais. O simulador tem como público-alvo estudantes de Sistemas Operativos e busca facilitar o aprendizado dos conceitos de escalonamento de processos de maneira interativa e visual.
+Este projeto é uma ferramenta web que simula o funcionamento de algoritmos de escalonamento da CPU. Seu objetivo principal é oferecer uma representação gráfica do comportamento de diferentes algoritmos de escalonamento, como FCFS, SJF, RR, Prioridades e mais. O simulador tem como público-alvo estudantes de Sistemas Operativos e busca facilitar o aprendizado dos conceitos de escalonamento de processos de maneira interativa e visual.
 
 ## Tecnologias Utilizadas
 
@@ -12,7 +12,7 @@ Este projeto é uma ferramenta web que simula o funcionamento de algoritmos de e
 
 ## Funcionalidades
 
-- **Simulação de algoritmos de escalonamento**: Suporta FIFO, SJF, RR, Prioridades, e suas combinações.
+- **Simulação de algoritmos de escalonamento**: Suporta FCFS, SJF, RR, Prioridades, e suas combinações.
 - **Personalização de parâmetros**: Permite configurar o número de processos, o tempo total de CPU necessário, o tempo de entrada na fila de ready, entre outros.
 - **Geração de cenários aleatórios**: O simulador pode gerar cenários automaticamente com base em parâmetros definidos.
 - **Visualização passo-a-passo**: Permite acompanhar o processo de escalonamento passo a passo, facilitando a compreensão dos algoritmos.
@@ -51,7 +51,7 @@ O projeto está hospedado no Firebase Hosting e pode ser acessado através do se
 
 # CPU Scheduling Algorithm Simulator
 
-This project is a web tool that simulates the operation of CPU scheduling algorithms. Its main objective is to provide a graphical representation of the behaviour of different scheduling algorithms, such as FIFO, SJF, RR, Priorities and more. The simulator is aimed at students of Operating Systems and seeks to facilitate the learning of process scheduling concepts in an interactive and visual way.
+This project is a web tool that simulates the operation of CPU scheduling algorithms. Its main objective is to provide a graphical representation of the behaviour of different scheduling algorithms, such as FCFS, SJF, RR, Priorities and more. The simulator is aimed at students of Operating Systems and seeks to facilitate the learning of process scheduling concepts in an interactive and visual way.
 
 ## Technologies Used
 
@@ -63,7 +63,7 @@ This project is a web tool that simulates the operation of CPU scheduling algori
 
 ## Features
 
-- Simulation of scheduling algorithms**: Supports FIFO, SJF, RR, Priorities, and their combinations.
+- Simulation of scheduling algorithms**: Supports FCFS, SJF, RR, Priorities, and their combinations.
 - **Parameter customisation**: Allows you to configure the number of processes, the total CPU time required, the ready queue entry time, among others.
 - Random scenario generation**: The simulator can generate scenarios automatically based on defined parameters.
 - Step-by-step visualisation**: Allows you to follow the scheduling process step by step, making it easier to understand the algorithms.
