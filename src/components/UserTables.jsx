@@ -111,10 +111,10 @@ const UserTables = ({ user }) => {
                     <Table 
                         processes={table.processes || []} 
                         showPriority={table.algorithm === 'PP' || table.algorithm === 'PNP'} 
-                        showQuantum={table.algorithm === 'RR'}
-                        //readOnly={true}
                     />
-
+                        {table.algorithm === 'RR' && (
+                        <div style={{ margin: '10px' }}>Quantum: {table.quantum}</div>
+                        )}
                     {(table.interruptions && table.interruptions.length > 0) && (
                         <>
                             <h4 className="font-semibold mt-4">{t('userTables.interruptionsLabel')}:</h4>

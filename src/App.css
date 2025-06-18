@@ -97,9 +97,9 @@
   grid-column: 1 / span 3;
   grid-row: 1 / span 1;
   display: grid;
-  grid-auto-rows: minmax(50px, 60px); /* Altura das células */
-  grid-auto-columns: 80px; /* Largura fixa de 50px */
-  grid-template-columns: repeat(auto-fill, 80px); /* Garante largura de 50px para todas as colunas */
+  grid-auto-rows: minmax(50px, 60px);
+  grid-auto-columns: 80px;
+  grid-template-columns: repeat(auto-fill, 80px);
   overflow-x: scroll;
   overflow-y: hidden;
   position: relative;
@@ -474,9 +474,6 @@ max-height: '20px';
   font-weight: bold;
 }
 
-/* ============================= */
-/* Admin User Management Styles  */
-/* ============================= */
 
 .AdminUserManagement-page {
   margin: 20px 40px 20px 40px;
@@ -565,30 +562,18 @@ max-height: '20px';
 }
 
 .AdminUserManagement-action-button.approve {
-  background-color: #088F8F; /* Green */
+  background-color: #088F8F;
   color: white;
 }
 
 .AdminUserManagement-action-button.reject {
-  background-color: #8c7ccc; /* Red */
+  background-color: #8c7ccc;
   color: white;
 }
 .AdminUserManagement-action-button.role {
-    background-color: #ffc107; /* Yellow */
+    background-color: #ffc107;
     color: #333;
 }
-.AdminUserManagement-action-button.promote {
-    /* Optional: specific style */
-}
-.AdminUserManagement-action-button.demote {
-     /* Optional: specific style */
-}
-
-
-
-/* ============================= */
-/* Admin Settings Styles      */
-/* ============================= */
 
 .AdminSettings-page {
   margin: 20px 40px 20px 40px;
@@ -632,7 +617,7 @@ max-height: '20px';
 
 .AdminSettings-setting-item input[type="checkbox"] {
   margin-right: 10px;
-  width: 16px; /* Make checkbox slightly larger */
+  width: 16px;
   height: 16px;
   cursor: pointer;
 }
@@ -660,41 +645,34 @@ max-height: '20px';
 }
 
 
-
-/* Adicione isto ao seu App.css */
-
-/* Contentor para centralizar o spinner */
 .loading-container {
-  display: flex;            /* Usa Flexbox para alinhar */
-  justify-content: center;  /* Centraliza horizontalmente */
-  align-items: center;      /* Centraliza verticalmente */
-  width: 100%;              /* Ocupa a largura disponível */
-  min-height: 300px;        /* Altura mínima para permitir centralização vertical */
-                              /* Pode ajustar esta altura conforme necessário */
-  padding: 40px 0;          /* Espaçamento vertical */
+  display: flex;            
+  justify-content: center;  
+  align-items: center;     
+  width: 100%;     
+  min-height: 300px;   
+  padding: 40px 0;  
 }
 
-/* O spinner (círculo giratório) */
 .loading-spinner {
-  width: 50px;              /* Largura do spinner */
-  height: 50px;             /* Altura do spinner */
-  border: 6px solid #f0f0f0; /* Cor da borda base (cinza claro) */
-  border-top-color: #8c7ccc; /* Cor da parte que gira (seu azul) */
-  border-radius: 50%;       /* Torna-o um círculo */
-  animation: spin 1s linear infinite; /* Aplica a animação 'spin' */
+  width: 50px;     
+  height: 50px;     
+  border: 6px solid #f0f0f0;
+  border-top-color: #8c7ccc; 
+  border-radius: 50%;  
+  animation: spin 1s linear infinite;
 }
 
-/* Animação de rotação */
 @keyframes spin {
   to {
-    transform: rotate(360deg); /* Gira 360 graus */
+    transform: rotate(360deg);
   }
 }
 
 .file-importer {
   display: inline-block;
   padding: 10px 40px;
-  background-color: #fce4b4; /* Cor do botão */
+  background-color: #fce4b4;
   color: black;
   border: none;
   border-radius: 5px;
@@ -704,7 +682,7 @@ max-height: '20px';
 }
 
 .file-importer:hover {
-  background-color: #d1be99; /* Cor ao passar o mouse */
+  background-color: #d1be99;
 }
 
 
@@ -712,7 +690,7 @@ max-height: '20px';
 .file-exporter {
   display: inline-block;
   padding: 10px 40px;
-  background-color: #fce4b4; /* Cor do botão */
+  background-color: #fce4b4; 
   color: black;
   border: none;
   border-radius: 5px;
@@ -722,7 +700,7 @@ max-height: '20px';
 }
 
 .file-exporter:hover {
-  background-color: #d1be99; /* Cor ao passar o mouse */
+  background-color: #d1be99;
 }
 
 .button-add-interruption {
@@ -736,15 +714,13 @@ max-height: '20px';
 }
 
 .button-add-interruption:hover {
-  background-color: #faddaa; /* Um tom de laranja um pouco mais escuro para o hover */
-  /* Ou qualquer outra cor de hover que você preferir, por exemplo: */
-  /* background-color: #e7c898; */
+  background-color: #faddaa; 
 }
 
 .usertables-card-header {
   display: flex;
-  justify-content: space-between; /* Alinha itens nas extremidades */
-  align-items: center; /* Centraliza verticalmente */
+  justify-content: space-between;
+  align-items: center;
   padding-bottom: 10px;
   margin-bottom: 10px;
   border-bottom: 1px solid #eee;
@@ -756,7 +732,7 @@ max-height: '20px';
   position: relative;
   top:20px;
   right: 40px;
-  z-index: 1000; /* Ensure it's above other content */
+  z-index: 1000;
   padding: 5px;}
 
 .language-switcher button {

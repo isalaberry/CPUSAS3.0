@@ -24,7 +24,6 @@ const Table = ({
           {showArrivalTime && <th>{t('table.headerArrivalTime')}</th>}
           <th>{t('table.headerRunningTime')}</th>
           {showPriority && <th>{t('table.headerPriority')}</th>}
-          {showQuantum && <th>{t('table.headerQuantum')}</th>}
         </tr>
       </thead>
       <tbody>
@@ -74,21 +73,7 @@ const Table = ({
                 />
               </td>
             )}
-            {showQuantum && (
-              <td>
-                <input
-                  type="number"
-                  min="1"
-                  value={process.quantum}
-                  onChange={(e) =>
-                    handleInputChange &&
-                    handleInputChange(index, "quantum", Number(e.target.value))
-                  }
-                  className="input-table"
-                  readOnly={!handleInputChange}
-                />
-              </td>
-            )}
+
           </tr>
         ))}
       </tbody>

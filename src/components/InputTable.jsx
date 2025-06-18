@@ -22,6 +22,7 @@ class InputTable extends Component {
       time: 0,
       showGanttChart: false,
       user: null,
+      globalQuantum: 1,
     };
     this.addProcess = this.addProcess.bind(this);
     this.deleteProcess = this.deleteProcess.bind(this);
@@ -43,7 +44,8 @@ class InputTable extends Component {
           interruptions: interruptionsToSave || [],
           timestamp: new Date(),
           userId: this.state.user.uid,
-          algorithm: this.props.algorithm
+          algorithm: this.props.algorithm,
+          quantum: this.props.algorithm === 'RR' ? this.state.globalQuantum : null
         });
       } catch (error) {
           console.error("Error saving data to Firestore: ", error);
@@ -240,6 +242,13 @@ class InputTable extends Component {
       tempProcesses = tempProcesses.map((p, idx) => ({
         ...p,
         arrivalTime: p.id - 1
+      }));
+    }
+
+    if (this.props.algorithm === 'RR') {
+      tempProcesses = tempProcesses.map(p => ({
+        ...p,
+        quantum: this.state.globalQuantum
       }));
     }
 
@@ -488,7 +497,7 @@ generateRandomData() {
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
     const showQuantum = algorithm === 'RR';
-    const showArrivalTime = algorithm !== 'fcfs'; // Esconde para FCFS
+    const showArrivalTime = algorithm !== 'fcfs';
 
 
     return (
@@ -504,11 +513,25 @@ generateRandomData() {
           </button>
         </div>
 
+        {algorithm === 'RR' && (
+          <div style={{ marginBottom: '1em' }}>
+            <label>
+              Quantum:&nbsp;
+              <input
+                type="number"
+                min="1"
+                value={this.state.globalQuantum}
+                onChange={e => this.setState({ globalQuantum: Number(e.target.value) })}
+                style={{ width: 60 }}
+              />
+            </label>
+          </div>
+        )}
+
         <Table
           processes={tempProcesses}
           handleInputChange={this.handleInputChange}
           showPriority={showPriority}
-          showQuantum={showQuantum}
           showArrivalTime={showArrivalTime}
         />
 
