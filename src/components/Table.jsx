@@ -1,8 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPrefix = "P", nameColumnHeader = "Name"}) => {
-    const { t } = useTranslation();
+const Table = ({
+  processes,
+  handleInputChange,
+  showPriority,
+  showQuantum,
+  showArrivalTime = true,
+  idPrefix = "P",
+  nameColumnHeader = "Name"
+}) => {
+  const { t } = useTranslation();
   if (!Array.isArray(processes)) {
     console.error("Processes must be an array");
     console.log(processes);
@@ -13,7 +21,7 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
       <thead>
         <tr>
           <th>ID</th>
-          <th>{t('table.headerArrivalTime')}</th>
+          {showArrivalTime && <th>{t('table.headerArrivalTime')}</th>}
           <th>{t('table.headerRunningTime')}</th>
           {showPriority && <th>{t('table.headerPriority')}</th>}
           {showQuantum && <th>{t('table.headerQuantum')}</th>}
@@ -23,22 +31,30 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
         {processes.map((process, index) => (
           <tr key={index}>
             <td>{idPrefix}{process.id}</td>
+            {showArrivalTime && (
+              <td>
+                <input
+                  type="number"
+                  min="1"
+                  value={process.arrivalTime}
+                  onChange={(e) =>
+                    handleInputChange &&
+                    handleInputChange(index, "arrivalTime", Number(e.target.value))
+                  }
+                  className="input-table"
+                  readOnly={!handleInputChange || process.readOnlyArrivalTime}
+                />
+              </td>
+            )}
             <td>
               <input
                 type="number"
-                min="0"
-                value={process.arrivalTime}
-                onChange={(e) => handleInputChange && handleInputChange(index, "arrivalTime", Number(e.target.value))}
-                className="input-table"
-                readOnly={!handleInputChange}
-              />
-            </td>
-            <td>
-              <input
-                type="number"
-          //      min={nameColumnHeader === "ID" ? "1" : "1"}
+                min="1"
                 value={process.runningTime}
-                onChange={(e) => handleInputChange && handleInputChange(index, "runningTime", Number(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange &&
+                  handleInputChange(index, "runningTime", Number(e.target.value))
+                }
                 className="input-table"
                 readOnly={!handleInputChange}
               />
@@ -49,7 +65,10 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
                   type="number"
                   min="0"
                   value={process.priority}
-                  onChange={(e) => handleInputChange && handleInputChange(index, "priority", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleInputChange &&
+                    handleInputChange(index, "priority", Number(e.target.value))
+                  }
                   className="input-table"
                   readOnly={!handleInputChange}
                 />
@@ -61,7 +80,10 @@ const Table = ({ processes, handleInputChange, showPriority, showQuantum, idPref
                   type="number"
                   min="1"
                   value={process.quantum}
-                  onChange={(e) => handleInputChange && handleInputChange(index, "quantum", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleInputChange &&
+                    handleInputChange(index, "quantum", Number(e.target.value))
+                  }
                   className="input-table"
                   readOnly={!handleInputChange}
                 />

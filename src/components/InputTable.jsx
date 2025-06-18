@@ -113,9 +113,10 @@ class InputTable extends Component {
       const nextId = prevState.tempProcesses.length > 0
                      ? Math.max(...prevState.tempProcesses.map(p => p.id)) + 1
                      : 1;
+      const arrivalTime = this.props.algorithm === 'fcfs' ? nextId - 1 : 0;
       const newProcess = {
         id: nextId,
-        arrivalTime: 0,
+        arrivalTime,
         runningTime: 1,
         priority: 0,
         quantum: 1,
@@ -156,6 +157,9 @@ class InputTable extends Component {
 
   handleInputChange(index, field, value) {
     const { t } = this.props;
+      if (this.props.algorithm === 'fcfs' && field === 'arrivalTime') {
+      return;
+    }
     const numericValue = value === '' ? '' : Number(value);
 
     let translatedField = field;
@@ -226,11 +230,18 @@ class InputTable extends Component {
 
   prepareAndShowGanttChart() {
     const { t } = this.props;
-    const tempProcesses = [...this.state.tempProcesses];
+    let tempProcesses = [...this.state.tempProcesses];
     const tempInterruptions = [...this.state.tempInterruptions];
 
     let isValid = true;
     let commonQuantum = null;
+
+    if (this.props.algorithm === 'fcfs') {
+      tempProcesses = tempProcesses.map((p, idx) => ({
+        ...p,
+        arrivalTime: p.id - 1
+      }));
+    }
 
     for (let i = 0; i < tempProcesses.length; i++) {
         const process = tempProcesses[i];
@@ -308,31 +319,29 @@ class InputTable extends Component {
     });
   }
 
-  generateRandomData() {
-    this.setState((prevState) => {
-      if (prevState.tempProcesses.length === 0 && prevState.tempInterruptions.length === 0) {return {};}
+generateRandomData() {
+  const { algorithm } = this.props;
+  const numProcesses = 3 + Math.floor(Math.random() * 3); // 3 a 5 processos
+  const randomProcesses = Array.from({ length: numProcesses }, (_, i) => {
+    const process = {
+      id: i + 1,
+      runningTime: 1 + Math.floor(Math.random() * 10),
+      priority: 0,
+      quantum: 1,
+      arrivalTime: algorithm === 'fcfs' ? i : 1 + Math.floor(Math.random() * 10)
+    };
+    return process;
+  });
 
-      const commonQuantum = this.props.algorithm === 'RR' ? Math.floor(Math.random() * 5) + 1 : null;
-      const randomizedProcesses = prevState.tempProcesses.map(process => ({
-        ...process,
-        arrivalTime: Math.floor(Math.random() * 10),
-        runningTime: Math.floor(Math.random() * 10) + 1,
-        priority: Math.floor(Math.random() * 10),
-        quantum: commonQuantum !== null ? commonQuantum : (Math.floor(Math.random() * 5) + 1),
-      }));
-
-      const randomizedInterruptions = prevState.tempInterruptions.map(interrupt => ({
-        ...interrupt,
-        arrivalTime: Math.floor(Math.random() * 15),
-        runningTime: Math.floor(Math.random() * 3) + 1,
-      }));
-
-      return {
-        tempProcesses: randomizedProcesses,
-        tempInterruptions: randomizedInterruptions,
-      };
-    });
-  }
+  this.setState({
+    totalProcess: randomProcesses.length,
+    tempProcesses: randomProcesses,
+    interruptions: [],
+    tempInterruptions: [],
+    showGanttChart: false,
+    time: 0,
+  });
+}
   
   handleFileImport = (event) => {
     const file = event.target.files[0];
@@ -479,6 +488,7 @@ class InputTable extends Component {
     const { algorithm } = this.props;
     const showPriority = algorithm === 'PP' || algorithm === 'PNP';
     const showQuantum = algorithm === 'RR';
+    const showArrivalTime = algorithm !== 'fcfs'; // Esconde para FCFS
 
 
     return (
@@ -499,6 +509,7 @@ class InputTable extends Component {
           handleInputChange={this.handleInputChange}
           showPriority={showPriority}
           showQuantum={showQuantum}
+          showArrivalTime={showArrivalTime}
         />
 
         {tempInterruptions.length > 0 && (

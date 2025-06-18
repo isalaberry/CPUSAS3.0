@@ -491,15 +491,14 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                              gridColumnStart: interrupt.arrivalTime + 1, 
                              gridColumnEnd: interrupt.arrivalTime + 2,
                              gridRowStart: maxProcessId + interrupt.id, 
-                             position: 'relative', // From original
-                             top: 0, // From original
-                             left: 0, // From original
-                             backgroundColor: '#e6c9f0', // Color from refactored, original used #cadeed
+                             position: 'relative',
+                             top: 0,
+                             left: 0,
+                             backgroundColor: '#e6c9f0',
                              width: '10px', 
                              height: '100%', 
                              zIndex: 1,
                              writingMode: 'vertical-rl', fontSize: '0.7em', textAlign: 'center',
-                             // borderRight removed
                          }}
                          title={`I${interrupt.id} Arrival: ${interrupt.arrivalTime}`}
                      >
@@ -507,39 +506,45 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                 ))}
                 <div className="labels" style={{ 
                     gridRowStart: totalRowsForGrid + 1, 
-                    // Removed other inline styles to match original's simplicity for the container
                     }}> 
-                    {[...Array(Math.max(0, simulationLastEndTime + 1))].map((_, i) => ( 
-                        <div key={`label-${i}`} className="label" style={{
-                            gridColumnStart: i + 1, 
-                            gridColumnEnd: i + 2, 
-                            // Removed other inline styles to match original label style
-                            }}>
-                            {i.toString().padStart(2, '0')} {/* Kept padStart from original */}
+                    {[...Array(Math.max(0, simulationLastEndTime + 1))].map((_, i) => (
+                        <div
+                            key={`label-${i}`}
+                            className="label"
+                            style={{
+                                gridColumnStart: i + 1,
+                                gridColumnEnd: i + 2,
+                                // ...
+                            }}
+                        >
+                            {algorithm === 'fcfs'
+                                ? String(i + 1).padStart(2, '0') // começa em 01, 02, 03...
+                                : String(i).padStart(2, '0')     // começa em 00, 01, 02...
+                            }
                         </div>
                     ))}
                 </div>
             </div>
             <div className='description-table'>
-                <table style={{ width: '100%' }}> {/* Removed marginTop, borderCollapse */}
+                <table style={{ width: '100%' }}>
                     <thead>
-                        <tr><th className='description-table-title' /* Removed inline style */>Description (Tick: {currentColumn > 0 ? currentColumn -1 : 0})</th></tr>
+                        <tr><th className='description-table-title'>Description (Tick: {currentColumn > 0 ? currentColumn -1 : 0})</th></tr>
                     </thead>
                     <tbody>
                         {(initialTableInfos || []).map((process) => (
                             <tr key={`desc-process-${process.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' /* Removed border */ }}>{descriptions[`process-${process.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'P', id: process.id })}</td>
+                                <td style={{ padding: '8px', textAlign:'center'}}>{descriptions[`process-${process.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'P', id: process.id })}</td>
                             </tr>
                         ))}
                         {(initialInterruptionsData || []).map((interrupt) => (
                             <tr key={`desc-interrupt-${interrupt.id}`}>
-                                <td style={{ padding: '8px', textAlign:'center' /* Removed border */ }}>{descriptions[`interrupt-${interrupt.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'I', id: interrupt.id })}</td>
+                                <td style={{ padding: '8px', textAlign:'center'}}>{descriptions[`interrupt-${interrupt.id}`] || t('gridProcess.statusDefaultAwait', { prefix: 'I', id: interrupt.id })}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            <div className="button-time-container" /* Removed inline styles */>
+            <div className="button-time-container">
                 <button onClick={handleFirstColumn} className="button" disabled={recIsRecording}>{'<<'}</button>
                 <button onClick={handlePreviousColumn} className="button" disabled={recIsRecording}>{'<'}</button>
                 <button onClick={handleNextColumn} className="button" disabled={recIsRecording}>{'>'}</button>
@@ -552,12 +557,12 @@ export const GridProcess = ({ tableInfos: initialTableInfos, interruptionsData: 
                     </button>
                 )}
                 {recIsRecording ? (
-                    <button onClick={recHandleStop} className="button" /* Removed inline style */ >{t('gridProcess.buttonStopRecording')}</button>
+                    <button onClick={recHandleStop} className="button">{t('gridProcess.buttonStopRecording')}</button>
                 ) : (
-                    <button onClick={recHandleStart} className="button" /* Removed inline style */ >{t('gridProcess.buttonStartRecording')}</button>
+                    <button onClick={recHandleStart} className="button">{t('gridProcess.buttonStartRecording')}</button>
                 )}
             </div>
-            <div className="ttwt-container" /* Removed inline styles */>
+            <div className="ttwt-container">
                 <div>{t('gridProcess.avgWaitingTimeLabel')}{averageWaitingTime.toFixed(2)}</div>
                 <div>{t('gridProcess.avgTurnaroundTimeLabel')} {averageTurnaroundTime.toFixed(2)}</div>
             </div>

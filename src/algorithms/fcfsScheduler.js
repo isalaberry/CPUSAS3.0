@@ -5,6 +5,7 @@ export function runFcfsSimulation(initialProcesses, initialInterruptions, maxPro
 
     let processesForSim = initialProcesses.map(p => ({
         ...p,
+        arrivalTime: p.arrivalTime !== undefined ? p.arrivalTime : (idx + 1),
         originalId: p.id,
         remainingTime: p.runningTime,
         finishedAt: -1,
