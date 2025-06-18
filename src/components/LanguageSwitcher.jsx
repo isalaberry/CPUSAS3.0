@@ -18,7 +18,7 @@ return (
             aria-label="Mudar para Português"
         >
             <img 
-                src="public\assets\flags\flag-for-flag-portugal-svgrepo-com.svg" 
+                src="/assets/flags/flag-for-flag-portugal-svgrepo-com.svg" 
                 alt="PT Flag"
                 style={{ maxWidth: '40px', maxHeight: '20px' }}
             />    
@@ -29,7 +29,7 @@ return (
             aria-label="Switch to English"
         >
             <img 
-                src="public/assets/flags/flag-england-svgrepo-com.svg" 
+                src="/assets/flags/flag-england-svgrepo-com.svg" 
                 alt="EN Flag" 
                 style={{ maxWidth: '40px', maxHeight: '20px' }}
             />   

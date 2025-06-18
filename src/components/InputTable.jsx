@@ -608,8 +608,13 @@ generateRandomData() {
           />
         </div>
       ) : (
-        <div className="flex justify-center items-center bg-blue-100 p-10 rounded-lg shadow">
-          <img src="/assets/cpusas3.jpg" alt="Insert data and generate Gantt chart" className="max-w-md rounded shadow" />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <img 
+            src="/assets/cpusas3Copia.jpg" 
+            alt="Insert data and generate Gantt chart" 
+            className="max-w-md rounded shadow" 
+            style={{ display: 'block', borderRadius: '8px', maxWidth: '100%', marginTop: '20px' }}
+          />
         </div>
       )}
       </div>

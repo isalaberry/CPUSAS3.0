@@ -374,17 +374,7 @@
   text-align: center;
 }
 
-.pt-flag-icon{
-background-image: url('/assets/flags/flag-for-flag-portugal-svgrepo-com.svg'); 
-max-width: '40px';
-max-height: '20px';
-}
 
-.en-flag-icon{
-background-image: url('/assets/flags/flag-england-svgrepo-com.svg'); 
-max-width: '40px';
-max-height: '20px';
-}
 
 .universalinitial-image-container {
   display: flex;

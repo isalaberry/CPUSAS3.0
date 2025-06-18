@@ -120,10 +120,9 @@ const UserTables = ({ user }) => {
                             <h4 className="font-semibold mt-4">{t('userTables.interruptionsLabel')}:</h4>
                             <Table 
                                 processes={table.interruptions} 
-                                showPriority={false} // Interrupções não têm prioridade
-                                showQuantum={false}  // Interrupções não têm quantum
+                                showPriority={false}
+                                showQuantum={false}
                                 idPrefix="I"
-                               // readOnly={true}
                             />
                         </>
                     )}
