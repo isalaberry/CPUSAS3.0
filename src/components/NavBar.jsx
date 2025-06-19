@@ -1,18 +1,19 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useLocation } from "react-router-dom"; 
 import { UserContext } from './UserContext';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import '../App.css';
 import { useTranslation } from 'react-i18next';
 
 export function NavBar() {
-    const { t } = useTranslation(); // Add this line
+    const { t } = useTranslation(); 
     const { userProfile } = useContext(UserContext);
     const [activeItem, setActiveItem] = useState('');
-    const [visibility, setVisibility] = useState({
+    const defaultVisibility = {
         fcfs: true, sjf: true, sjfp: true, pnp: true, pp: true, rr: true,
-    });
+    };
+    const [visibility, setVisibility] = useState(defaultVisibility);
     const [loadingVisibility, setLoadingVisibility] = useState(true);
     const location = useLocation();
 
@@ -43,24 +44,26 @@ export function NavBar() {
 
     useEffect(() => {
         setLoadingVisibility(true);
-        const fetchVisibility = async () => {
-            const configDocRef = doc(db, "appConfig", "visibility");
-            try {
-                const docSnap = await getDoc(configDocRef);
-                if (docSnap.exists()) {
-                    const fetchedData = docSnap.data();
-                    setVisibility(prev => ({ ...prev, ...fetchedData }));
-                } else {
-                    setVisibility({ fcfs: true, sjf: true, pnp: true, pp: true, rr: true });
-                }
-            } catch (error) {
-                setVisibility({ fcfs: true, sjf: true, pnp: true, pp: true, rr: true });
-            } finally {
-                 setLoadingVisibility(false);
+        const configDocRef = doc(db, "appConfig", "visibility");
+        const unsubscribe = onSnapshot(configDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const fetchedData = docSnap.data();
+                // Garante que todos os campos estejam presentes
+                setVisibility({
+                    ...defaultVisibility,
+                    ...fetchedData
+                });
+            } else {
+                setVisibility(defaultVisibility);
             }
-        };
-        fetchVisibility();
-    }, []);
+            setLoadingVisibility(false);
+        }, (error) => {
+            setVisibility(defaultVisibility);
+            setLoadingVisibility(false);
+        });
+
+        return () => unsubscribe();
+    }, [userProfile]);
 
     const handleSetActive = (item) => {
         setActiveItem(item);
@@ -68,7 +71,7 @@ export function NavBar() {
 
     if (loadingVisibility) {
         return <nav className="navbar"><ul className="nav-list"><li>{t('navLoading', 'Loading Nav...')}</li></ul></nav>;
-     }
+    }
 
     return (
         <nav className="navbar">
@@ -94,8 +97,8 @@ export function NavBar() {
                             {t('navSjf')}
                         </Link>
                     </li>
-                 )}
-                 {visibility.sjfp && (
+                )}
+                {visibility.sjfp && (
                     <li className="nav-item">
                         <Link
                             to="/sjfp"
@@ -105,10 +108,10 @@ export function NavBar() {
                             {t('navSjfp')}
                         </Link>
                     </li>
-                 )}
-                 {visibility.pnp && (
+                )}
+                {visibility.pnp && (
                     <li className="nav-item">
-                         <Link
+                        <Link
                             to="/pnp"
                             className={`nav-link ${activeItem === 'pnp' ? 'active' : ''}`}
                             onClick={() => handleSetActive('pnp')}
@@ -116,10 +119,10 @@ export function NavBar() {
                             {t('navPnp')}
                         </Link>
                     </li>
-                 )}
-                 {visibility.pp && (
+                )}
+                {visibility.pp && (
                     <li className="nav-item">
-                         <Link
+                        <Link
                             to="/pp"
                             className={`nav-link ${activeItem === 'pp' ? 'active' : ''}`}
                             onClick={() => handleSetActive('pp')}
@@ -127,10 +130,10 @@ export function NavBar() {
                             {t('navPp')}
                         </Link>
                     </li>
-                 )}
-                 {visibility.rr && (
+                )}
+                {visibility.rr && (
                     <li className="nav-item">
-                         <Link
+                        <Link
                             to="/rr"
                             className={`nav-link ${activeItem === 'rr' ? 'active' : ''}`}
                             onClick={() => handleSetActive('rr')}
@@ -138,9 +141,9 @@ export function NavBar() {
                             {t('navRr')}
                         </Link>
                     </li>
-                 )}
+                )}
 
-                 {userProfile?.role === 'admin' && (
+                {userProfile?.role === 'admin' && (
                     <>
                         <li className="nav-item">
                             <Link
@@ -161,7 +164,7 @@ export function NavBar() {
                             </Link>
                         </li>
                     </>
-                 )}
+                )}
             </ul>
         </nav>
     );
