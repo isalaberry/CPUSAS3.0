@@ -55,11 +55,13 @@ class InputTable extends Component {
 
   componentDidMount() {
     const savedHistory = Cookies.get('history');
+    console.log('[InputTable] Cookie "history" recuperado (raw):', savedHistory);
     let initialProcesses = [];
     let initialInterruptions = [];
     if (savedHistory) {
         try {
             const parsedHistory = JSON.parse(savedHistory);
+                console.log('[InputTable] Cookie "history" após parse:', parsedHistory);
             if (Array.isArray(parsedHistory) && parsedHistory.length > 0 && typeof parsedHistory[0] === 'object' && parsedHistory[0] !== null) {
                 const latestScenario = parsedHistory[0];
                 initialProcesses = latestScenario.processes || [];
@@ -107,6 +109,7 @@ class InputTable extends Component {
 
   saveHistoryToCookies(historyToSave) {
     const limitedHistory = historyToSave.slice(0, 10);
+    console.log('[InputTable] TENTANDO SALVAR ESTES DADOS NO COOKIE:', historyToSave);
     Cookies.set('history', JSON.stringify(limitedHistory), { expires: 7 });
   }
 
@@ -328,29 +331,31 @@ class InputTable extends Component {
     });
   }
 
-generateRandomData() {
-  const { algorithm } = this.props;
-  const numProcesses = 3 + Math.floor(Math.random() * 3); // 3 a 5 processos
-  const randomProcesses = Array.from({ length: numProcesses }, (_, i) => {
-    const process = {
-      id: i + 1,
-      runningTime: 1 + Math.floor(Math.random() * 10),
-      priority: 0,
-      quantum: 1,
-      arrivalTime: algorithm === 'fcfs' ? i : 1 + Math.floor(Math.random() * 10)
-    };
-    return process;
-  });
+  generateRandomData() {
+    const { algorithm } = this.props;
 
-  this.setState({
-    totalProcess: randomProcesses.length,
-    tempProcesses: randomProcesses,
-    interruptions: [],
-    tempInterruptions: [],
-    showGanttChart: false,
-    time: 0,
-  });
-}
+    const randomizedProcesses = this.state.tempProcesses.map(p => ({
+      ...p,
+      runningTime: 1 + Math.floor(Math.random() * 10),
+      arrivalTime: algorithm === 'fcfs' ? p.id - 1 : Math.floor(Math.random() * 10),
+      priority: (algorithm === 'PP' || algorithm === 'PNP') ? Math.floor(Math.random() * 11) : 0,
+    }));
+
+    const randomizedInterruptions = this.state.tempInterruptions.map(i => ({
+      ...i,
+      arrivalTime: 1 + Math.floor(Math.random() * 15),
+      runningTime: 1 + Math.floor(Math.random() * 5),
+    }));
+
+    // DEBUG: Verifique os dados gerados aqui
+    console.log('[Randomize] Interrupções geradas:', randomizedInterruptions);
+
+    this.setState({
+      tempProcesses: randomizedProcesses,
+      tempInterruptions: randomizedInterruptions,
+      showGanttChart: false,
+    });
+  }
   
   handleFileImport = (event) => {
     const file = event.target.files[0];
